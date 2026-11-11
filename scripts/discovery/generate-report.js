@@ -37,9 +37,26 @@ export function generateDailyReport(evaluatedCandidates, metadata = {}) {
   md += `> **CRITICAL POLICY REMINDER**: No discovered game is ever published automatically. Human review and explicit approval via GitHub Pull Request is strictly required before any code enters \`src/data/games.json\`.\n\n`;
 
   md += `## 📊 Executive Summary\n\n`;
-  md += `| Total Evaluated | Recommended for Approval | Request More Info | Rejected / Ineligible |\n`;
-  md += `| :---: | :---: | :---: | :---: | \n`;
-  md += `| **${evaluatedCandidates.length}** | **${approved.length}** 🟢 | **${needsInfo.length}** 🟡 | **${rejected.length}** 🔴 |\n\n`;
+  md += `| Metric | Count |\n`;
+  md += `| :--- | :---: |\n`;
+  md += `| Total raw candidates | **${metadata.totalRaw ?? evaluatedCandidates.length}** |\n`;
+  md += `| Duplicates / archived filtered | **${metadata.duplicateCount ?? 0}** |\n`;
+  md += `| Rejected / ineligible | **${rejected.length}** 🔴 |\n`;
+  md += `| Fresh candidates evaluated | **${evaluatedCandidates.length}** |\n`;
+  md += `| Recommended for approval | **${approved.length}** 🟢 |\n`;
+  md += `| Request more info | **${needsInfo.length}** 🟡 |\n\n`;
+
+  if (metadata.sourceCounts) {
+    md += `### Source-specific counts\n\n`;
+    md += `| Source | Raw |\n`;
+    md += `| :--- | :---: |\n`;
+    for (const [src, cnt] of Object.entries(metadata.sourceCounts)) {
+      md += `| ${src} | ${cnt} |\n`;
+    }
+    md += `\n`;
+  }
+
+  md += `> **Verification note:** Popularity (stars) is an unverified popularity signal, not proof of quality or licensing. License/security/quality gates are the verified decision criteria.\n\n`;
 
   md += `* **Run Timestamp**: \`${new Date().toISOString()}\`\n`;
   md += `* **Discovery Sources**: GitHub API, itch.io Web Feed, Open Game Repositories\n`;
@@ -125,6 +142,10 @@ function renderCandidateCard(c, index, status) {
   card += `- **Popularity Signals**: ${c.popularityIndicators?.githubStars || 0} ⭐ Stars, ${c.popularityIndicators?.forks || 0} 🍴 Forks, ~${c.popularityIndicators?.communityPlays || 0} plays (${c.popularityIndicators?.signalsSource || 'Public API'}, ${c.popularityIndicators?.signalsDate || c.discoveryDate})\n`;
   card += `- **License Status**: \`${c.licensingStatus}\` (${c.licenseName}) — [License Link](${c.licenseUrl})\n`;
   card += `- **Security Audit Gate**: \`${c.securityStatus}\` (${(c.securityFindings || []).length} findings)\n`;
+  card += `- **Quality Gate**: \`${c.qualityStatus || 'NOT EVALUATED'}\` (${c.qualityClassification || 'N/A'})\n`;
+  if (c.qualityEvidence && c.qualityEvidence.length) {
+    card += `  - Quality evidence: ${c.qualityEvidence.join('; ')}\n`;
+  }
   card += `- **Mobile Support**: ${c.mobileCompatibility ? '✅ Touch Enabled' : '⚠️ Desktop Keyboard'}\n`;
   card += `- **Composite Score**: **${scores.totalScore || 0} / 100** (Popularity: ${scores.popularityScore || 0}/25, Tech: ${scores.technicalQualityScore || 0}/20, Mobile: ${scores.mobileScore || 0}/15, Maintenance: ${scores.maintenanceScore || 0}/15, Relevance: ${scores.relevanceScore || 0}/15, Standalone: ${scores.standaloneScore || 0}/10)\n`;
 

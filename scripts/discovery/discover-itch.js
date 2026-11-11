@@ -1,18 +1,31 @@
 /**
  * discover-itch.js
- * 
+ *
  * Public itch.io / Community Web Game Candidate Discovery Engine.
  * Discovers indie HTML5 games published for web browsers.
+ *
+ * Robust XML extraction (no external XML dependency): handles multiline
+ * descriptions and CDATA. Filters to browser-playable (html) items.
  */
 
 const ITCH_WEB_FEED = 'https://itch.io/games/platform-web/free.xml';
 
-/**
- * Discovers candidate games from public itch.io feeds or curated open web feeds.
- * 
- * @param {Object} options
- * @returns {Promise<Array>} List of raw candidate objects
- */
+export function stripCdata(s) {
+  return (s || '').replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').trim();
+}
+
+export function extractTag(block, tag) {
+  const re = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
+  const m = block.match(re);
+  return m ? stripCdata(m[1]) : '';
+}
+
+export function isHtmlPlatform(block) {
+  const m = block.match(/<platforms>([\s\S]*?)<\/platforms>/i);
+  if (!m) return true; // assume web feed implies web if missing
+  return /<html>\s*yes\s*<\/html>/i.test(m[1]);
+}
+
 export async function discoverFromItch(options = {}) {
   const maxResults = options.maxResults || 5;
   const discovered = [];
@@ -29,26 +42,29 @@ export async function discoverFromItch(options = {}) {
 
     if (response.ok) {
       const xml = await response.text();
-      // Simple regex extraction for RSS items (zero external XML parser dependency)
-      const itemRegex = /<item>[\s\S]*?<title>(.*?)<\/title>[\s\S]*?<link>(.*?)<\/link>[\s\S]*?<description>(.*?)<\/description>[\s\S]*?<\/item>/gi;
-      let match;
+      // Split into <item>...</item> blocks (robust across newlines)
+      const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+      for (const block of itemBlocks) {
+        if (discovered.length >= maxResults) break;
 
-      while ((match = itemRegex.exec(xml)) !== null && discovered.length < maxResults) {
-        const rawTitle = match[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim();
-        const link = match[2].trim();
-        const rawDesc = match[3].replace(/<[^>]+>/g, '').slice(0, 150).trim();
+        const title = extractTag(block, 'title');
+        const link = extractTag(block, 'link');
+        const rawDesc = extractTag(block, 'description');
+        const desc = rawDesc.replace(/<[^>]+>/g, '').slice(0, 150).trim();
 
-        // Extract author from URL: https://author.itch.io/game
+        if (!title || !link) continue;
+        if (!isHtmlPlatform(block)) continue; // only browser-playable
+
         const authorMatch = link.match(/https?:\/\/([^.]+)\.itch\.io\/([^/]+)/);
         const author = authorMatch ? authorMatch[1] : 'itch.io creator';
-        const slug = authorMatch ? authorMatch[2] : rawTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        const slug = authorMatch ? authorMatch[2] : title.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
         discovered.push({
           candidateId: `itch-${author}-${slug}`.toLowerCase(),
-          name: rawTitle,
+          name: title,
           originalRepoUrl: link,
           author,
-          description: rawDesc || 'Web browser game published on itch.io.',
+          description: desc || 'Web browser game published on itch.io.',
           discoveryDate: currentDate,
           lastUpdateDate: currentDate,
           sourcePlatform: 'itch.io',
@@ -62,7 +78,7 @@ export async function discoverFromItch(options = {}) {
             signalsSource: 'itch.io Public Web RSS',
             signalsDate: currentDate,
           },
-          licenseName: 'UNKNOWN', // Itch games typically require manual author contact/verification
+          licenseName: 'UNKNOWN', // requires manual author verification
           licenseUrl: link,
           assetLicensingStatus: 'Requires explicit author written clearance',
           dependencies: [],

@@ -10,9 +10,22 @@
 const GITHUB_API_BASE = 'https://api.github.com';
 
 const SEARCH_QUERIES = [
+  // Popular (stars) - broad HTML5
   'topic:html5-game stars:>20 pushed:>2024-01-01',
-  'topic:phaser-game stars:>20 pushed:>2024-01-01',
-  'topic:browser-game language:JavaScript stars:>50 pushed:>2024-01-01',
+  // Recently updated (freshness)
+  'topic:html5-game pushed:>2025-01-01 sort:updated-desc',
+  // Engine-specific
+  'topic:phaser-game stars:>10 pushed:>2024-01-01',
+  'topic:phaser3 stars:>10 pushed:>2024-01-01',
+  'topic:kaboom stars:>5 pushed:>2024-01-01',
+  'topic:littlejs stars:>5 pushed:>2024-01-01',
+  'topic:js13k stars:>5 pushed:>2024-01-01',
+  // Language-specific
+  'topic:browser-game language:JavaScript stars:>30 pushed:>2024-01-01',
+  'topic:browser-game language:TypeScript stars:>10 pushed:>2024-01-01',
+  // Rendering tech
+  'topic:canvas-game stars:>10 pushed:>2024-01-01',
+  'topic:webgl-game stars:>10 pushed:>2024-01-01',
 ];
 
 /**

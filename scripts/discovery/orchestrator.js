@@ -23,6 +23,7 @@ import { discoverFromItch } from './discover-itch.js';
 import { verifyLicense } from './verify-license.js';
 import { inspectSecurity } from './security-inspection.js';
 import { scoreCandidate } from './score-candidates.js';
+import { assessCandidateQuality } from './assess-quality.js';
 import { generateDailyReport } from './generate-report.js';
 import { submitReview } from './submit-review.js';
 
@@ -195,7 +196,7 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   if (!offline) {
     // Query GitHub
     try {
-      const ghCandidates = await discoverFromGitHub({ maxResults: options.maxGitHub || 5 });
+      const ghCandidates = await discoverFromGitHub({ maxResults: options.maxGitHub || 25 });
       rawCandidates.push(...ghCandidates);
     } catch (err) {
       console.warn(`⚠️ GitHub query skipped: ${err.message}`);
@@ -203,7 +204,7 @@ export async function runDailyDiscoveryPipeline(options = {}) {
 
     // Query itch.io
     try {
-      const itchCandidates = await discoverFromItch({ maxResults: options.maxItch || 3 });
+      const itchCandidates = await discoverFromItch({ maxResults: options.maxItch || 10 });
       rawCandidates.push(...itchCandidates);
     } catch (err) {
       console.warn(`⚠️ itch.io query skipped: ${err.message}`);
@@ -215,14 +216,13 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   // Use seed fallbacks if APIs returned 0 (e.g. rate limit or offline sandbox)
   if (rawCandidates.length === 0) {
     console.log(`ℹ️ Public API returned 0 candidates (rate limits or offline sandbox). Using verified candidate queue...`);
-    rawCandidates.push(...SEED_FALLBACK_CANDIDATES);
+    const fallback = Array.isArray(options.candidates) && options.candidates.length > 0
+      ? options.candidates
+      : SEED_FALLBACK_CANDIDATES;
+    rawCandidates.push(...fallback);
   }
 
-  // Enforce max_candidates (total cap across sources)
-  if (rawCandidates.length > maxCandidates) {
-    console.log(`✂️ Trimming raw candidates from ${rawCandidates.length} to max_candidates=${maxCandidates}.`);
-    rawCandidates = rawCandidates.slice(0, maxCandidates);
-  }
+  // (max_candidates is applied to FRESH candidates after dedup, not to the raw pool)
 
   console.log(`\n🔍 Total Raw Candidates Found: ${rawCandidates.length}`);
 
@@ -239,10 +239,14 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   }
 
   console.log(`🛡️ Deduplication: ${skippedDuplicates} duplicate/archived candidates filtered out.`);
-  console.log(`✨ Fresh Candidates for Review: ${newCandidates.length}\n`);
+  console.log(`✨ Fresh Candidates for Review: ${newCandidates.length}\\n`);
 
   // 4. Mandatory Gates & Scoring for each fresh candidate
+  // max_candidates limits RETAINED ELIGIBLE candidates, not raw/fresh ones.
+  // Rejected/ineligible candidates are still evaluated and recorded, but do
+  // not consume the final eligible-candidate limit.
   const evaluatedCandidates = [];
+  let retainedEligible = 0;
 
   for (const candidate of newCandidates) {
     console.log(`--------------------------------------------------------------------`);
@@ -269,8 +273,12 @@ export async function runDailyDiscoveryPipeline(options = {}) {
     const securityCheck = inspectSecurity(virtualFiles);
     console.log(`  🛡️ Gate 2 (Security): ${securityCheck.status} (Allowed: ${securityCheck.isPermittedForPublication})`);
 
+    // Gate 3: Quality / Playability Assessment (popularity alone never qualifies)
+    const qualityCheck = assessCandidateQuality(candidate);
+    console.log(`  🎮 Gate 3 (Quality): ${qualityCheck.status} (Classification: ${qualityCheck.classification}, Playable: ${qualityCheck.isPlayableInBrowser})`);
+
     // Intelligent Multi-Factor Scoring
-    const scoring = scoreCandidate(candidate, licenseCheck, securityCheck);
+    const scoring = scoreCandidate(candidate, licenseCheck, securityCheck, qualityCheck);
     console.log(`  ⭐ Composite Score: ${scoring.scores.totalScore} / 100`);
     console.log(`  ⚖️ Recommended Decision: ${scoring.recommendedDecision} | Eligibility: ${scoring.publicationEligibility}`);
 
@@ -280,6 +288,10 @@ export async function runDailyDiscoveryPipeline(options = {}) {
       assetLicensingStatus: candidate.assetLicensingStatus || (licenseCheck.assetWarning || 'Verified clean'),
       securityStatus: securityCheck.status,
       securityFindings: securityCheck.findings,
+      qualityStatus: qualityCheck.status,
+      qualityClassification: qualityCheck.classification,
+      qualityEvidence: qualityCheck.evidence,
+      playability: qualityCheck.isPlayableInBrowser,
       scores: scoring.scores,
       publicationEligibility: scoring.publicationEligibility,
       reviewerDecision: scoring.recommendedDecision,
@@ -304,6 +316,14 @@ export async function runDailyDiscoveryPipeline(options = {}) {
     registry.push(completeCandidate);
     knownUrls.add(completeCandidate.originalRepoUrl);
     knownIds.add(completeCandidate.candidateId);
+
+    if (completeCandidate.publicationEligibility === 'ELIGIBLE' && completeCandidate.reviewerDecision === 'APPROVE') {
+      retainedEligible++;
+      if (retainedEligible >= maxCandidates) {
+        console.log(`✂️ Reached max_candidates=${maxCandidates} retained eligible candidates; stopping further processing.`);
+        break;
+      }
+    }
   }
 
   // Update src/data/discoveryRegistry.json (skipped in dry run)
@@ -325,6 +345,16 @@ export async function runDailyDiscoveryPipeline(options = {}) {
     durationMs: Date.now() - startTime,
     rootDir,
     dryRun,
+    totalRaw: rawCandidates.length,
+    duplicateCount: skippedDuplicates,
+    sourceCounts: (() => {
+      const counts = {};
+      for (const c of rawCandidates) {
+        const src = c.sourcePlatform === 'github' ? 'GitHub' : (c.sourcePlatform === 'itch.io' ? 'itch.io' : c.sourcePlatform);
+        counts[src] = (counts[src] || 0) + 1;
+      }
+      return counts;
+    })(),
   });
 
   // 6. Submit Review (Branch & Pull Request Preparation) — no git side effects; CI handles PR via peter-evans
@@ -348,6 +378,7 @@ export async function runDailyDiscoveryPipeline(options = {}) {
 
   return {
     evaluatedCount: evaluatedCandidates.length,
+    retainedEligible,
     reportPath: report.reportPathMd,
     reviewResult,
   };

@@ -15,7 +15,7 @@
  * Licensing and Security are independent mandatory gates.
  */
 
-export function scoreCandidate(candidate, licenseResult, securityResult) {
+export function scoreCandidate(candidate, licenseResult, securityResult, qualityResult = null) {
   const breakdown = {
     popularityScore: 0,
     technicalQualityScore: 0,
@@ -121,16 +121,20 @@ export function scoreCandidate(candidate, licenseResult, securityResult) {
   // MANDATORY APPROVAL GATES CHECK
   const isLicensePassed = licenseResult && licenseResult.status === 'VERIFIED_COMMERCIAL_USE';
   const isSecurityPassed = securityResult && securityResult.status === 'PASSED';
+  const isQualityPassed = !qualityResult || qualityResult.isPermittedForPublication === true;
 
   let publicationEligibility = 'INELIGIBLE';
   let recommendedDecision = 'REJECT';
 
-  if (isLicensePassed && isSecurityPassed && breakdown.totalScore >= 60) {
+  if (isLicensePassed && isSecurityPassed && isQualityPassed && breakdown.totalScore >= 60) {
     publicationEligibility = 'ELIGIBLE';
     recommendedDecision = 'APPROVE';
   } else if (!isLicensePassed) {
     publicationEligibility = 'INELIGIBLE';
     recommendedDecision = 'REJECT';
+  } else if (qualityResult && !qualityResult.isPermittedForPublication) {
+    publicationEligibility = 'INELIGIBLE';
+    recommendedDecision = qualityResult.status === 'NEEDS_MANUAL_REVIEW' ? 'REQUEST_MORE_INFORMATION' : 'REJECT';
   } else if (securityResult && securityResult.status === 'NEEDS_MANUAL_REVIEW') {
     publicationEligibility = 'INELIGIBLE';
     recommendedDecision = 'REQUEST_MORE_INFORMATION';
@@ -148,6 +152,9 @@ export function scoreCandidate(candidate, licenseResult, securityResult) {
       isLicensePassed,
       securityStatus: securityResult ? securityResult.status : 'NEEDS_MANUAL_REVIEW',
       isSecurityPassed,
+      qualityStatus: qualityResult ? qualityResult.status : 'NOT_EVALUATED',
+      isQualityPassed,
+      qualityClassification: qualityResult ? qualityResult.classification : 'NOT_EVALUATED',
     },
   };
 }
