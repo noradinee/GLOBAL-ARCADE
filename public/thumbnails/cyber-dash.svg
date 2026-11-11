@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d1a" />
+      <stop offset="100%" stop-color="#161233" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#bg)"/>
+  <!-- Perspective Grid lines -->
+  <path d="M0 180 L400 180 M0 200 L400 200 M0 220 L400 220" stroke="#3b82f6" stroke-opacity="0.25" stroke-width="1.5"/>
+  <path d="M200 160 L-50 240 M200 160 L50 240 M200 160 L150 240 M200 160 L250 240 M200 160 L350 240 M200 160 L450 240" stroke="#8b5cf6" stroke-opacity="0.3" stroke-width="1.5"/>
+  
+  <!-- Cyber Silhouette Runner -->
+  <rect x="175" y="110" width="34" height="50" rx="8" fill="#06b6d4" />
+  <rect x="190" y="120" width="16" height="8" rx="2" fill="#ffffff" />
+  <!-- Neon jump trail -->
+  <path d="M160 145 C 130 150, 110 160, 90 160" stroke="#06b6d4" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Spikes -->
+  <polygon points="260,160 275,130 290,160" fill="#f43f5e" />
+  <polygon points="310,160 325,120 340,160" fill="#ec4899" />
+
+  <!-- Badge text -->
+  <rect x="20" y="20" width="90" height="24" rx="12" fill="#8b5cf6" fill-opacity="0.2" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="65" y="36" fill="#a78bfa" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">ARCADE</text>
+  <text x="200" y="215" fill="#ffffff" font-size="20" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="2">CYBER DASH</text>
+</svg>

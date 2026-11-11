@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Tower Stack Neon</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #070911;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 500px;
+      max-height: 700px;
+      background: #0b0e1a;
+      box-shadow: 0 0 35px rgba(139, 92, 246, 0.25);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .hud {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      color: #38bdf8;
+      font-weight: 800;
+      font-size: 18px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 9, 17, 0.88);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+    .btn {
+      padding: 12px 34px;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="hud">
+      <div>SCORE: <span id="scoreVal">0</span></div>
+      <div>COMBO: <span id="comboVal" style="color: #f59e0b;">0x</span></div>
+      <div>BEST: <span id="highVal">0</span></div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <div id="startOverlay" class="overlay">
+      <h1 style="font-size: 32px; font-weight: 900; background: linear-gradient(135deg, #06b6d4, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TOWER STACK NEON</h1>
+      <p style="color: #94a3b8; margin: 8px 0 16px; text-align: center;">Click, Tap, or press [SPACE] to drop the sliding block!<br/>Slice overhangs and stack to the heavens.</p>
+      <button class="btn" id="startBtn">START STACKING</button>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <h2 style="font-size: 32px; font-weight: 900; color: #f43f5e;">TOWER COLLAPSED</h2>
+      <p style="color: #cbd5e1; margin-top: 8px;">Final Height: <span id="finalScore" style="color: #38bdf8; font-weight: bold;">0</span></p>
+      <button class="btn" id="restartBtn">REBUILD TOWER</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreVal = document.getElementById('scoreVal');
+    const comboVal = document.getElementById('comboVal');
+    const highVal = document.getElementById('highVal');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const finalScore = document.getElementById('finalScore');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type = 'sine', duration = 0.1) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    let W, H;
+    function resize() {
+      const container = document.getElementById('game-container');
+      W = canvas.width = container.clientWidth;
+      H = canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const BLOCK_HEIGHT = 28;
+    let stack = [];
+    let currentBlock = null;
+    let score = 0;
+    let combo = 0;
+    let highScore = parseInt(localStorage.getItem('tower_stack_high') || '0', 10);
+    highVal.textContent = highScore;
+    let isPlaying = false;
+    let cameraY = 0;
+
+    const COLORS = ['#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+
+    function init() {
+      score = 0;
+      combo = 0;
+      cameraY = 0;
+      scoreVal.textContent = '0';
+      comboVal.textContent = '0x';
+
+      const baseWidth = Math.min(W * 0.65, 240);
+      stack = [
+        {
+          x: (W - baseWidth) / 2,
+          y: H - 80,
+          w: baseWidth,
+          h: BLOCK_HEIGHT,
+          color: COLORS[0]
+        }
+      ];
+
+      spawnCurrentBlock();
+    }
+
+    function spawnCurrentBlock() {
+      const prev = stack[stack.length - 1];
+      const color = COLORS[stack.length % COLORS.length];
+      const direction = stack.length % 2 === 0 ? 1 : -1;
+      const speed = 3.5 + Math.min(stack.length * 0.15, 6);
+
+      currentBlock = {
+        x: direction === 1 ? -prev.w : W,
+        y: prev.y - BLOCK_HEIGHT,
+        w: prev.w,
+        h: BLOCK_HEIGHT,
+        vx: direction * speed,
+        color: color
+      };
+    }
+
+    function placeBlock() {
+      if (!isPlaying || !currentBlock) return;
+
+      const prev = stack[stack.length - 1];
+      const diff = currentBlock.x - prev.x;
+
+      // Check perfect slice tolerance
+      if (Math.abs(diff) < 4) {
+        currentBlock.x = prev.x;
+        combo++;
+        beep(500 + combo * 60, 'triangle', 0.15);
+      } else {
+        combo = 0;
+        beep(360, 'sine', 0.1);
+      }
+
+      comboVal.textContent = combo + 'x';
+
+      // Missed completely
+      if (currentBlock.x + currentBlock.w <= prev.x || currentBlock.x >= prev.x + prev.w) {
+        return gameOver();
+      }
+
+      // Trim overhang
+      let newX = Math.max(currentBlock.x, prev.x);
+      let newW = currentBlock.w - Math.abs(diff);
+
+      if (newW <= 0) return gameOver();
+
+      stack.push({
+        x: newX,
+        y: currentBlock.y,
+        w: newW,
+        h: BLOCK_HEIGHT,
+        color: currentBlock.color
+      });
+
+      score++;
+      scoreVal.textContent = score;
+
+      // Adjust camera upward
+      if (currentBlock.y - cameraY < H * 0.45) {
+        cameraY += BLOCK_HEIGHT;
+      }
+
+      spawnCurrentBlock();
+    }
+
+    function gameOver() {
+      isPlaying = false;
+      beep(150, 'sawtooth', 0.4);
+      finalScore.textContent = score;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('tower_stack_high', highScore);
+        highVal.textContent = highScore;
+      }
+      gameOverOverlay.style.display = 'flex';
+    }
+
+    function update() {
+      if (!isPlaying || !currentBlock) return;
+
+      currentBlock.x += currentBlock.vx;
+      if (currentBlock.x < -currentBlock.w * 0.6 || currentBlock.x > W - currentBlock.w * 0.4) {
+        currentBlock.vx = -currentBlock.vx;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.save();
+      ctx.translate(0, cameraY);
+
+      // Draw Stack
+      stack.forEach((b) => {
+        ctx.fillStyle = b.color;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 10;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        // Highlight top border
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(b.x, b.y, b.w, 3);
+      });
+      ctx.shadowBlur = 0;
+
+      // Draw Active sliding block
+      if (isPlaying && currentBlock) {
+        ctx.fillStyle = currentBlock.color;
+        ctx.shadowColor = currentBlock.color;
+        ctx.shadowBlur = 14;
+        ctx.fillRect(currentBlock.x, currentBlock.y, currentBlock.w, currentBlock.h);
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.restore();
+
+      requestAnimationFrame(draw);
+      update();
+    }
+
+    requestAnimationFrame(draw);
+
+    function start() {
+      init();
+      isPlaying = true;
+      startOverlay.style.display = 'none';
+      gameOverOverlay.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', start);
+    restartBtn.addEventListener('click', start);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (isPlaying) placeBlock();
+        else if (gameOverOverlay.style.display === 'flex') start();
+      }
+    });
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target === canvas) {
+        if (isPlaying) placeBlock();
+      }
+    });
+  </script>
+</body>
+</html>

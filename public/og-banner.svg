@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07080c" />
+      <stop offset="50%" stop-color="#0f1220" />
+      <stop offset="100%" stop-color="#07080c" />
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Grid lines -->
+  <g stroke="#1e263d" stroke-opacity="0.3" stroke-width="1.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Glowing Controller Logo Center -->
+  <g transform="translate(600, 210) scale(1.4)">
+    <circle cx="0" cy="0" r="60" fill="#121520" stroke="#8b5cf6" stroke-width="4"/>
+    <path d="M-30 -10 C -30 -22, 30 -22, 30 -10 C 35 10, 32 26, 24 28 C 17 30, 11 20, 0 20 C -11 20, -17 30, -24 28 C -32 26, -35 10, -30 -10 Z" fill="#1c2033" stroke="#06b6d4" stroke-width="3"/>
+    <circle cx="16" cy="-2" r="3" fill="#f43f5e"/>
+    <circle cx="21" cy="4" r="3" fill="#10b981"/>
+    <circle cx="11" cy="4" r="3" fill="#f59e0b"/>
+    <circle cx="16" cy="10" r="3" fill="#8b5cf6"/>
+  </g>
+
+  <!-- Brand Title -->
+  <text x="600" y="370" fill="url(#titleGrad)" font-size="64" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="4">GLOBAL ARCADE</text>
+  <text x="600" y="420" fill="#cbd5e1" font-size="24" font-weight="700" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="2">PLAY FREE ONLINE HTML5 BROWSER GAMES</text>
+  <text x="600" y="470" fill="#38bdf8" font-size="20" font-weight="bold" font-family="'Cairo', sans-serif" text-anchor="middle">أفضل منصة ألعاب مجانية بدون تحميل أونلاين</text>
+
+  <!-- Feature Pills -->
+  <g transform="translate(360, 520)">
+    <rect x="0" y="0" width="140" height="38" rx="19" fill="#161b2e" stroke="#2a3556"/>
+    <text x="70" y="24" fill="#f8fafc" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle">⚡ Instant Play</text>
+
+    <rect x="170" y="0" width="140" height="38" rx="19" fill="#161b2e" stroke="#2a3556"/>
+    <text x="240" y="24" fill="#f8fafc" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle">📱 Mobile Ready</text>
+
+    <rect x="340" y="0" width="140" height="38" rx="19" fill="#161b2e" stroke="#2a3556"/>
+    <text x="410" y="24" fill="#f8fafc" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle">🎮 100% Free</text>
+  </g>
+</svg>

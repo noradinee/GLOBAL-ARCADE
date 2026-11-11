@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" fill="#04060d"/>
+  <!-- Planet Core -->
+  <circle cx="200" cy="110" r="42" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2"/>
+  <circle cx="200" cy="110" r="85" stroke="#38bdf8" stroke-dasharray="6 6" stroke-width="1.5" opacity="0.6"/>
+  <!-- Spaceship Defender -->
+  <polygon points="260,110 245,100 248,110 245,120" fill="#06b6d4"/>
+  <!-- Asteroids -->
+  <circle cx="90" cy="60" r="14" fill="#f43f5e"/>
+  <circle cx="330" cy="70" r="16" fill="#ec4899"/>
+  <circle cx="310" cy="160" r="12" fill="#f59e0b"/>
+  <!-- Laser Beam -->
+  <line x1="260" y1="110" x2="320" y2="75" stroke="#facc15" stroke-width="3"/>
+  <rect x="20" y="20" width="90" height="24" rx="12" fill="#f43f5e" fill-opacity="0.2" stroke="#f43f5e" stroke-width="1"/>
+  <text x="65" y="36" fill="#fb7185" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">ACTION</text>
+  <text x="200" y="215" fill="#ffffff" font-size="20" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="2">SPACE ORBIT DEFENDER</text>
+</svg>

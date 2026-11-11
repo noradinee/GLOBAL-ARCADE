@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" fill="#04060d"/>
+  <!-- Orbit Jump Planets -->
+  <circle cx="100" cy="150" r="30" fill="#38bdf8" stroke="#0ea5e9" stroke-width="2"/>
+  <circle cx="100" cy="150" r="50" stroke="#38bdf8" stroke-dasharray="4 4" stroke-width="1" opacity="0.4"/>
+
+  <circle cx="230" cy="90" r="26" fill="#8b5cf6" stroke="#a855f7" stroke-width="2"/>
+  <circle cx="230" cy="90" r="44" stroke="#8b5cf6" stroke-dasharray="4 4" stroke-width="1" opacity="0.4"/>
+
+  <circle cx="330" cy="160" r="22" fill="#ec4899" stroke="#f43f5e" stroke-width="2"/>
+
+  <!-- Jumping Capsule & Arc -->
+  <path d="M125 115 Q170 45 210 75" stroke="#facc15" stroke-width="3" stroke-dasharray="6 4" fill="none"/>
+  <circle cx="180" cy="55" r="6" fill="#ffffff"/>
+
+  <rect x="20" y="20" width="100" height="24" rx="12" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="1"/>
+  <text x="70" y="36" fill="#7dd3fc" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">CASUAL</text>
+  <text x="200" y="220" fill="#ffffff" font-size="19" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="2">COSMIC GRAVITY JUMP</text>
+</svg>

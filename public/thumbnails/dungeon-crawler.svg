@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" fill="#0c0a17"/>
+  <!-- Dungeon brick arches -->
+  <path d="M120 180 L120 90 Q200 40 280 90 L280 180 Z" stroke="#8b5cf6" stroke-width="3" fill="#17122b"/>
+  <!-- Glowing sword in center -->
+  <rect x="196" y="70" width="8" height="70" rx="3" fill="#38bdf8"/>
+  <rect x="180" y="115" width="40" height="8" rx="2" fill="#f59e0b"/>
+  <circle cx="200" cy="145" r="7" fill="#f59e0b"/>
+  <circle cx="200" cy="65" r="18" fill="#38bdf8" opacity="0.3"/>
+  <rect x="20" y="20" width="110" height="24" rx="12" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1"/>
+  <text x="75" y="36" fill="#818cf8" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">ADVENTURE</text>
+  <text x="200" y="215" fill="#ffffff" font-size="20" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="2">DUNGEON CRAWLER</text>
+</svg>

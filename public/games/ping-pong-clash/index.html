@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ping Pong Clash: 2 Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #080a11;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 520px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #0d101c;
+      border: 2px solid #232c49;
+      border-radius: 12px;
+    }
+    .hud {
+      position: absolute;
+      top: 16px;
+      left: 30px;
+      right: 30px;
+      display: flex;
+      justify-content: space-between;
+      color: #38bdf8;
+      font-weight: 900;
+      font-size: 26px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 10, 17, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 20;
+      border-radius: 12px;
+    }
+    .btn {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+      margin: 6px;
+      min-width: 220px;
+    }
+    .btn-secondary {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="hud">
+      <div id="scoreP1" style="color: #06b6d4;">P1: 0</div>
+      <div id="scoreP2" style="color: #ec4899;">P2: 0</div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <div id="startOverlay" class="overlay">
+      <h1 style="font-size: 34px; font-weight: 900; background: linear-gradient(135deg, #06b6d4, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PING PONG CLASH</h1>
+      <p style="color: #94a3b8; margin: 10px 0 16px; text-align: center;">P1: [W / S] or Left Screen Touch<br/>P2: [UP / DOWN] or Right Screen Touch</p>
+      <button class="btn" id="btn1P">1 PLAYER (VS AI)</button>
+      <button class="btn btn-secondary" id="btn2P">2 PLAYERS (LOCAL)</button>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <h2 id="winnerText" style="font-size: 32px; font-weight: 900; color: #10b981;">PLAYER 1 WINS!</h2>
+      <button class="btn" id="restartBtn">REMATCH</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreP1El = document.getElementById('scoreP1');
+    const scoreP2El = document.getElementById('scoreP2');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const winnerText = document.getElementById('winnerText');
+    const btn1P = document.getElementById('btn1P');
+    const btn2P = document.getElementById('btn2P');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type = 'sine', duration = 0.08) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    const W = 800, H = 500;
+    canvas.width = W;
+    canvas.height = H;
+
+    let isTwoPlayer = false;
+    let isPlaying = false;
+    let p1Score = 0;
+    let p2Score = 0;
+    const WIN_SCORE = 7;
+
+    const paddleW = 12;
+    const paddleH = 80;
+    let p1 = { y: H / 2 - paddleH / 2, vy: 0 };
+    let p2 = { y: H / 2 - paddleH / 2, vy: 0 };
+    let ball = { x: W / 2, y: H / 2, vx: 5, vy: 3, r: 8 };
+    let particles = [];
+    let keys = {};
+
+    function resetBall(servingToP1) {
+      ball.x = W / 2;
+      ball.y = H / 2;
+      const speed = 5.5;
+      const angle = (Math.random() - 0.5) * 0.8;
+      ball.vx = (servingToP1 ? -1 : 1) * speed * Math.cos(angle);
+      ball.vy = speed * Math.sin(angle);
+    }
+
+    function update() {
+      if (!isPlaying) return;
+
+      // P1 input
+      if (keys['KeyW'] || keys['KeyA']) p1.y -= 7;
+      if (keys['KeyS'] || keys['KeyD']) p1.y += 7;
+
+      // P2 input
+      if (isTwoPlayer) {
+        if (keys['ArrowUp']) p2.y -= 7;
+        if (keys['ArrowDown']) p2.y += 7;
+      } else {
+        // AI Logic with slight reaction lag
+        const target = ball.y - paddleH / 2;
+        const diff = target - p2.y;
+        p2.y += Math.sign(diff) * Math.min(Math.abs(diff), 5.2);
+      }
+
+      // Constrain paddles
+      p1.y = Math.max(10, Math.min(H - paddleH - 10, p1.y));
+      p2.y = Math.max(10, Math.min(H - paddleH - 10, p2.y));
+
+      // Ball movement
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Top / bottom wall bounce
+      if (ball.y - ball.r <= 0 || ball.y + ball.r >= H) {
+        ball.vy = -ball.vy;
+        beep(300, 'triangle', 0.05);
+      }
+
+      // Paddle 1 hit (Left)
+      if (ball.x - ball.r <= 30 + paddleW && ball.y >= p1.y && ball.y <= p1.y + paddleH) {
+        if (ball.vx < 0) {
+          ball.vx = -ball.vx * 1.05;
+          const hitOffset = (ball.y - (p1.y + paddleH / 2)) / (paddleH / 2);
+          ball.vy += hitOffset * 3;
+          beep(520, 'sine', 0.08);
+          spawnHitFX(ball.x, ball.y, '#06b6d4');
+        }
+      }
+
+      // Paddle 2 hit (Right)
+      if (ball.x + ball.r >= W - 30 - paddleW && ball.y >= p2.y && ball.y <= p2.y + paddleH) {
+        if (ball.vx > 0) {
+          ball.vx = -ball.vx * 1.05;
+          const hitOffset = (ball.y - (p2.y + paddleH / 2)) / (paddleH / 2);
+          ball.vy += hitOffset * 3;
+          beep(620, 'sine', 0.08);
+          spawnHitFX(ball.x, ball.y, '#ec4899');
+        }
+      }
+
+      // Point scoring
+      if (ball.x < 0) {
+        p2Score++;
+        scoreP2El.textContent = (isTwoPlayer ? 'P2: ' : 'AI: ') + p2Score;
+        beep(220, 'sawtooth', 0.2);
+        checkWin();
+        resetBall(true);
+      } else if (ball.x > W) {
+        p1Score++;
+        scoreP1El.textContent = 'P1: ' + p1Score;
+        beep(740, 'triangle', 0.2);
+        checkWin();
+        resetBall(false);
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function spawnHitFX(x, y, color) {
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5,
+          color,
+          life: 15
+        });
+      }
+    }
+
+    function checkWin() {
+      if (p1Score >= WIN_SCORE) {
+        endGame('PLAYER 1 WINS!', '#06b6d4');
+      } else if (p2Score >= WIN_SCORE) {
+        endGame(isTwoPlayer ? 'PLAYER 2 WINS!' : 'AI BOT WINS!', '#ec4899');
+      }
+    }
+
+    function endGame(text, color) {
+      isPlaying = false;
+      winnerText.textContent = text;
+      winnerText.style.color = color;
+      gameOverOverlay.style.display = 'flex';
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Center dividing dashed net
+      ctx.strokeStyle = '#232c49';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 10]);
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 0);
+      ctx.lineTo(W / 2, H);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Paddle 1
+      ctx.fillStyle = '#06b6d4';
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 12;
+      ctx.fillRect(30, p1.y, paddleW, paddleH);
+
+      // Paddle 2
+      ctx.fillStyle = '#ec4899';
+      ctx.shadowColor = '#ec4899';
+      ctx.shadowBlur = 12;
+      ctx.fillRect(W - 30 - paddleW, p2.y, paddleW, paddleH);
+
+      // Ball
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+      });
+
+      requestAnimationFrame(draw);
+      update();
+    }
+
+    requestAnimationFrame(draw);
+
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    // Touch support for mobile screen split
+    window.addEventListener('touchmove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      for (let i = 0; i < e.touches.length; i++) {
+        const t = e.touches[i];
+        const tx = t.clientX - rect.left;
+        const ty = (t.clientY - rect.top) * (H / rect.height);
+        if (tx < rect.width / 2) {
+          p1.y = ty - paddleH / 2;
+        } else if (isTwoPlayer) {
+          p2.y = ty - paddleH / 2;
+        }
+      }
+    }, { passive: true });
+
+    function startGame(twoPlayers) {
+      isTwoPlayer = twoPlayers;
+      p1Score = 0;
+      p2Score = 0;
+      scoreP1El.textContent = 'P1: 0';
+      scoreP2El.textContent = (isTwoPlayer ? 'P2: ' : 'AI: ') + '0';
+      p1.y = H / 2 - paddleH / 2;
+      p2.y = H / 2 - paddleH / 2;
+      resetBall(Math.random() > 0.5);
+      isPlaying = true;
+      startOverlay.style.display = 'none';
+      gameOverOverlay.style.display = 'none';
+    }
+
+    btn1P.addEventListener('click', () => startGame(false));
+    btn2P.addEventListener('click', () => startGame(true));
+    restartBtn.addEventListener('click', () => startGame(isTwoPlayer));
+  </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Speed Racer Drift</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #08090f;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #0b0d18;
+    }
+    .hud {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      color: #38bdf8;
+      font-weight: 800;
+      font-size: 16px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 9, 15, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 20;
+    }
+    .btn {
+      padding: 12px 34px;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+      margin-top: 14px;
+    }
+    /* Touch controls */
+    .touch-controls {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .touch-btn {
+      pointer-events: auto;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(30, 41, 59, 0.85);
+      border: 2px solid #38bdf8;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .touch-btn:active {
+      background: #38bdf8;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="hud">
+      <div>LAP: <span id="lapVal" style="color: #f59e0b;">1 / 3</span></div>
+      <div>SPEED: <span id="speedVal">0</span> MPH</div>
+      <div>TIME: <span id="timeVal">0.0s</span></div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <div class="touch-controls">
+      <div style="display: flex; gap: 12px;">
+        <button class="touch-btn" id="btnLeft">◀</button>
+        <button class="touch-btn" id="btnRight">▶</button>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button class="touch-btn" id="btnBrake" style="border-color: #f43f5e;">B</button>
+        <button class="touch-btn" id="btnGas" style="border-color: #10b981;">▲</button>
+      </div>
+    </div>
+
+    <div id="startOverlay" class="overlay">
+      <h1 style="font-size: 34px; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SPEED RACER DRIFT</h1>
+      <p style="color: #cbd5e1; margin-top: 8px; text-align: center;">Controls: [W / UP] Gas, [S / DOWN] Brake, [A/D or Arrows] Steer.<br/>Drift around corners to maintain maximum velocity!</p>
+      <button class="btn" id="startBtn">START ENGINE</button>
+    </div>
+
+    <div id="finishOverlay" class="overlay" style="display: none;">
+      <h2 style="font-size: 34px; font-weight: 900; color: #10b981;">RACE FINISHED!</h2>
+      <p style="color: #cbd5e1; margin-top: 8px;">Total Time: <span id="finalTime" style="color: #f59e0b; font-weight: bold;">0.0s</span></p>
+      <button class="btn" id="restartBtn">RACE AGAIN</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const lapVal = document.getElementById('lapVal');
+    const speedVal = document.getElementById('speedVal');
+    const timeVal = document.getElementById('timeVal');
+    const startOverlay = document.getElementById('startOverlay');
+    const finishOverlay = document.getElementById('finishOverlay');
+    const finalTime = document.getElementById('finalTime');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type = 'sine', duration = 0.1) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    let W = 800, H = 600;
+    canvas.width = W;
+    canvas.height = H;
+
+    let car = {
+      x: 180,
+      y: 110,
+      vx: 0,
+      vy: 0,
+      angle: 0,
+      speed: 0,
+      accel: 0.16,
+      maxSpeed: 7.5,
+      friction: 0.965,
+      turnSpeed: 0.055
+    };
+
+    let keys = {};
+    let particles = [];
+    let currentLap = 1;
+    const TOTAL_LAPS = 3;
+    let raceStartTime = 0;
+    let isRacing = false;
+    let checkpointPassed = false;
+
+    // Track points defining an oval/chicane race track
+    const trackInner = [
+      { x: 260, y: 190 }, { x: 540, y: 190 }, { x: 620, y: 300 },
+      { x: 540, y: 410 }, { x: 260, y: 410 }, { x: 180, y: 300 }
+    ];
+    const trackOuter = [
+      { x: 240, y: 70 }, { x: 560, y: 70 }, { x: 730, y: 300 },
+      { x: 560, y: 530 }, { x: 240, y: 530 }, { x: 70, y: 300 }
+    ];
+
+    function update() {
+      if (!isRacing) return;
+
+      const elapsed = ((performance.now() - raceStartTime) / 1000).toFixed(1);
+      timeVal.textContent = elapsed + 's';
+
+      // Input
+      if (keys['ArrowUp'] || keys['KeyW']) {
+        car.speed += car.accel;
+      }
+      if (keys['ArrowDown'] || keys['KeyS']) {
+        car.speed -= car.accel * 0.8;
+      }
+
+      car.speed *= car.friction;
+      if (car.speed > car.maxSpeed) car.speed = car.maxSpeed;
+      if (car.speed < -car.maxSpeed * 0.4) car.speed = -car.maxSpeed * 0.4;
+
+      if (Math.abs(car.speed) > 0.2) {
+        const dir = car.speed > 0 ? 1 : -1;
+        if (keys['ArrowLeft'] || keys['KeyA']) car.angle -= car.turnSpeed * dir;
+        if (keys['ArrowRight'] || keys['KeyD']) car.angle += car.turnSpeed * dir;
+
+        // Drift smoke
+        if (Math.abs(car.speed) > 4) {
+          particles.push({
+            x: car.x - Math.cos(car.angle) * 12,
+            y: car.y - Math.sin(car.angle) * 12,
+            r: Math.random() * 4 + 2,
+            alpha: 0.5
+          });
+        }
+      }
+
+      car.x += Math.cos(car.angle) * car.speed;
+      car.y += Math.sin(car.angle) * car.speed;
+
+      speedVal.textContent = Math.floor(Math.abs(car.speed) * 16);
+
+      // Checkpoint halfway (right curve: x > 600)
+      if (car.x > 580) {
+        checkpointPassed = true;
+      }
+
+      // Finish line check: x ~ 180, y between 70 and 190
+      if (checkpointPassed && car.x < 220 && car.y > 60 && car.y < 200) {
+        checkpointPassed = false;
+        currentLap++;
+        beep(700, 'triangle', 0.2);
+
+        if (currentLap > TOTAL_LAPS) {
+          isRacing = false;
+          finalTime.textContent = elapsed + 's';
+          finishOverlay.style.display = 'flex';
+          return;
+        } else {
+          lapVal.textContent = `${currentLap} / ${TOTAL_LAPS}`;
+        }
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.alpha -= 0.03;
+        p.r += 0.2;
+        if (p.alpha <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Track surface
+      ctx.beginPath();
+      trackOuter.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.closePath();
+      ctx.fillStyle = '#181d2f';
+      ctx.fill();
+
+      // Grass / infield
+      ctx.beginPath();
+      trackInner.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.closePath();
+      ctx.fillStyle = '#0b0d18';
+      ctx.fill();
+
+      // Track borders (neon glow)
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+
+      ctx.beginPath();
+      trackOuter.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.closePath();
+      ctx.strokeStyle = '#8b5cf6';
+      ctx.shadowColor = '#8b5cf6';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Finish line
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([8, 8]);
+      ctx.beginPath();
+      ctx.moveTo(200, 70);
+      ctx.lineTo(200, 190);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Drift Smoke
+      particles.forEach(p => {
+        ctx.fillStyle = `rgba(148, 163, 184, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Car
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle);
+
+      // Car body
+      ctx.fillStyle = '#f59e0b';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(-16, -9, 32, 18);
+
+      // Windshield
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-2, -7, 10, 14);
+
+      // Neon headlights
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(14, -8, 3, 4);
+      ctx.fillRect(14, 4, 3, 4);
+      ctx.restore();
+
+      requestAnimationFrame(draw);
+      update();
+    }
+
+    requestAnimationFrame(draw);
+
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    // Touch button handlers
+    function bindTouch(id, key) {
+      const el = document.getElementById(id);
+      el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+      el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+      el.addEventListener('mousedown', () => { keys[key] = true; });
+      el.addEventListener('mouseup', () => { keys[key] = false; });
+    }
+    bindTouch('btnLeft', 'ArrowLeft');
+    bindTouch('btnRight', 'ArrowRight');
+    bindTouch('btnGas', 'ArrowUp');
+    bindTouch('btnBrake', 'ArrowDown');
+
+    function startRace() {
+      car.x = 180;
+      car.y = 130;
+      car.speed = 0;
+      car.angle = 0;
+      currentLap = 1;
+      checkpointPassed = false;
+      lapVal.textContent = '1 / 3';
+      raceStartTime = performance.now();
+      isRacing = true;
+      startOverlay.style.display = 'none';
+      finishOverlay.style.display = 'none';
+      beep(440, 'triangle', 0.2);
+    }
+
+    startBtn.addEventListener('click', startRace);
+    restartBtn.addEventListener('click', startRace);
+  </script>
+</body>
+</html>

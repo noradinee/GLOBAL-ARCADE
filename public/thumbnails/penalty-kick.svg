@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" fill="#07120e"/>
+  <!-- Goal Net Post -->
+  <rect x="70" y="50" width="260" height="110" stroke="#10b981" stroke-width="4" fill="#0c1e17"/>
+  <path d="M70 50 L330 50 M70 80 L330 80 M70 110 L330 110 M70 140 L330 140" stroke="#10b981" stroke-width="1" opacity="0.3"/>
+  <path d="M110 50 L110 160 M160 50 L160 160 M210 50 L210 160 M260 50 L260 160 M290 50 L290 160" stroke="#10b981" stroke-width="1" opacity="0.3"/>
+  <!-- Goalkeeper silhouette jumping -->
+  <circle cx="170" cy="95" r="10" fill="#f59e0b"/>
+  <rect x="165" y="105" width="10" height="25" rx="3" fill="#f59e0b"/>
+  <!-- Soccer Ball flying top right corner -->
+  <circle cx="300" cy="70" r="14" fill="#ffffff"/>
+  <circle cx="300" cy="70" r="10" fill="#000000" stroke="#ffffff" stroke-width="2" stroke-dasharray="3 3"/>
+  <!-- Ball motion line -->
+  <path d="M190 200 Q260 140 295 75" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 4" fill="none"/>
+
+  <rect x="20" y="18" width="90" height="24" rx="12" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="1"/>
+  <text x="65" y="34" fill="#34d399" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">SPORTS</text>
+  <text x="200" y="215" fill="#ffffff" font-size="20" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="2">PENALTY MASTER</text>
+</svg>

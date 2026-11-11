@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Cosmic Gravity Jump</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #04050a;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 600px;
+      max-height: 750px;
+      background: #080a14;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .hud {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      color: #38bdf8;
+      font-weight: 800;
+      font-size: 18px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 5, 10, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 20;
+    }
+    .btn {
+      padding: 12px 34px;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="hud">
+      <div>SCORE: <span id="scoreVal">0</span></div>
+      <div>BEST: <span id="highVal">0</span></div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <div id="startOverlay" class="overlay">
+      <h1 style="font-size: 32px; font-weight: 900; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">COSMIC GRAVITY JUMP</h1>
+      <p style="color: #94a3b8; margin: 8px 0 16px; text-align: center;">Click, Tap or press [SPACE] to launch your capsule into orbit!<br/>Jump from planet to planet upwards.</p>
+      <button class="btn" id="startBtn">LAUNCH MISSION</button>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <h2 style="font-size: 32px; font-weight: 900; color: #f43f5e;">LOST IN DEEP SPACE</h2>
+      <p style="color: #cbd5e1; margin-top: 8px;">Planets Reached: <span id="finalScore" style="color: #38bdf8; font-weight: bold;">0</span></p>
+      <button class="btn" id="restartBtn">TRY AGAIN</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreVal = document.getElementById('scoreVal');
+    const highVal = document.getElementById('highVal');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const finalScore = document.getElementById('finalScore');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type = 'sine', duration = 0.1) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    let W, H;
+    function resize() {
+      const container = document.getElementById('game-container');
+      W = canvas.width = container.clientWidth;
+      H = canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let planets = [];
+    let player = {
+      planetIndex: 0,
+      angle: 0,
+      orbitDist: 40,
+      isFlying: false,
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      trail: []
+    };
+
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('gravity_jump_high') || '0', 10);
+    highVal.textContent = highScore;
+    let isPlaying = false;
+    let cameraY = 0;
+
+    const PLANET_COLORS = ['#38bdf8', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'];
+
+    function init() {
+      score = 0;
+      scoreVal.textContent = '0';
+      cameraY = 0;
+
+      planets = [];
+      let currentY = H - 100;
+      for (let i = 0; i < 6; i++) {
+        planets.push({
+          x: W / 2 + (i === 0 ? 0 : (Math.random() - 0.5) * (W * 0.45)),
+          y: currentY,
+          r: 28 + Math.random() * 8,
+          speed: (Math.random() > 0.5 ? 1 : -1) * (0.04 + Math.random() * 0.02),
+          color: PLANET_COLORS[i % PLANET_COLORS.length]
+        });
+        currentY -= 170;
+      }
+
+      player = {
+        planetIndex: 0,
+        angle: 0,
+        orbitDist: planets[0].r + 14,
+        isFlying: false,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        trail: []
+      };
+    }
+
+    function spawnNextPlanet() {
+      const highest = planets[planets.length - 1];
+      planets.push({
+        x: W / 2 + (Math.random() - 0.5) * (W * 0.5),
+        y: highest.y - 170,
+        r: 28 + Math.random() * 8,
+        speed: (Math.random() > 0.5 ? 1 : -1) * (0.04 + Math.random() * 0.02),
+        color: PLANET_COLORS[Math.floor(Math.random() * PLANET_COLORS.length)]
+      });
+    }
+
+    function jump() {
+      if (!isPlaying || player.isFlying) return;
+
+      const p = planets[player.planetIndex];
+      const speed = 12;
+      // Tangential launch angle
+      const launchAngle = player.angle + Math.PI / 2 * Math.sign(p.speed);
+      player.vx = Math.cos(launchAngle) * speed;
+      player.vy = Math.sin(launchAngle) * speed;
+      player.isFlying = true;
+      beep(580, 'triangle', 0.12);
+    }
+
+    function update() {
+      if (!isPlaying) return;
+
+      if (!player.isFlying) {
+        // Orbit current planet
+        const p = planets[player.planetIndex];
+        player.angle += p.speed;
+        player.x = p.x + Math.cos(player.angle) * player.orbitDist;
+        player.y = p.y + Math.sin(player.angle) * player.orbitDist;
+      } else {
+        // Flying through vacuum
+        player.x += player.vx;
+        player.y += player.vy;
+
+        // Add trail
+        player.trail.push({ x: player.x, y: player.y, alpha: 0.8 });
+
+        // Check boundary loss
+        if (player.x < -80 || player.x > W + 80 || player.y > planets[player.planetIndex].y + 150) {
+          return gameOver();
+        }
+
+        // Check collision with other planets (especially next ones)
+        for (let i = player.planetIndex + 1; i < planets.length; i++) {
+          const target = planets[i];
+          const dist = Math.hypot(player.x - target.x, player.y - target.y);
+          if (dist < target.r + 20) {
+            // Captured by gravity well!
+            player.isFlying = false;
+            player.planetIndex = i;
+            player.orbitDist = target.r + 14;
+            player.angle = Math.atan2(player.y - target.y, player.x - target.x);
+            score++;
+            scoreVal.textContent = score;
+            beep(780, 'sine', 0.15);
+
+            // Camera follow
+            cameraY = -(target.y - H * 0.65);
+            spawnNextPlanet();
+            break;
+          }
+        }
+      }
+
+      // Update trail
+      player.trail.forEach(t => t.alpha -= 0.05);
+      player.trail = player.trail.filter(t => t.alpha > 0);
+    }
+
+    function gameOver() {
+      isPlaying = false;
+      beep(140, 'sawtooth', 0.35);
+      finalScore.textContent = score;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('gravity_jump_high', highScore);
+        highVal.textContent = highScore;
+      }
+      gameOverOverlay.style.display = 'flex';
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.save();
+      ctx.translate(0, cameraY);
+
+      // Draw Planets
+      planets.forEach((p, idx) => {
+        // Orbit ring
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r + 14, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Planet body
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // Draw Trail
+      player.trail.forEach(t => {
+        ctx.fillStyle = `rgba(56, 189, 248, ${t.alpha})`;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw Player Capsule
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+
+      requestAnimationFrame(draw);
+      update();
+    }
+
+    requestAnimationFrame(draw);
+
+    function start() {
+      init();
+      isPlaying = true;
+      startOverlay.style.display = 'none';
+      gameOverOverlay.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', start);
+    restartBtn.addEventListener('click', start);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (isPlaying) jump();
+        else if (gameOverOverlay.style.display === 'flex') start();
+      }
+    });
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target === canvas) {
+        if (isPlaying) jump();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "adsEnabled": true,
+  "devMockMode": true,
+  "gdprConsentRequired": true,
+  "activeDefaultProvider": "adsense",
+  "providers": {
+    "adsense": {
+      "enabled": true,
+      "publisherId": "ca-pub-XXXXXXXXXXXXXXXX",
+      "testMode": true,
+      "priority": 1
+    },
+    "adsterra": {
+      "enabled": false,
+      "publisherId": "adsterra-zone-123456",
+      "testMode": true,
+      "priority": 2
+    },
+    "monetag": {
+      "enabled": false,
+      "publisherId": "monetag-tag-789012",
+      "testMode": true,
+      "priority": 3
+    },
+    "medianet": {
+      "enabled": false,
+      "publisherId": "media-net-id-345678",
+      "testMode": true,
+      "priority": 4
+    },
+    "hilltopads": {
+      "enabled": false,
+      "publisherId": "hilltop-zone-901234",
+      "testMode": true,
+      "priority": 5
+    }
+  },
+  "slots": {
+    "header-top": {
+      "id": "slot-header-top",
+      "placement": "header-top",
+      "activeProvider": "adsense",
+      "desktopSize": [728, 90],
+      "mobileSize": [320, 50],
+      "refreshIntervalSeconds": 60,
+      "responsive": true
+    },
+    "sidebar": {
+      "id": "slot-sidebar",
+      "placement": "sidebar",
+      "activeProvider": "adsense",
+      "desktopSize": [300, 250],
+      "mobileSize": [300, 250],
+      "refreshIntervalSeconds": 45,
+      "responsive": false
+    },
+    "game-sidebar": {
+      "id": "slot-game-sidebar",
+      "placement": "game-sidebar",
+      "activeProvider": "adsense",
+      "desktopSize": [300, 600],
+      "mobileSize": [300, 250],
+      "refreshIntervalSeconds": 60,
+      "responsive": true
+    },
+    "below-game": {
+      "id": "slot-below-game",
+      "placement": "below-game",
+      "activeProvider": "adsense",
+      "desktopSize": [728, 90],
+      "mobileSize": [320, 100],
+      "refreshIntervalSeconds": 60,
+      "responsive": true
+    },
+    "in-feed": {
+      "id": "slot-in-feed",
+      "placement": "in-feed",
+      "activeProvider": "adsense",
+      "desktopSize": [336, 280],
+      "mobileSize": [300, 250],
+      "refreshIntervalSeconds": 0,
+      "responsive": true
+    },
+    "interstitial": {
+      "id": "slot-interstitial",
+      "placement": "interstitial",
+      "activeProvider": "adsense",
+      "desktopSize": [640, 480],
+      "mobileSize": [320, 480],
+      "refreshIntervalSeconds": 0,
+      "responsive": true
+    }
+  }
+}

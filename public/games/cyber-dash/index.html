@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Cyber Dash</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #06070b;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 900px;
+      max-height: 600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #090b14;
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .hud {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      text-shadow: 0 0 10px #06b6d4;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 11, 20, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 20;
+    }
+    .title {
+      font-size: 38px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .btn {
+      padding: 14px 36px;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 16px;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.9);
+    }
+    .instructions {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="hud">
+      <div>SCORE: <span id="scoreVal">0</span></div>
+      <div>ENERGY: <span id="coinVal">0</span></div>
+      <div>BEST: <span id="highVal">0</span></div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="startOverlay" class="overlay">
+      <div class="title">CYBER DASH</div>
+      <p style="color: #cbd5e1; font-size: 16px;">Jump over neon hazards and collect cyber energy!</p>
+      <button class="btn" id="startBtn">START RUN</button>
+      <div class="instructions">Tap / Click or press [SPACE] / [UP] to Jump (Double Jump supported)</div>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <div class="title" style="color: #f43f5e;">SYSTEM CRASHED</div>
+      <p style="color: #cbd5e1; font-size: 18px;">Score: <span id="finalScore" style="color: #06b6d4; font-weight: bold;">0</span></p>
+      <button class="btn" id="restartBtn">RETRY MISSION</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreVal = document.getElementById('scoreVal');
+    const coinVal = document.getElementById('coinVal');
+    const highVal = document.getElementById('highVal');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const finalScore = document.getElementById('finalScore');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // Audio Synthesis for zero dependencies
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type, duration) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    let width, height;
+    function resize() {
+      const container = document.getElementById('game-container');
+      width = canvas.width = container.clientWidth;
+      height = canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let gameState = 'START';
+    let score = 0;
+    let coins = 0;
+    let highScore = parseInt(localStorage.getItem('cyber_dash_high') || '0', 10);
+    highVal.textContent = highScore;
+
+    const gravity = 0.65;
+    const player = {
+      x: 80,
+      y: 0,
+      w: 36,
+      h: 52,
+      vy: 0,
+      jumps: 0,
+      maxJumps: 2,
+      trail: []
+    };
+
+    let groundY = 0;
+    let obstacles = [];
+    let energyOrbs = [];
+    let particles = [];
+    let speed = 6;
+    let spawnTimer = 0;
+
+    function resetGame() {
+      score = 0;
+      coins = 0;
+      speed = 6.5;
+      groundY = height - 70;
+      player.y = groundY - player.h;
+      player.vy = 0;
+      player.jumps = 0;
+      player.trail = [];
+      obstacles = [];
+      energyOrbs = [];
+      particles = [];
+      spawnTimer = 0;
+      scoreVal.textContent = '0';
+      coinVal.textContent = '0';
+    }
+
+    function jump() {
+      if (gameState !== 'PLAYING') return;
+      if (player.jumps < player.maxJumps) {
+        player.vy = -12.5;
+        player.jumps++;
+        playBeep(player.jumps === 1 ? 380 : 540, 'triangle', 0.15);
+        for (let i = 0; i < 8; i++) {
+          particles.push({
+            x: player.x + player.w / 2,
+            y: player.y + player.h,
+            vx: (Math.random() - 0.5) * 5,
+            vy: Math.random() * 2 + 1,
+            color: '#06b6d4',
+            life: 20
+          });
+        }
+      }
+    }
+
+    function spawnStuff() {
+      spawnTimer++;
+      if (spawnTimer % 90 === 0) {
+        const type = Math.random() > 0.4 ? 'spike' : 'barrier';
+        const obsH = type === 'spike' ? 40 : 55;
+        obstacles.push({
+          x: width + 50,
+          y: groundY - obsH,
+          w: type === 'spike' ? 34 : 26,
+          h: obsH,
+          type: type,
+          color: type === 'spike' ? '#f43f5e' : '#ec4899'
+        });
+
+        if (Math.random() > 0.3) {
+          energyOrbs.push({
+            x: width + 50 + (Math.random() * 80 + 30),
+            y: groundY - 80 - Math.random() * 70,
+            r: 10,
+            pulse: 0
+          });
+        }
+      }
+    }
+
+    function update() {
+      if (gameState !== 'PLAYING') return;
+
+      score++;
+      if (score % 200 === 0) speed += 0.3;
+      scoreVal.textContent = Math.floor(score / 5);
+
+      player.vy += gravity;
+      player.y += player.vy;
+
+      if (player.y >= groundY - player.h) {
+        player.y = groundY - player.h;
+        player.vy = 0;
+        player.jumps = 0;
+      }
+
+      // Trail
+      if (Math.random() > 0.4) {
+        player.trail.push({ x: player.x, y: player.y, alpha: 0.6 });
+      }
+      player.trail.forEach(t => t.alpha -= 0.05);
+      player.trail = player.trail.filter(t => t.alpha > 0);
+
+      spawnStuff();
+
+      // Obstacles
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obs = obstacles[i];
+        obs.x -= speed;
+
+        // Collision Check
+        if (
+          player.x < obs.x + obs.w - 6 &&
+          player.x + player.w > obs.x + 6 &&
+          player.y < obs.y + obs.h - 4 &&
+          player.y + player.h > obs.y + 4
+        ) {
+          gameOver();
+          return;
+        }
+
+        if (obs.x < -60) obstacles.splice(i, 1);
+      }
+
+      // Energy Orbs
+      for (let i = energyOrbs.length - 1; i >= 0; i--) {
+        const orb = energyOrbs[i];
+        orb.x -= speed;
+        orb.pulse += 0.1;
+
+        const dx = (player.x + player.w / 2) - orb.x;
+        const dy = (player.y + player.h / 2) - orb.y;
+        if (Math.hypot(dx, dy) < player.w / 2 + orb.r) {
+          coins++;
+          coinVal.textContent = coins;
+          playBeep(780, 'sine', 0.12);
+          for (let p = 0; p < 10; p++) {
+            particles.push({
+              x: orb.x,
+              y: orb.y,
+              vx: (Math.random() - 0.5) * 6,
+              vy: (Math.random() - 0.5) * 6,
+              color: '#38bdf8',
+              life: 25
+            });
+          }
+          energyOrbs.splice(i, 1);
+          continue;
+        }
+
+        if (orb.x < -30) energyOrbs.splice(i, 1);
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function gameOver() {
+      gameState = 'GAMEOVER';
+      playBeep(140, 'sawtooth', 0.4);
+      finalScore.textContent = Math.floor(score / 5) + (coins * 25);
+      const total = Math.floor(score / 5) + (coins * 25);
+      if (total > highScore) {
+        highScore = total;
+        localStorage.setItem('cyber_dash_high', highScore);
+        highVal.textContent = highScore;
+      }
+      gameOverOverlay.style.display = 'flex';
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Cyber Grid Background
+      const gridOffset = (score * 2) % 40;
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.12)';
+      ctx.lineWidth = 1;
+      for (let x = -gridOffset; x < width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Ground Line
+      groundY = height - 70;
+      const groundGrad = ctx.createLinearGradient(0, groundY, 0, height);
+      groundGrad.addColorStop(0, '#8b5cf6');
+      groundGrad.addColorStop(1, '#090b14');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, groundY, width, height - groundY);
+
+      // Glowing Ground Edge
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(width, groundY);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Player Trails
+      player.trail.forEach(t => {
+        ctx.fillStyle = `rgba(6, 182, 212, ${t.alpha * 0.4})`;
+        ctx.fillRect(t.x, t.y, player.w, player.h);
+      });
+
+      // Player
+      ctx.fillStyle = '#06b6d4';
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 15;
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+      // Cyber Visor
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(player.x + 16, player.y + 10, 16, 8);
+      ctx.shadowBlur = 0;
+
+      // Obstacles
+      obstacles.forEach(obs => {
+        ctx.fillStyle = obs.color;
+        ctx.shadowColor = obs.color;
+        ctx.shadowBlur = 14;
+        if (obs.type === 'spike') {
+          ctx.beginPath();
+          ctx.moveTo(obs.x + obs.w / 2, obs.y);
+          ctx.lineTo(obs.x + obs.w, obs.y + obs.h);
+          ctx.lineTo(obs.x, obs.y + obs.h);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+        }
+        ctx.shadowBlur = 0;
+      });
+
+      // Energy Orbs
+      energyOrbs.forEach(orb => {
+        const glowR = orb.r + Math.sin(orb.pulse) * 2;
+        ctx.fillStyle = '#f59e0b';
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // Particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+      });
+
+      requestAnimationFrame(draw);
+      update();
+    }
+
+    requestAnimationFrame(draw);
+
+    function startGame() {
+      resetGame();
+      gameState = 'PLAYING';
+      startOverlay.style.display = 'none';
+      gameOverOverlay.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+        e.preventDefault();
+        if (gameState === 'PLAYING') {
+          jump();
+        } else if (gameState === 'GAMEOVER') {
+          startGame();
+        }
+      }
+    });
+
+    window.addEventListener('touchstart', (e) => {
+      if (gameState === 'PLAYING') {
+        jump();
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>

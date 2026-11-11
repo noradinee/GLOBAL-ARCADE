@@ -1,0 +1,92 @@
+name: Daily Game Discovery & Human Approval Pipeline
+
+# SCHEDULE CONFIGURATION:
+# Runs every day at 04:00 UTC automatically.
+# To change the schedule, update the cron expression below:
+# Format: 'minute hour day-of-month month day-of-week' (all in UTC)
+# Example: '0 2 * * *' runs at 02:00 UTC.
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      max_candidates:
+        description: 'Maximum number of candidate repositories to evaluate'
+        required: false
+        default: '10'
+      dry_run:
+        description: 'Run discovery without committing or opening a PR'
+        required: false
+        type: boolean
+        default: false
+
+# Minimum permissions principle: Read & Write to repository content and PRs only
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover-and-report:
+    name: Automated Game Discovery & Security Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Workspace Dependencies
+        run: npm ci --prefer-offline
+
+      - name: 🔍 Execute Daily Game Discovery Pipeline
+        id: run_discovery
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Starting Global Arcade Automated Daily Discovery..."
+          node scripts/discovery/orchestrator.js
+          
+          # Export current date for PR naming
+          TODAY=$(date -u +"%Y-%m-%d")
+          echo "DISCOVERY_DATE=$TODAY" >> $GITHUB_ENV
+
+      - name: 📋 Check for New Candidates and Reports
+        id: check_changes
+        run: |
+          git status --porcelain
+          if [ -n "$(git status --porcelain discovery/ src/data/discoveryRegistry.json)" ]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+            echo "✅ New candidate records or daily reports detected."
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No new candidates discovered in this run. Registry is up to date."
+          fi
+
+      - name: 🚀 Create Daily Review Pull Request
+        if: steps.check_changes.outputs.changes_detected == 'true' && inputs.dry_run != true
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat(discovery): daily game candidate review for ${{ env.DISCOVERY_DATE }} [skip ci]"
+          branch: "discovery/daily-${{ env.DISCOVERY_DATE }}"
+          delete-branch: true
+          title: "🕹️ Daily Game Discovery Review: ${{ env.DISCOVERY_DATE }}"
+          body-path: "discovery/reports/${{ env.DISCOVERY_DATE }}-discovery-report.md"
+          labels: |
+            game-review
+            automated-discovery
+            human-approval-required
+          reviewers: ${{ github.repository_owner }}
+
+      - name: 🛡️ Audit Website Build Integrity
+        run: |
+          echo "Verifying that existing games catalog and production site remain untouched..."
+          npm run build

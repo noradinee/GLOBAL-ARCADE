@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Hexa Block Puzzle</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background: #07090e;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    #game-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      background: #111524;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid #1e263d;
+    }
+    .score-box {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .score-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+      background: #101423;
+      padding: 8px;
+      border-radius: 12px;
+      border: 2px solid #232c49;
+      width: 100%;
+      aspect-ratio: 1;
+    }
+    .cell {
+      background: #181f33;
+      border-radius: 6px;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .cell.filled-1 { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+    .cell.filled-2 { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
+    .cell.filled-3 { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+    .cell.filled-4 { background: #10b981; box-shadow: 0 0 10px #10b981; }
+    .cell.preview { background: rgba(56, 189, 248, 0.45); }
+
+    #pieces-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      margin-top: 14px;
+      min-height: 90px;
+    }
+    .piece-card {
+      background: #111524;
+      border: 2px solid #232c49;
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .piece-card.selected {
+      border-color: #38bdf8;
+      transform: scale(1.08);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+    .piece-row {
+      display: flex;
+      gap: 3px;
+    }
+    .piece-cell {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+    .piece-cell.empty {
+      background: transparent;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .btn {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="header">
+      <div class="score-box">
+        SCORE
+        <div class="score-val" id="score">0</div>
+      </div>
+      <div class="score-box" style="text-align: right;">
+        BEST
+        <div class="score-val" id="highScore" style="color: #a78bfa;">0</div>
+      </div>
+    </div>
+
+    <div id="board"></div>
+
+    <div id="pieces-container"></div>
+  </div>
+
+  <div id="gameOverModal" class="overlay" style="display: none;">
+    <h1 style="color: #f43f5e; font-size: 32px; font-weight: 900;">NO MORE MOVES</h1>
+    <p style="color: #94a3b8; margin-top: 8px;">Final Score: <span id="finalScore" style="color: #38bdf8; font-weight: bold;">0</span></p>
+    <button class="btn" id="restartBtn">PLAY AGAIN</button>
+  </div>
+
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type = 'sine', duration = 0.1) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    const BOARD_SIZE = 8;
+    let board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('hexa_block_high') || '0', 10);
+    document.getElementById('highScore').textContent = highScore;
+
+    const boardEl = document.getElementById('board');
+    const piecesEl = document.getElementById('pieces-container');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('finalScore');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const restartBtn = document.getElementById('restartBtn');
+
+    let selectedPieceIndex = null;
+    let currentPieces = [];
+
+    const SHAPES = [
+      { shape: [[1]], colorId: 1 },
+      { shape: [[1, 1]], colorId: 1 },
+      { shape: [[1], [1]], colorId: 1 },
+      { shape: [[1, 1, 1]], colorId: 2 },
+      { shape: [[1], [1], [1]], colorId: 2 },
+      { shape: [[1, 1], [1, 1]], colorId: 3 },
+      { shape: [[1, 0], [1, 1]], colorId: 4 },
+      { shape: [[0, 1], [1, 1]], colorId: 4 },
+      { shape: [[1, 1, 1], [0, 1, 0]], colorId: 2 },
+      { shape: [[1, 1, 1], [1, 0, 0]], colorId: 3 },
+    ];
+
+    const COLOR_CLASSES = ['', 'filled-1', 'filled-2', 'filled-3', 'filled-4'];
+    const HEX_COLORS = ['', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981'];
+
+    function createBoardUI() {
+      boardEl.innerHTML = '';
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          cell.addEventListener('click', () => handleBoardCellClick(r, c));
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderBoard() {
+      const cells = boardEl.children;
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const idx = r * BOARD_SIZE + c;
+          const val = board[r][c];
+          cells[idx].className = 'cell' + (val ? ' ' + COLOR_CLASSES[val] : '');
+        }
+      }
+    }
+
+    function spawnPieces() {
+      currentPieces = [];
+      for (let i = 0; i < 3; i++) {
+        const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        currentPieces.push(JSON.parse(JSON.stringify(randomShape)));
+      }
+      renderPieces();
+      checkGameOver();
+    }
+
+    function renderPieces() {
+      piecesEl.innerHTML = '';
+      currentPieces.forEach((p, idx) => {
+        if (!p) {
+          const empty = document.createElement('div');
+          empty.style.width = '70px';
+          piecesEl.appendChild(empty);
+          return;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'piece-card' + (selectedPieceIndex === idx ? ' selected' : '');
+        card.onclick = () => {
+          selectedPieceIndex = (selectedPieceIndex === idx) ? null : idx;
+          renderPieces();
+          beep(400, 'sine', 0.08);
+        };
+
+        p.shape.forEach(row => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'piece-row';
+          row.forEach(val => {
+            const c = document.createElement('div');
+            c.className = 'piece-cell' + (val ? '' : ' empty');
+            if (val) c.style.background = HEX_COLORS[p.colorId];
+            rowDiv.appendChild(c);
+          });
+          card.appendChild(rowDiv);
+        });
+
+        piecesEl.appendChild(card);
+      });
+    }
+
+    function canPlace(shape, r, c) {
+      for (let dr = 0; dr < shape.length; dr++) {
+        for (let dc = 0; dc < shape[dr].length; dc++) {
+          if (shape[dr][dc]) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) return false;
+            if (board[nr][nc] !== 0) return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function handleBoardCellClick(r, c) {
+      if (selectedPieceIndex === null || !currentPieces[selectedPieceIndex]) return;
+
+      const piece = currentPieces[selectedPieceIndex];
+      if (canPlace(piece.shape, r, c)) {
+        // Place piece
+        for (let dr = 0; dr < piece.shape.length; dr++) {
+          for (let dc = 0; dc < piece.shape[dr].length; dc++) {
+            if (piece.shape[dr][dc]) {
+              board[r + dr][c + dc] = piece.colorId;
+              score += 1;
+            }
+          }
+        }
+
+        beep(540, 'triangle', 0.12);
+        currentPieces[selectedPieceIndex] = null;
+        selectedPieceIndex = null;
+
+        clearLines();
+        renderBoard();
+        renderPieces();
+
+        if (currentPieces.every(p => p === null)) {
+          spawnPieces();
+        } else {
+          checkGameOver();
+        }
+      } else {
+        beep(160, 'sawtooth', 0.15);
+      }
+    }
+
+    function clearLines() {
+      let rowsToClear = [];
+      let colsToClear = [];
+
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        if (board[r].every(v => v !== 0)) rowsToClear.push(r);
+      }
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        let full = true;
+        for (let r = 0; r < BOARD_SIZE; r++) {
+          if (board[r][c] === 0) { full = false; break; }
+        }
+        if (full) colsToClear.push(c);
+      }
+
+      const totalLines = rowsToClear.length + colsToClear.length;
+      if (totalLines > 0) {
+        beep(720, 'sine', 0.2);
+        score += totalLines * 20 * totalLines;
+        scoreEl.textContent = score;
+
+        rowsToClear.forEach(r => {
+          for (let c = 0; c < BOARD_SIZE; c++) board[r][c] = 0;
+        });
+        colsToClear.forEach(c => {
+          for (let r = 0; r < BOARD_SIZE; r++) board[r][c] = 0;
+        });
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('hexa_block_high', highScore);
+          document.getElementById('highScore').textContent = highScore;
+        }
+      } else {
+        scoreEl.textContent = score;
+      }
+    }
+
+    function checkGameOver() {
+      const activePieces = currentPieces.filter(p => p !== null);
+      if (activePieces.length === 0) return;
+
+      let anyMovesPossible = false;
+      for (let piece of activePieces) {
+        for (let r = 0; r < BOARD_SIZE; r++) {
+          for (let c = 0; c < BOARD_SIZE; c++) {
+            if (canPlace(piece.shape, r, c)) {
+              anyMovesPossible = true;
+              break;
+            }
+          }
+          if (anyMovesPossible) break;
+        }
+        if (anyMovesPossible) break;
+      }
+
+      if (!anyMovesPossible) {
+        gameOverModal.style.display = 'flex';
+        finalScoreEl.textContent = score;
+        beep(180, 'sawtooth', 0.4);
+      }
+    }
+
+    function startNewGame() {
+      board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
+      score = 0;
+      scoreEl.textContent = '0';
+      selectedPieceIndex = null;
+      gameOverModal.style.display = 'none';
+      createBoardUI();
+      renderBoard();
+      spawnPieces();
+    }
+
+    restartBtn.addEventListener('click', startNewGame);
+    startNewGame();
+  </script>
+</body>
+</html>

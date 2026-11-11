@@ -1,0 +1,46 @@
+{
+  "candidateId": "gh-phaserjs-phaser-ce-examples",
+  "name": "Phaser Ce Examples",
+  "originalRepoUrl": "https://github.com/phaserjs/phaser-ce-examples",
+  "author": "phaserjs",
+  "description": "Contains hundreds of source code examples and related media for the Phaser HTML5 Game Framework.",
+  "discoveryDate": "2026-11-11",
+  "lastUpdateDate": "2024-12-27",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 1787,
+    "forks": 1118,
+    "openIssues": 14,
+    "communityPlays": 6255,
+    "trendVelocity": "1787 stars / 1118 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-11"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/phaserjs/phaser-ce-examples/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 60
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

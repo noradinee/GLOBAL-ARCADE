@@ -1,0 +1,102 @@
+[
+  {
+    "id": "action",
+    "slug": "action",
+    "name": "Action Games",
+    "nameAr": "ألعاب أكشن",
+    "description": "Fast-paced adrenaline combat, dodging, and reflexes testing games.",
+    "descriptionAr": "ألعاب إثارة وقتال سريعة تختبر ردود أفعالك ومهاراتك الحركية.",
+    "icon": "Swords",
+    "color": "from-rose-500 to-red-600"
+  },
+  {
+    "id": "arcade",
+    "slug": "arcade",
+    "name": "Arcade Games",
+    "nameAr": "ألعاب أركيد",
+    "description": "Classic retro and modern arcade thrills with instant replayability.",
+    "descriptionAr": "ألعاب أركيد كلاسيكية وحديثة مميزة تقدم متعة لا تنتهي وسرعة فائقة.",
+    "icon": "Gamepad2",
+    "color": "from-violet-500 to-purple-600"
+  },
+  {
+    "id": "racing",
+    "slug": "racing",
+    "name": "Racing Games",
+    "nameAr": "ألعاب سباق",
+    "description": "High-octane drifting, street racing, and speed trials.",
+    "descriptionAr": "سباقات سيارات وسرعة فائقة وتفحيط وتحديات على حلبات مختلفة.",
+    "icon": "Gauge",
+    "color": "from-amber-500 to-orange-600"
+  },
+  {
+    "id": "puzzle",
+    "slug": "puzzle",
+    "name": "Puzzle Games",
+    "nameAr": "ألعاب ذكاء وألغاز",
+    "description": "Brain teasers, logic blocks, and strategic pattern matching.",
+    "descriptionAr": "ألغاز وتحديات عقلية ومطابقة كتل واختبارات ذكاء ممتعة.",
+    "icon": "Brain",
+    "color": "from-cyan-500 to-blue-600"
+  },
+  {
+    "id": "sports",
+    "slug": "sports",
+    "name": "Sports Games",
+    "nameAr": "ألعاب رياضية",
+    "description": "Compete in table tennis, basketball, soccer, and athletic matches.",
+    "descriptionAr": "مباريات كرة قدم، بينج بونج، كرة سلة ومنافسات بطولات رياضية.",
+    "icon": "Trophy",
+    "color": "from-emerald-500 to-teal-600"
+  },
+  {
+    "id": "adventure",
+    "slug": "adventure",
+    "name": "Adventure Games",
+    "nameAr": "ألعاب مغامرات",
+    "description": "Explore strange realms, uncover secrets, and embark on journeys.",
+    "descriptionAr": "استكشف عوالم غامضة وخض رحلات مشوقة مليئة بالاستكشاف والمفاجآت.",
+    "icon": "Compass",
+    "color": "from-indigo-500 to-blue-700"
+  },
+  {
+    "id": "two-player",
+    "slug": "two-player",
+    "name": "Two Player Games",
+    "nameAr": "ألعاب لاعبين 2",
+    "description": "Play locally with friends on the same screen or keyboard.",
+    "descriptionAr": "ألعاب تنافسية وتعاونية لشخصين على نفس الجهاز أو الشاشة.",
+    "icon": "Users",
+    "color": "from-fuchsia-500 to-pink-600"
+  },
+  {
+    "id": "multiplayer",
+    "slug": "multiplayer",
+    "name": "Multiplayer Games",
+    "nameAr": "ألعاب جماعية",
+    "description": "Battle against opponents or cooperate in multiplayer lobbies.",
+    "descriptionAr": "تحدَّ أصدقاءك ولاعبين حقيقيين في مواجهات أونلاين ملحمية.",
+    "icon": "Globe",
+    "color": "from-sky-500 to-indigo-600"
+  },
+  {
+    "id": "casual",
+    "slug": "casual",
+    "name": "Casual Games",
+    "nameAr": "ألعاب كاجوال",
+    "description": "Relaxing, easy-to-learn games perfect for quick coffee breaks.",
+    "descriptionAr": "ألعاب خفيفة ومسلية سهلة التعلم ومثالية للاسترخاء وقضاء وقت ممتع.",
+    "icon": "Coffee",
+    "color": "from-teal-400 to-emerald-600"
+  },
+  {
+    "id": "kids",
+    "slug": "kids",
+    "name": "Kids Games",
+    "nameAr": "ألعاب أطفال",
+    "description": "Safe, family-friendly, educational, and delightfully colorful games.",
+    "descriptionAr": "ألعاب ملونة وآمنة للأطفال والأسرة لتنمية التفكير والمهارات الترفيهية.",
+    "icon": "Sparkles",
+    "color": "from-yellow-400 to-pink-500"
+  }
+]
