@@ -129,8 +129,39 @@ const SEED_FALLBACK_CANDIDATES = [
 export async function runDailyDiscoveryPipeline(options = {}) {
   const startTime = Date.now();
   const runDate = options.date || new Date().toISOString().split('T')[0];
+
+  const rootDir = options.rootDir || ROOT_DIR;
+  const REGISTRY_FILE = path.join(rootDir, 'src/data/discoveryRegistry.json');
+  const CANDIDATES_DIR = path.join(rootDir, 'discovery/candidates');
+  const REJECTED_DIR = path.join(rootDir, 'discovery/rejected');
+  const APPROVED_DIR = path.join(rootDir, 'discovery/approved');
+  const REPORTS_DIR = path.join(rootDir, 'discovery/reports');
+
+  // Ensure required directories exist (supports temp/test roots)
+  for (const d of [CANDIDATES_DIR, REJECTED_DIR, APPROVED_DIR, REPORTS_DIR, path.dirname(REGISTRY_FILE)]) {
+    fs.mkdirSync(d, { recursive: true });
+  }
+
+  const dryRun = options.dryRun === true || String(process.env.DRY_RUN || '').toLowerCase() === 'true' || process.env.DRY_RUN === '1';
+  const offline = options.offline === true;
+
+  let maxCandidates = Number(options.maxCandidates ?? options.max_candidates ?? process.env.MAX_CANDIDATES ?? 10);
+  if (!Number.isFinite(maxCandidates) || maxCandidates < 1) {
+    console.warn(`⚠️ Invalid max_candidates value; defaulting to 10.`);
+    maxCandidates = 10;
+  }
+  if (maxCandidates > 100) {
+    console.warn(`⚠️ max_candidates clamped to 100.`);
+    maxCandidates = 100;
+  }
+
+  if (dryRun) {
+    console.log(`\n🧪 DRY RUN MODE: No tracked repository files will be modified, no branches pushed, no PRs created.`);
+  }
+
   console.log(`\n====================================================================`);
   console.log(`🕹️  GLOBAL ARCADE — AUTOMATED DAILY GAME DISCOVERY ENGINE (${runDate})`);
+  console.log(`   max_candidates=${maxCandidates} | offline=${offline} | dryRun=${dryRun}`);
   console.log(`====================================================================`);
 
   // 1. Load Registry & History
@@ -161,26 +192,36 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   // 2. Discover Candidates from Public Sources
   let rawCandidates = [];
 
-  // Query GitHub
-  try {
-    const ghCandidates = await discoverFromGitHub({ maxResults: options.maxGitHub || 5 });
-    rawCandidates.push(...ghCandidates);
-  } catch (err) {
-    console.warn(`⚠️ GitHub query skipped: ${err.message}`);
-  }
+  if (!offline) {
+    // Query GitHub
+    try {
+      const ghCandidates = await discoverFromGitHub({ maxResults: options.maxGitHub || 5 });
+      rawCandidates.push(...ghCandidates);
+    } catch (err) {
+      console.warn(`⚠️ GitHub query skipped: ${err.message}`);
+    }
 
-  // Query itch.io
-  try {
-    const itchCandidates = await discoverFromItch({ maxResults: options.maxItch || 3 });
-    rawCandidates.push(...itchCandidates);
-  } catch (err) {
-    console.warn(`⚠️ itch.io query skipped: ${err.message}`);
+    // Query itch.io
+    try {
+      const itchCandidates = await discoverFromItch({ maxResults: options.maxItch || 3 });
+      rawCandidates.push(...itchCandidates);
+    } catch (err) {
+      console.warn(`⚠️ itch.io query skipped: ${err.message}`);
+    }
+  } else {
+    console.log(`ℹ️ Offline mode: skipping public API queries.`);
   }
 
   // Use seed fallbacks if APIs returned 0 (e.g. rate limit or offline sandbox)
   if (rawCandidates.length === 0) {
     console.log(`ℹ️ Public API returned 0 candidates (rate limits or offline sandbox). Using verified candidate queue...`);
     rawCandidates.push(...SEED_FALLBACK_CANDIDATES);
+  }
+
+  // Enforce max_candidates (total cap across sources)
+  if (rawCandidates.length > maxCandidates) {
+    console.log(`✂️ Trimming raw candidates from ${rawCandidates.length} to max_candidates=${maxCandidates}.`);
+    rawCandidates = rawCandidates.slice(0, maxCandidates);
   }
 
   console.log(`\n🔍 Total Raw Candidates Found: ${rawCandidates.length}`);
@@ -247,25 +288,31 @@ export async function runDailyDiscoveryPipeline(options = {}) {
 
     evaluatedCandidates.push(completeCandidate);
 
-    // Save individual candidate dossier in discovery/candidates/
-    const candidateFile = path.join(CANDIDATES_DIR, `${completeCandidate.candidateId}.json`);
-    fs.writeFileSync(candidateFile, JSON.stringify(completeCandidate, null, 2), 'utf-8');
+    // Save individual candidate dossier in discovery/candidates/ (skipped in dry run)
+    if (!dryRun) {
+      const candidateFile = path.join(CANDIDATES_DIR, `${completeCandidate.candidateId}.json`);
+      fs.writeFileSync(candidateFile, JSON.stringify(completeCandidate, null, 2), 'utf-8');
 
-    // If rejected, also archive to discovery/rejected/ to prevent re-discovery
-    if (completeCandidate.reviewerDecision === 'REJECT') {
-      const rejectedFile = path.join(REJECTED_DIR, `${completeCandidate.candidateId}.json`);
-      fs.writeFileSync(rejectedFile, JSON.stringify(completeCandidate, null, 2), 'utf-8');
+      // If rejected, also archive to discovery/rejected/ to prevent re-discovery
+      if (completeCandidate.reviewerDecision === 'REJECT') {
+        const rejectedFile = path.join(REJECTED_DIR, `${completeCandidate.candidateId}.json`);
+        fs.writeFileSync(rejectedFile, JSON.stringify(completeCandidate, null, 2), 'utf-8');
+      }
     }
 
-    // Append to discoveryRegistry.json
+    // Append to discoveryRegistry.json (in-memory; persisted only if not dry run)
     registry.push(completeCandidate);
     knownUrls.add(completeCandidate.originalRepoUrl);
     knownIds.add(completeCandidate.candidateId);
   }
 
-  // Update src/data/discoveryRegistry.json
-  fs.writeFileSync(REGISTRY_FILE, JSON.stringify(registry, null, 2), 'utf-8');
-  console.log(`\n💾 Updated discovery registry at ${REGISTRY_FILE}.`);
+  // Update src/data/discoveryRegistry.json (skipped in dry run)
+  if (!dryRun) {
+    fs.writeFileSync(REGISTRY_FILE, JSON.stringify(registry, null, 2), 'utf-8');
+    console.log(`\n💾 Updated discovery registry at ${REGISTRY_FILE}.`);
+  } else {
+    console.log(`\n🧪 Dry run: skipped registry write.`);
+  }
 
   // 5. Generate Daily Reports
   // If evaluatedCandidates was populated today, use it; otherwise include today's discoveries from registry
@@ -276,13 +323,22 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   const report = generateDailyReport(reportCandidates, {
     date: runDate,
     durationMs: Date.now() - startTime,
+    rootDir,
+    dryRun,
   });
 
-  // 6. Submit Review (Branch & Pull Request Preparation)
-  const reviewResult = submitReview({
-    runDate,
-    reportPathMd: report.reportPathMd,
-  });
+  // 6. Submit Review (Branch & Pull Request Preparation) — no git side effects; CI handles PR via peter-evans
+  let reviewResult = { success: true, prCreated: false, dryRun };
+  if (!dryRun) {
+    reviewResult = submitReview({
+      runDate,
+      reportPathMd: report.reportPathMd,
+      dryRun,
+      rootDir,
+    });
+  } else {
+    console.log(`🧪 Dry run: skipped review submission.`);
+  }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log(`\n====================================================================`);
@@ -297,9 +353,26 @@ export async function runDailyDiscoveryPipeline(options = {}) {
   };
 }
 
+// Minimal CLI argument parser (no external deps)
+function parseCliArgs(argv) {
+  const opts = {};
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--dry-run' || a === '--dryRun') opts.dryRun = true;
+    else if (a === '--offline') opts.offline = true;
+    else if (a === '--max-candidates' || a === '--maxCandidates') { opts.maxCandidates = argv[++i]; }
+    else if (a.startsWith('--max-candidates=') || a.startsWith('--maxCandidates=')) opts.maxCandidates = a.split('=')[1];
+    else if (a === '--root-dir' || a === '--rootDir') { opts.rootDir = argv[++i]; }
+    else if (a.startsWith('--root-dir=') || a.startsWith('--rootDir=')) opts.rootDir = a.split('=')[1];
+    else if (a === '--date') { opts.date = argv[++i]; }
+  }
+  return opts;
+}
+
 // Run CLI
 if (process.argv[1] && process.argv[1].endsWith('orchestrator.js')) {
-  runDailyDiscoveryPipeline().catch(err => {
+  const cliOpts = parseCliArgs(process.argv.slice(2));
+  runDailyDiscoveryPipeline(cliOpts).catch(err => {
     console.error(`❌ Discovery pipeline failure: ${err.message}`);
     process.exit(1);
   });

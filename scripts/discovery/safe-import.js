@@ -25,17 +25,18 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * @param {Object} options - Override metadata or Arabic translations
  */
 export function safeImportCandidate(candidateId, options = {}) {
+  const rootDir = options.rootDir || ROOT_DIR;
   console.log(`\n🛡️ [SAFE IMPORT] Starting human-approved import for: "${candidateId}"...`);
 
   // 1. Locate Candidate Record
-  const candidatePath = path.join(ROOT_DIR, `discovery/candidates/${candidateId}.json`);
+  const candidatePath = path.join(rootDir, `discovery/candidates/${candidateId}.json`);
   let candidate = null;
 
   if (fs.existsSync(candidatePath)) {
     candidate = JSON.parse(fs.readFileSync(candidatePath, 'utf-8'));
   } else {
     // Check discoveryRegistry.json
-    const registryPath = path.join(ROOT_DIR, 'src/data/discoveryRegistry.json');
+    const registryPath = path.join(rootDir, 'src/data/discoveryRegistry.json');
     if (fs.existsSync(registryPath)) {
       const registry = JSON.parse(fs.readFileSync(registryPath, 'utf-8'));
       candidate = registry.find(c => c.id === candidateId || c.candidateId === candidateId);
@@ -67,8 +68,8 @@ export function safeImportCandidate(candidateId, options = {}) {
   // 4. Source Directory Verification and Re-audit
   console.log(`🔍 [GATE 3/4] Re-running Security Audit on Game Assets...`);
   const slug = candidate.slug || candidate.candidateId.replace(/^(gh-|itch-)/, '');
-  const stagedDir = path.join(ROOT_DIR, `discovery/approved/${slug}`);
-  const targetDir = path.join(ROOT_DIR, `public/games/${slug}`);
+  const stagedDir = path.join(rootDir, `discovery/approved/${slug}`);
+  const targetDir = path.join(rootDir, `public/games/${slug}`);
 
   // If already staged in discovery/approved, run security scan
   if (fs.existsSync(stagedDir)) {
@@ -85,7 +86,7 @@ export function safeImportCandidate(candidateId, options = {}) {
 
   // 5. Register in src/data/games.json
   console.log(`📝 [GATE 4/4] Registering Metadata in Production Catalog...`);
-  const gamesPath = path.join(ROOT_DIR, 'src/data/games.json');
+  const gamesPath = path.join(rootDir, 'src/data/games.json');
   const games = JSON.parse(fs.readFileSync(gamesPath, 'utf-8'));
 
   const gameEntry = {
@@ -133,7 +134,7 @@ export function safeImportCandidate(candidateId, options = {}) {
 
   // 6. Regenerate Sitemap
   console.log(`🗺️ Regenerating Sitemap XML...`);
-  const sitemapScript = path.join(ROOT_DIR, 'scripts/generate-sitemap.js');
+  const sitemapScript = path.join(rootDir, 'scripts/generate-sitemap.js');
   if (fs.existsSync(sitemapScript)) {
     import(sitemapScript);
   }

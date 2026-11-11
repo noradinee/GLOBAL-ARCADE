@@ -19,10 +19,14 @@ import path from 'path';
  */
 export function generateDailyReport(evaluatedCandidates, metadata = {}) {
   const runDate = metadata.date || new Date().toISOString().split('T')[0];
-  const reportsDir = path.resolve(process.cwd(), 'discovery/reports');
+  const rootDir = metadata.rootDir || process.cwd();
+  const reportsDir = path.join(rootDir, 'discovery', 'reports');
+  const dryRun = metadata.dryRun === true;
 
-  if (!fs.existsSync(reportsDir)) {
-    fs.mkdirSync(reportsDir, { recursive: true });
+  if (!dryRun) {
+    if (!fs.existsSync(reportsDir)) {
+      fs.mkdirSync(reportsDir, { recursive: true });
+    }
   }
 
   const approved = evaluatedCandidates.filter(c => c.reviewerDecision === 'APPROVE');
@@ -83,25 +87,29 @@ export function generateDailyReport(evaluatedCandidates, metadata = {}) {
   md += `---\n`;
   md += `*Report generated automatically by Global Arcade Discovery Engine.*\n`;
 
-  // Save files
+  // Save files (skipped in dry run)
   const reportPathMd = path.join(reportsDir, `${runDate}-discovery-report.md`);
   const reportPathJson = path.join(reportsDir, `${runDate}-discovery-report.json`);
 
-  fs.writeFileSync(reportPathMd, md, 'utf-8');
-  fs.writeFileSync(reportPathJson, JSON.stringify({
-    runDate,
-    generatedAt: new Date().toISOString(),
-    summary: {
-      total: evaluatedCandidates.length,
-      approved: approved.length,
-      needsInfo: needsInfo.length,
-      rejected: rejected.length,
-    },
-    candidates: evaluatedCandidates,
-  }, null, 2), 'utf-8');
+  if (!dryRun) {
+    fs.writeFileSync(reportPathMd, md, 'utf-8');
+    fs.writeFileSync(reportPathJson, JSON.stringify({
+      runDate,
+      generatedAt: new Date().toISOString(),
+      summary: {
+        total: evaluatedCandidates.length,
+        approved: approved.length,
+        needsInfo: needsInfo.length,
+        rejected: rejected.length,
+      },
+      candidates: evaluatedCandidates,
+    }, null, 2), 'utf-8');
 
-  console.log(`📄 Generated Daily Report: ${reportPathMd}`);
-  console.log(`📄 Generated Machine-Readable Report: ${reportPathJson}`);
+    console.log(`📄 Generated Daily Report: ${reportPathMd}`);
+    console.log(`📄 Generated Machine-Readable Report: ${reportPathJson}`);
+  } else {
+    console.log(`🧪 Dry run: skipped report file writes.`);
+  }
 
   return { reportPathMd, reportPathJson, markdownContent: md };
 }

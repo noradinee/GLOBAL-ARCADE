@@ -20,6 +20,11 @@ on:
         type: boolean
         default: false
 
+# Concurrency protection: prevent overlapping discovery runs from colliding
+concurrency:
+  group: global-arcade-discovery-${{ github.ref }}
+  cancel-in-progress: false
+
 # Minimum permissions principle: Read & Write to repository content and PRs only
 permissions:
   contents: write
@@ -50,9 +55,15 @@ jobs:
         id: run_discovery
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+          MAX_CANDIDATES: ${{ inputs.max_candidates || '10' }}
         run: |
           echo "Starting Global Arcade Automated Daily Discovery..."
-          node scripts/discovery/orchestrator.js
+          if [ "${DRY_RUN}" = "true" ]; then
+            node scripts/discovery/orchestrator.js --max-candidates "${MAX_CANDIDATES}" --dry-run
+          else
+            node scripts/discovery/orchestrator.js --max-candidates "${MAX_CANDIDATES}"
+          fi
           
           # Export current date for PR naming
           TODAY=$(date -u +"%Y-%m-%d")
@@ -76,14 +87,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "feat(discovery): daily game candidate review for ${{ env.DISCOVERY_DATE }} [skip ci]"
-          branch: "discovery/daily-${{ env.DISCOVERY_DATE }}"
+          branch: "discovery/review-${{ github.run_id }}"
           delete-branch: true
           title: "🕹️ Daily Game Discovery Review: ${{ env.DISCOVERY_DATE }}"
           body-path: "discovery/reports/${{ env.DISCOVERY_DATE }}-discovery-report.md"
-          labels: |
-            game-review
-            automated-discovery
-            human-approval-required
           reviewers: ${{ github.repository_owner }}
 
       - name: 🛡️ Audit Website Build Integrity
