@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-numbofathma-phaser-typescript-webpack",
+  "name": "Phaser Typescript Webpack",
+  "originalRepoUrl": "https://github.com/numbofathma/phaser-typescript-webpack",
+  "author": "numbofathma",
+  "description": "Another Phaser CE boilerplate using TypeScript and Webpack.",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2024-06-18",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 19,
+    "forks": 6,
+    "openIssues": 3,
+    "communityPlays": 67,
+    "trendVelocity": "19 stars / 6 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/numbofathma/phaser-typescript-webpack/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "TEMPLATE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"boilerplate\" → classified as TEMPLATE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (TEMPLATE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 5,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 40
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

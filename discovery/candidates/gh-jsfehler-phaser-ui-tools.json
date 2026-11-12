@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-jsfehler-phaser-ui-tools",
+  "name": "Phaser Ui Tools",
+  "originalRepoUrl": "https://github.com/jsfehler/phaser-ui-tools",
+  "author": "jsfehler",
+  "description": "UI Kit for the Phaser game engine. Rows, columns, viewports, scrollbars, stuff like that.",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2024-08-31",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 294,
+    "forks": 22,
+    "openIssues": 4,
+    "communityPlays": 1029,
+    "trendVelocity": "294 stars / 22 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "ENGINE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"engine\" → classified as ENGINE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (ENGINE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 20,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 55
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}
