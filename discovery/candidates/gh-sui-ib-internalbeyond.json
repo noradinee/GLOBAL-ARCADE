@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-sui-ib-internalbeyond",
+  "name": "InternalBeyond",
+  "originalRepoUrl": "https://github.com/Sui-IB/InternalBeyond",
+  "author": "Sui-IB",
+  "description": "【Project-IB】边界之外：离线运行的单文件个人网站式项目，旨于维系情感的连续性。A single-file offline personal website, built to sustain the continuity of feeling.",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2026-10-29",
+  "sourcePlatform": "github",
+  "programmingLanguage": "HTML",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 662,
+    "forks": 279,
+    "openIssues": 0,
+    "communityPlays": 2317,
+    "trendVelocity": "662 stars / 279 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "NOASSERTION",
+  "licenseUrl": "https://github.com/Sui-IB/InternalBeyond/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 71
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "No recognized SPDX license identifier found. Repository lacks explicit public license."
+}

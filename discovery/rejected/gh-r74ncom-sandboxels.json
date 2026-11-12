@@ -1,0 +1,53 @@
+{
+  "candidateId": "gh-r74ncom-sandboxels",
+  "name": "Sandboxels",
+  "originalRepoUrl": "https://github.com/R74nCom/sandboxels",
+  "author": "R74nCom",
+  "description": "In-browser falling-sand simulation game with over 500 elements and thousands of reactions.",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2026-06-03",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "HTML5 Canvas2D",
+  "popularityIndicators": {
+    "githubStars": 481,
+    "forks": 983,
+    "openIssues": 74,
+    "communityPlays": 1684,
+    "trendVelocity": "481 stars / 983 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "NOASSERTION",
+  "licenseUrl": "https://github.com/R74nCom/sandboxels/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: html5 canvas, canvas2d.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 Canvas2D."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 22,
+    "technicalQualityScore": 20,
+    "mobileScore": 5,
+    "maintenanceScore": 10,
+    "relevanceScore": 10,
+    "standaloneScore": 5,
+    "totalScore": 72
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "No recognized SPDX license identifier found. Repository lacks explicit public license."
+}

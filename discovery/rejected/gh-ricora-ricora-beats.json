@@ -1,0 +1,54 @@
+{
+  "candidateId": "gh-ricora-ricora-beats",
+  "name": "Ricora Beats",
+  "originalRepoUrl": "https://github.com/ricora/ricora-beats",
+  "author": "ricora",
+  "description": "🎵🎹 Cross-platform rhythm game played with touch screen or keyboard by RICORA",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2024-03-02",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 30,
+    "forks": 3,
+    "openIssues": 4,
+    "communityPlays": 105,
+    "trendVelocity": "30 stars / 3 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/ricora/ricora-beats/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 5,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 40
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

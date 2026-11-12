@@ -1,0 +1,53 @@
+{
+  "candidateId": "gh-pr0mming-bomberman-js",
+  "name": "Bomberman JS",
+  "originalRepoUrl": "https://github.com/pr0mming/Bomberman-JS",
+  "author": "pr0mming",
+  "description": "A small simulator popular game Bomberman (NES) developed in JavaScript using Phaser.js",
+  "discoveryDate": "2026-11-12",
+  "lastUpdateDate": "2025-12-28",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 35,
+    "forks": 10,
+    "openIssues": 0,
+    "communityPlays": 123,
+    "trendVelocity": "35 stars / 10 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-12"
+  },
+  "licenseName": "GPL-3.0",
+  "licenseUrl": "https://api.github.com/licenses/gpl-3.0",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "RESTRICTED",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: Phaser 3 / WebGL."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 7,
+    "technicalQualityScore": 20,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 48
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"GPL-3.0\" imposes copyleft (viral source distribution) or non-commercial restrictions incompatible with ad-supported web portal hosting."
+}
