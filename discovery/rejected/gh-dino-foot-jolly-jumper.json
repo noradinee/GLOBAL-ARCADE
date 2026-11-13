@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-dino-foot-jolly-jumper",
+  "name": "Jolly Jumper",
+  "originalRepoUrl": "https://github.com/dino-foot/jolly-jumper",
+  "author": "dino-foot",
+  "description": "be jolly play jolly ",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2024-02-22",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 72,
+    "forks": 41,
+    "openIssues": 0,
+    "communityPlays": 252,
+    "trendVelocity": "72 stars / 41 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/dino-foot/jolly-jumper/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "gh-pages",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 14,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 48
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

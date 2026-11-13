@@ -1,0 +1,54 @@
+{
+  "candidateId": "gh-damian-pastorini-reldens",
+  "name": "Reldens",
+  "originalRepoUrl": "https://github.com/damian-pastorini/reldens",
+  "author": "damian-pastorini",
+  "description": "Reldens - You can make it - Open Source MMORPG Platform",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-11-13",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 590,
+    "forks": 89,
+    "openIssues": 3,
+    "communityPlays": 2065,
+    "trendVelocity": "590 stars / 89 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 72
+  },
+  "publicationEligibility": "ELIGIBLE",
+  "reviewerDecision": "APPROVE",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}

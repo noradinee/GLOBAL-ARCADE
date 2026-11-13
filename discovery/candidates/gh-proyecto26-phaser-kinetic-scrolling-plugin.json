@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-proyecto26-phaser-kinetic-scrolling-plugin",
+  "name": "Phaser Kinetic Scrolling Plugin",
+  "originalRepoUrl": "https://github.com/proyecto26/Phaser-Kinetic-Scrolling-Plugin",
+  "author": "proyecto26",
+  "description": "Kinetic Scrolling plugin for Phaser Framework, add smooth physics based scrolling to your games",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2024-10-27",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 133,
+    "forks": 25,
+    "openIssues": 2,
+    "communityPlays": 466,
+    "trendVelocity": "133 stars / 25 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "ENGINE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"framework\" → classified as ENGINE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (ENGINE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 14,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 49
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}
