@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-batd92-telegram-mini-game",
+  "name": "Telegram Mini Game",
+  "originalRepoUrl": "https://github.com/batd92/telegram-mini-game",
+  "author": "batd92",
+  "description": "Welcome to the Mini Game Telegram project! This repository contains a fun and engaging mini game designed specifically for Telegram users. The game offers a unique blend of competition and cooperation, allowing players to invite friends, track their scores, and complete daily tasks for rewards",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2024-11-13",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 17,
+    "forks": 2,
+    "openIssues": 0,
+    "communityPlays": 60,
+    "trendVelocity": "17 stars / 2 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/batd92/telegram-mini-game/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 5,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 3,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 39
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

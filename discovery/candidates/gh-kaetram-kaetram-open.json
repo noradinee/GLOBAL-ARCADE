@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-kaetram-kaetram-open",
+  "name": "Kaetram Open",
+  "originalRepoUrl": "https://github.com/Kaetram/Kaetram-Open",
+  "author": "Kaetram",
+  "description": "Kaetram is an open-source 2D HTML5 MMORPG. It is an extended version of BrowserQuest (BQ).",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-10-13",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 752,
+    "forks": 206,
+    "openIssues": 15,
+    "communityPlays": 2632,
+    "trendVelocity": "752 stars / 206 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "MPL-2.0",
+  "licenseUrl": "https://api.github.com/licenses/mpl-2.0",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "develop",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 71
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"MPL-2.0\" is not on the verified commercial whitelist."
+}

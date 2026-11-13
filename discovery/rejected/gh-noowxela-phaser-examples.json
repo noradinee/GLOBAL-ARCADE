@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-noowxela-phaser-examples",
+  "name": "Phaser Examples",
+  "originalRepoUrl": "https://github.com/noowxela/phaser-examples",
+  "author": "noowxela",
+  "description": " 🎮 A gallery of browser games and experiments built with Phaser.",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-10-27",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 46,
+    "forks": 13,
+    "openIssues": 0,
+    "communityPlays": 161,
+    "trendVelocity": "46 stars / 13 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/noowxela/phaser-examples/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "EXAMPLES",
+  "qualityEvidence": [
+    "Matched non-game keyword \"examples\" → classified as EXAMPLES.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl, browser game.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (EXAMPLES)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 7,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 54
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

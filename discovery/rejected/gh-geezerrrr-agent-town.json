@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-geezerrrr-agent-town",
+  "name": "Agent Town",
+  "originalRepoUrl": "https://github.com/geezerrrr/agent-town",
+  "author": "geezerrrr",
+  "description": "A pixel-art AI agent online collaboration platform.",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-10-10",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 262,
+    "forks": 49,
+    "openIssues": 1,
+    "communityPlays": 917,
+    "trendVelocity": "262 stars / 49 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/geezerrrr/agent-town/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 18,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 64
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

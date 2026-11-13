@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-phaserjs-template-webpack",
+  "name": "Template Webpack",
+  "originalRepoUrl": "https://github.com/phaserjs/template-webpack",
+  "author": "phaserjs",
+  "description": "A Phaser 3 project template that uses Webpack 5 for bundling",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-04-10",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 1174,
+    "forks": 767,
+    "openIssues": 6,
+    "communityPlays": 4109,
+    "trendVelocity": "1174 stars / 767 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "TEMPLATE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"template\" → classified as TEMPLATE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (TEMPLATE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 63
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}

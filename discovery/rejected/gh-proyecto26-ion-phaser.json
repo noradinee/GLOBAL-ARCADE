@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-proyecto26-ion-phaser",
+  "name": "Ion Phaser",
+  "originalRepoUrl": "https://github.com/proyecto26/ion-phaser",
+  "author": "proyecto26",
+  "description": "A web component to use Phaser Framework with Angular, React, Vue, etc 🎮",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-03-22",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 251,
+    "forks": 36,
+    "openIssues": 9,
+    "communityPlays": 879,
+    "trendVelocity": "251 stars / 36 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "develop",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "ENGINE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"framework\" → classified as ENGINE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (ENGINE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 18,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 56
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}

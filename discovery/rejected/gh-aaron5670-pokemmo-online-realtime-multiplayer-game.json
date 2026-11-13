@@ -1,0 +1,54 @@
+{
+  "candidateId": "gh-aaron5670-pokemmo-online-realtime-multiplayer-game",
+  "name": "PokeMMO Online Realtime Multiplayer Game",
+  "originalRepoUrl": "https://github.com/aaron5670/PokeMMO-Online-Realtime-Multiplayer-Game",
+  "author": "aaron5670",
+  "description": "🕹️ A simple realtime Pokémon MMO game build with Phaser 3, Colyseus.io & Webpack 4",
+  "discoveryDate": "2026-11-13",
+  "lastUpdateDate": "2026-03-22",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 339,
+    "forks": 89,
+    "openIssues": 34,
+    "communityPlays": 1187,
+    "trendVelocity": "339 stars / 89 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-13"
+  },
+  "licenseName": "WTFPL",
+  "licenseUrl": "https://api.github.com/licenses/wtfpl",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 22,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 15,
+    "standaloneScore": 5,
+    "totalScore": 70
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"WTFPL\" is not on the verified commercial whitelist."
+}
