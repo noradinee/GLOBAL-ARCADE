@@ -1,0 +1,53 @@
+{
+  "candidateId": "itch-tarpingames-multi-purpose-wheel-incremental",
+  "name": "Multi Purpose Wheel Incremental [Free] [Simulation] [Windows] [Linux]",
+  "originalRepoUrl": "https://tarpingames.itch.io/multi-purpose-wheel-incremental",
+  "author": "tarpingames",
+  "description": "Rotate everything in this new spin on the Incremental genre!",
+  "discoveryDate": "2026-11-14",
+  "lastUpdateDate": "2026-11-14",
+  "sourcePlatform": "itch.io",
+  "programmingLanguage": "HTML5 / JavaScript / WebAssembly",
+  "gameEngine": "Web Game Engine",
+  "popularityIndicators": {
+    "githubStars": 0,
+    "forks": 0,
+    "communityPlays": 450,
+    "trendVelocity": "Featured on itch.io free web games feed",
+    "signalsSource": "itch.io Public Web RSS",
+    "signalsDate": "2026-11-14"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://tarpingames.itch.io/multi-purpose-wheel-incremental",
+  "assetLicensingStatus": "Requires explicit author written clearance",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": true,
+  "buildInstructions": "Direct web embed via iframe",
+  "exactCommitHash": "latest-web-build",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "ENGINE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"engine\" → classified as ENGINE.",
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: Web Game Engine.",
+    "Rejected: not a complete playable game (ENGINE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 4,
+    "technicalQualityScore": 13,
+    "mobileScore": 15,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 57
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

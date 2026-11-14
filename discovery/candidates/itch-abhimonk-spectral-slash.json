@@ -1,0 +1,53 @@
+{
+  "candidateId": "itch-abhimonk-spectral-slash",
+  "name": "Spectral Slash [Free] [Action] [Windows]",
+  "originalRepoUrl": "https://abhimonk.itch.io/spectral-slash",
+  "author": "abhimonk",
+  "description": "Melee combat deckbuilder. Slash to gain energy, use energy to play cards.",
+  "discoveryDate": "2026-11-14",
+  "lastUpdateDate": "2026-11-14",
+  "sourcePlatform": "itch.io",
+  "programmingLanguage": "HTML5 / JavaScript / WebAssembly",
+  "gameEngine": "Web Game Engine",
+  "popularityIndicators": {
+    "githubStars": 0,
+    "forks": 0,
+    "communityPlays": 450,
+    "trendVelocity": "Featured on itch.io free web games feed",
+    "signalsSource": "itch.io Public Web RSS",
+    "signalsDate": "2026-11-14"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://abhimonk.itch.io/spectral-slash",
+  "assetLicensingStatus": "Requires explicit author written clearance",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": true,
+  "buildInstructions": "Direct web embed via iframe",
+  "exactCommitHash": "latest-web-build",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "ENGINE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"engine\" → classified as ENGINE.",
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: Web Game Engine.",
+    "Rejected: not a complete playable game (ENGINE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 4,
+    "technicalQualityScore": 13,
+    "mobileScore": 15,
+    "maintenanceScore": 15,
+    "relevanceScore": 10,
+    "standaloneScore": 5,
+    "totalScore": 62
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}

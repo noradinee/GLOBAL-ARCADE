@@ -1,0 +1,54 @@
+{
+  "candidateId": "gh-kevinshen56714-skyoffice",
+  "name": "SkyOffice",
+  "originalRepoUrl": "https://github.com/kevinshen56714/SkyOffice",
+  "author": "kevinshen56714",
+  "description": "Immersive virtual office built with Phaser, React, Redux, PeerJS, and Colyseus.",
+  "discoveryDate": "2026-11-14",
+  "lastUpdateDate": "2025-12-20",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 1319,
+    "forks": 395,
+    "openIssues": 22,
+    "communityPlays": 4617,
+    "trendVelocity": "1319 stars / 395 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-14"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 63
+  },
+  "publicationEligibility": "ELIGIBLE",
+  "reviewerDecision": "APPROVE",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}
