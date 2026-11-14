@@ -9,14 +9,14 @@ export const PrivacyPolicyPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'سياسة الخصوصية — جلوبال أركيد | حماية بيانات المستخدم'
-      : 'Privacy Policy — Global Arcade | User Data Protection';
+      ? 'سياسة الخصوصية — كايراكسو | حماية بيانات المستخدم'
+      : 'Privacy Policy — KYRAXO | User Data Protection';
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
       <SEOHead
         title={seoTitle}
-        description="Global Arcade Privacy Policy. Understand how we handle data, advertising identifiers, cookies, and protect user confidentiality."
+        description="KYRAXO Privacy Policy. Understand how we handle data, advertising identifiers, cookies, and protect user confidentiality."
         canonicalUrl={`${window.location.origin}/privacy`}
         lang={lang}
       />
@@ -41,7 +41,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">1. Introduction</h2>
           <p>
-            Global Arcade (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, and the choices you have regarding your personal data when using our free online gaming platform.
+            KYRAXO (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, and the choices you have regarding your personal data when using our free online gaming platform.
           </p>
         </section>
 
@@ -60,7 +60,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">3. Third-Party Advertising & Cookies</h2>
           <p>
-            To keep Global Arcade 100% free for all players, we partner with reputable digital advertising networks (such as Google AdSense and authorized programmatic partners). These partners may use cookies, web beacons, and mobile advertising IDs to serve personalized or contextual advertisements.
+            To keep KYRAXO 100% free for all players, we partner with reputable digital advertising networks (such as Google AdSense and authorized programmatic partners). These partners may use cookies, web beacons, and mobile advertising IDs to serve personalized or contextual advertisements.
           </p>
           <p>
             You can manage your cookie preferences at any time using our Cookie Consent banner or through your browser settings.
@@ -77,7 +77,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">5. Contact Information</h2>
           <p>
-            If you have questions regarding this Privacy Policy or wish to submit a data inquiry, please contact our privacy compliance officer at: <strong className="text-brand-cyan">privacy@globalarcade.games</strong>.
+            If you have questions regarding this Privacy Policy or wish to submit a data inquiry, please contact our privacy compliance officer at: <strong className="text-brand-cyan">privacy@kyraxo.com</strong>.
           </p>
         </section>
       </div>

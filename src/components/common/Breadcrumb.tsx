@@ -30,7 +30,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         '@type': 'ListItem',
         position: index + 2,
         name: item.label,
-        ...(item.path ? { item: `${window.location.origin}${item.path}` } : {}),
+        item: item.path ? `${window.location.origin}${item.path}` : window.location.href,
       })),
     ],
   };

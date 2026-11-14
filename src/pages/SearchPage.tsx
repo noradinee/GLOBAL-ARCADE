@@ -120,14 +120,14 @@ export const SearchPage: React.FC = () => {
   };
 
   const seoTitle = query
-    ? `${t.search.resultsFor} "${query}" — Global Arcade`
-    : `${t.search.searchTitle} — Global Arcade`;
+    ? `${t.search.resultsFor} "${query}" — KYRAXO`
+    : `${t.search.searchTitle} — KYRAXO`;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Search hundreds of free HTML5 games by keyword, genre, device support, and tags on Global Arcade."
+        description="Search hundreds of free HTML5 games by keyword, genre, device support, and tags on KYRAXO."
         canonicalUrl={`${window.location.origin}/search`}
         lang={lang}
       />

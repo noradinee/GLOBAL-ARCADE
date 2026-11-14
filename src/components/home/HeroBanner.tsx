@@ -30,10 +30,16 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ featuredGame }) => {
       <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-brand-cyan/20 rounded-full filter blur-3xl pointer-events-none" />
 
       <div className="relative z-10 max-w-2xl flex flex-col items-start gap-4">
-        {/* Featured Pill */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-brand-violet/20 border border-brand-violet/40 text-brand-cyan text-xs font-bold uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 text-brand-neon" />
-          <span>{lang === 'ar' ? 'اللعبة المميزة اليوم' : 'Featured Game of the Day'}</span>
+        {/* Featured Pill & Live Status */}
+        <div className="flex items-center flex-wrap gap-2.5">
+          <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-violet/25 border border-brand-violet/40 text-brand-cyan text-xs font-bold uppercase tracking-wider shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-brand-neon animate-pulse" />
+            <span>{lang === 'ar' ? 'اللعبة المميزة اليوم' : 'Featured Game of the Day'}</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>{lang === 'ar' ? 'متصل الآن' : 'Live & Instant'}</span>
+          </div>
         </div>
 
         {/* Title */}

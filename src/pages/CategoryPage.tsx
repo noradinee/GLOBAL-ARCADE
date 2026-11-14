@@ -88,15 +88,35 @@ export const CategoryPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? `${categoryName} — العب أفضل ${categoryName} مجاناً بدون تحميل | جلوبال أركيد`
-      : `Free Online ${category.name} — Play Best ${category.name} Browser Games | Global Arcade`;
+      ? `${categoryName} — العب أفضل ${categoryName} مجاناً بدون تحميل | كايراكسو`
+      : `Free Online ${category.name} — Play Best ${category.name} Browser Games | KYRAXO`;
 
   const seoDescription =
     lang === 'ar'
-      ? `العب أحدث وأقوى ${categoryName} أونلاين على متصفحك بدون تحميل. استمتع بألعاب مجانية عالية الجودة للجوال والكمبيوتر على جلوبال أركيد.`
-      : `Play the best free online ${category.name.toLowerCase()} on Global Arcade. Instant browser play, no download required. Discover top-rated games now!`;
+      ? `العب أحدث وأقوى ${categoryName} أونلاين على متصفحك بدون تحميل. استمتع بألعاب مجانية عالية الجودة للجوال والكمبيوتر على كايراكسو (KYRAXO).`
+      : `Play the best free online ${category.name.toLowerCase()} on KYRAXO. Instant browser play, no download required. Discover top-rated games now!`;
 
   const canonicalUrl = `${window.location.origin}/category/${category.slug}`;
+
+  // CollectionPage Schema.org structured data
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: seoTitle,
+    description: seoDescription,
+    url: canonicalUrl,
+    inLanguage: lang === 'ar' ? 'ar' : 'en',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'KYRAXO',
+      url: window.location.origin,
+    },
+    about: {
+      '@type': 'Thing',
+      name: category.name,
+      description: category.description,
+    },
+  };
 
   const breadcrumbItems = [
     { label: t.nav.categories, path: '/categories' },
@@ -109,6 +129,7 @@ export const CategoryPage: React.FC = () => {
         title={seoTitle}
         description={seoDescription}
         canonicalUrl={canonicalUrl}
+        schemaData={collectionSchema}
         lang={lang}
       />
 

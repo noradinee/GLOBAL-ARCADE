@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BASE_URL = 'https://globalarcade.games';
+const BASE_URL = 'https://kyraxo.com';
 const today = new Date().toISOString().split('T')[0];
 
 const games = JSON.parse(

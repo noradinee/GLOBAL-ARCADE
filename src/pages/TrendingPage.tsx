@@ -13,14 +13,14 @@ export const TrendingPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'الألعاب الرائجة والأكثر تداولاً — العاب اون لاين | جلوبال أركيد'
-      : 'Trending Browser Games — What Gamers Are Playing Now | Global Arcade';
+      ? 'الألعاب الرائجة والأكثر تداولاً — العاب اون لاين | كايراكسو'
+      : 'Trending Browser Games — What Gamers Are Playing Now | KYRAXO';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Discover the most played and trending online HTML5 games on Global Arcade. Free instant play on mobile and desktop."
+        description="Discover the most played and trending online HTML5 games on KYRAXO. Free instant play on mobile and desktop."
         canonicalUrl={`${window.location.origin}/trending`}
         lang={lang}
       />

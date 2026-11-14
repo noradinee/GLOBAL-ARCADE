@@ -15,7 +15,41 @@ export interface GameControls {
   mobile: string[];
 }
 
+export type MultiplayerMode =
+  | 'SINGLE_PLAYER'
+  | 'LOCAL_MULTIPLAYER'
+  | 'ONLINE_MULTIPLAYER'
+  | 'TURN_BASED_MULTIPLAYER'
+  | 'REAL_TIME_MULTIPLAYER'
+  | 'MULTIPLAYER_UNKNOWN';
+
+export type MultiplayerNetworkingType =
+  | 'WEBSOCKET'
+  | 'WEBRTC'
+  | 'POLLING'
+  | 'NONE'
+  | 'UNKNOWN';
+
+export type MultiplayerBackendRequirement = 'NONE' | 'OPTIONAL' | 'REQUIRED' | 'UNKNOWN';
+
+export interface MultiplayerInfo {
+  mode: MultiplayerMode;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+  evidence: string[];
+  maxPlayers?: number;
+  supportsPublicMatchmaking?: boolean;
+  supportsPrivateRooms?: boolean;
+  supportsInviteLinks?: boolean;
+  supportsRoomCodes?: boolean;
+  networkingType?: MultiplayerNetworkingType;
+  backendRequirement?: MultiplayerBackendRequirement;
+  staticHostingCompatible?: boolean;
+  usesOwnBackend?: boolean;
+  externalServices?: string[];
+}
+
 export interface Game {
+  multiplayer?: MultiplayerInfo;
   id: string;
   slug: string;
   title: string;
@@ -37,6 +71,14 @@ export interface Game {
   status: 'published' | 'draft' | 'unlisted';
   author?: string;
   license?: string;
+  // Licensing/embedding distinction (optional; unknown by default)
+  commercialRedistributionAllowed?: boolean;
+  embeddingAllowed?: boolean;
+  hostingPermission?: boolean;
+  monetizationAllowed?: boolean;
+  // Discovery policy status (optional)
+  technicalAcceptance?: 'TECHNICALLY_ACCEPTED' | 'REJECTED';
+  licensePending?: boolean;
   releaseDate?: string;
   rating?: number; // e.g. 4.9
   ratingCount?: number;

@@ -134,8 +134,8 @@ export const GamePlayer: React.FC<GamePlayerProps> = ({ game }) => {
     const shareUrl = window.location.href;
     const challengeText =
       lang === 'ar'
-        ? `🎮 لقد حققت رقماً قياسياً في لعبة ${title} على منصة جلوبال أركيد! هل يمكنك التفوق عليّ؟ العب الآن: ${shareUrl}`
-        : `⚡ I am challenging you in ${title} on Global Arcade! Can you beat my personal best? Play now: ${shareUrl}`;
+        ? `🎮 لقد حققت رقماً قياسياً في لعبة ${title} على منصة كايراكسو! هل يمكنك التفوق عليّ؟ العب الآن: ${shareUrl}`
+        : `⚡ I am challenging you in ${title} on KYRAXO! Can you beat my personal best? Play now: ${shareUrl}`;
 
     if (navigator.share) {
       navigator.share({

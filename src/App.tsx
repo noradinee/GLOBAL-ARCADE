@@ -22,6 +22,8 @@ import { ContactPage } from './pages/ContactPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { CookiePolicyPage } from './pages/CookiePolicyPage';
+import { DiscoveryInboxPage } from './pages/DiscoveryInboxPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 export const App: React.FC = () => {
   return (
@@ -44,6 +46,10 @@ export const App: React.FC = () => {
                   <Route path="/popular" element={<PopularPage />} />
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
+                  <Route path="/inbox" element={<DiscoveryInboxPage />} />
+                  <Route path="/inbox/:candidateId" element={<DiscoveryInboxPage />} />
+                  <Route path="/admin" element={<AdminDashboardPage />} />
+                  <Route path="/admin/*" element={<AdminDashboardPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />

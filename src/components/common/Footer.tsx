@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
-import { Gamepad2, ShieldCheck, Zap, Heart } from 'lucide-react';
+import { Gamepad2, ShieldCheck, Zap, Heart, Shield } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -72,9 +72,9 @@ export const Footer: React.FC = () => {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Global Arcade" className="w-9 h-9" />
+              <img src="/logo.svg" alt="KYRAXO" className="w-9 h-9" />
               <span className="text-2xl font-black text-white tracking-wider">
-                {lang === 'ar' ? 'جلوبال أركيد' : 'GLOBAL ARCADE'}
+                {lang === 'ar' ? 'كايراكسو' : 'KYRAXO'}
               </span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
@@ -169,6 +169,16 @@ export const Footer: React.FC = () => {
                   {t.footer.cookiePolicy}
                 </Link>
               </li>
+              <li className="pt-2 border-t border-dark-800">
+                <Link
+                  to="/admin"
+                  className="text-slate-600 hover:text-slate-400 text-xs transition-colors flex items-center gap-1.5"
+                  aria-label="KYRAXO Staff Portal"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>KYRAXO Portal</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -176,7 +186,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom bar */}
         <div className="border-t border-dark-800 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} Global Arcade. {t.footer.copyright}</p>
+          <p>© {new Date().getFullYear()} KYRAXO. {t.footer.copyright}</p>
           <div className="flex items-center gap-1">
             <span>Built with precision for gamers globally</span>
             <Heart className="w-3.5 h-3.5 text-brand-rose fill-brand-rose" />

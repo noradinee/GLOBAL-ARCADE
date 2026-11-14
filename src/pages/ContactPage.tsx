@@ -23,14 +23,14 @@ export const ContactPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'اتصل بنا — جلوبال أركيد | تواصل مع فريق المنصة'
-      : 'Contact Us — Support & Partnerships | Global Arcade';
+      ? 'اتصل بنا — كايراكسو | تواصل مع فريق المنصة'
+      : 'Contact Us — Support & Partnerships | KYRAXO';
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
       <SEOHead
         title={seoTitle}
-        description="Get in touch with the Global Arcade team for technical support, game submissions, or advertising partnerships."
+        description="Get in touch with the KYRAXO team for technical support, game submissions, or advertising partnerships."
         canonicalUrl={`${window.location.origin}/contact`}
         lang={lang}
       />
@@ -62,10 +62,10 @@ export const ContactPage: React.FC = () => {
               {lang === 'ar' ? 'للاستفسارات العامة والملاحظات' : 'For general and technical inquiries'}
             </p>
             <a
-              href="mailto:contact@globalarcade.games"
+              href="mailto:contact@kyraxo.com"
               className="text-xs font-mono text-brand-purple hover:underline"
             >
-              contact@globalarcade.games
+              contact@kyraxo.com
             </a>
           </div>
 

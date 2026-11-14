@@ -39,13 +39,13 @@ export const CategoriesListPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'أقسام وتصنيفات الألعاب — تصفح جميع أنواع ألعاب المتصفح | جلوبال أركيد'
-      : 'All Game Categories — Browse Free Browser Games by Genre | Global Arcade';
+      ? 'أقسام وتصنيفات الألعاب — تصفح جميع أنواع ألعاب المتصفح | كايراكسو'
+      : 'All Game Categories — Browse Free Browser Games by Genre | KYRAXO';
 
   const seoDescription =
     lang === 'ar'
-      ? 'تصفح جميع أقسام الألعاب على جلوبال أركيد. ألعاب أركيد، سباق سيارات، ألغاز، أكشن، ألعاب شخصين، وألعاب أطفال مجانية بدون تحميل.'
-      : 'Explore all game categories on Global Arcade. Find your favorite arcade, puzzle, racing, action, sports, and multiplayer browser games.';
+      ? 'تصفح جميع أقسام الألعاب على كايراكسو (KYRAXO). ألعاب أركيد، سباق سيارات، ألغاز، أكشن، ألعاب شخصين، وألعاب أطفال مجانية بدون تحميل.'
+      : 'Explore all game categories on KYRAXO. Find your favorite arcade, puzzle, racing, action, sports, and multiplayer browser games.';
 
   const breadcrumbItems = [{ label: t.category.allCategoriesTitle }];
 

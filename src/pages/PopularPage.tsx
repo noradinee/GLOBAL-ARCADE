@@ -13,14 +13,14 @@ export const PopularPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'أفضل وأشهر الألعاب — الأعلى تقييماً | جلوبال أركيد'
-      : 'Most Popular Online Games — Highest Rated Games | Global Arcade';
+      ? 'أفضل وأشهر الألعاب — الأعلى تقييماً | كايراكسو'
+      : 'Most Popular Online Games — Highest Rated Games | KYRAXO';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Play the top-rated, most popular free browser games on Global Arcade. Hand-picked games with thousands of player reviews."
+        description="Play the top-rated, most popular free browser games on KYRAXO. Hand-picked games with thousands of player reviews."
         canonicalUrl={`${window.location.origin}/popular`}
         lang={lang}
       />

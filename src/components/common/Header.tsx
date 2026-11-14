@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-dark-950/90 backdrop-blur-md border-b border-dark-750/70 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-dark-950/90 backdrop-blur-md border-b border-dark-750/70 transition-colors shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           
@@ -59,19 +59,19 @@ export const Header: React.FC = () => {
           <Link
             to="/"
             className="flex items-center gap-3 group focus:outline-none"
-            aria-label="Global Arcade Home"
+            aria-label="KYRAXO Home"
           >
             <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-brand-violet to-brand-cyan p-0.5 shadow-glow-purple group-hover:scale-105 transition-transform">
               <div className="w-full h-full bg-dark-900 rounded-[10px] flex items-center justify-center">
-                <img src="/logo.svg" alt="Global Arcade Logo" className="w-7 h-7" />
+                <img src="/logo.svg" alt="KYRAXO Logo" className="w-7 h-7" />
               </div>
             </div>
             <div className="flex flex-col">
               <span className="text-xl sm:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-brand-cyan">
-                {lang === 'ar' ? 'جلوبال أركيد' : 'GLOBAL ARCADE'}
+                {lang === 'ar' ? 'كايراكسو' : 'KYRAXO'}
               </span>
               <span className="text-[10px] font-bold text-brand-purple tracking-widest uppercase hidden sm:block">
-                {lang === 'ar' ? 'ألعاب متصفح مجانية' : 'HTML5 Online Gaming'}
+                {lang === 'ar' ? 'ألعاب المتصفح الحديثة' : 'Next-Gen HTML5 Gaming'}
               </span>
             </div>
           </Link>

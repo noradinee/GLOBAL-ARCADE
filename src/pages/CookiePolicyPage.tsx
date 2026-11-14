@@ -19,14 +19,14 @@ export const CookiePolicyPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'سياسة ملفات تعريف الارتباط (الكوكيز) — جلوبال أركيد'
-      : 'Cookie Policy — Global Arcade';
+      ? 'سياسة ملفات تعريف الارتباط (الكوكيز) — كايراكسو'
+      : 'Cookie Policy — KYRAXO';
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
       <SEOHead
         title={seoTitle}
-        description="Learn how Global Arcade uses cookies to store high scores, remember preferences, and deliver programmatic advertising."
+        description="Learn how KYRAXO uses cookies to store high scores, remember preferences, and deliver programmatic advertising."
         canonicalUrl={`${window.location.origin}/cookies`}
         lang={lang}
       />
@@ -99,7 +99,7 @@ export const CookiePolicyPage: React.FC = () => {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-white">Types of Cookies Used on Global Arcade</h2>
+          <h2 className="text-lg font-bold text-white">Types of Cookies Used on KYRAXO</h2>
           <ul className="list-disc list-inside space-y-2 text-slate-400 pl-2">
             <li>
               <strong className="text-slate-200">Strictly Necessary & Functional Storage:</strong> Used to store your active language (English or Arabic), your favorite games list, and game progress.

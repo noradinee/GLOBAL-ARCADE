@@ -43,7 +43,7 @@ export function updatePageSEO({
   setMetaTag('property', 'og:url', canonicalUrl);
   setMetaTag('property', 'og:type', ogType);
   setMetaTag('property', 'og:image', ogImage);
-  setMetaTag('property', 'og:site_name', lang === 'ar' ? 'جلوبال أركيد' : 'Global Arcade');
+  setMetaTag('property', 'og:site_name', lang === 'ar' ? 'كايراكسو' : 'KYRAXO');
 
   // Twitter Card
   setMetaTag('property', 'twitter:card', 'summary_large_image');

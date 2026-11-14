@@ -86,3 +86,104 @@ test('verifyLicense rejects unknown license', () => {
   assert.equal(r.isPermittedForPublication, false);
   assert.notEqual(r.status, 'VERIFIED_COMMERCIAL_USE');
 });
+
+test('regression: TDZ ReferenceError fixed and rejected candidates register normalized name for cross-source dedup', async (t) => {
+  const root = makeTempRoot();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+
+  // Pre-seed a rejected candidate with name "PolyTrack"
+  const rejectedRecord = {
+    candidateId: 'gl-old-polytrack',
+    name: 'PolyTrack',
+    originalRepoUrl: 'https://gitlab.com/old/polytrack',
+    technicalAcceptance: 'REJECTED',
+    reviewerDecision: 'REJECT',
+  };
+  fs.writeFileSync(
+    path.join(root, 'discovery', 'rejected', 'gl-old-polytrack.json'),
+    JSON.stringify(rejectedRecord, null, 2),
+    'utf-8'
+  );
+
+  // New incoming candidate with different platform, different ID, different URL, but same name variation
+  const incomingCandidate = {
+    candidateId: 'cb-new-poly-track',
+    name: 'Poly Track', // Normalizes to 'polytrack'
+    originalRepoUrl: 'https://codeberg.org/new/polytrack',
+    author: 'new-author',
+    description: 'A racing game in the browser.',
+    discoveryDate: new Date().toISOString().split('T')[0],
+    lastUpdateDate: '2026-01-01',
+    sourcePlatform: 'codeberg',
+    programmingLanguage: 'JavaScript',
+    gameEngine: 'HTML5 Canvas2D',
+    popularityIndicators: { githubStars: 50, forks: 5, openIssues: 0, communityPlays: 200, trendVelocity: 'x', signalsSource: 'test', signalsDate: '2026-01-01' },
+    licenseName: 'MIT',
+    licenseUrl: 'https://codeberg.org/new/polytrack/src/branch/main/LICENSE',
+    assetLicensingStatus: 'Original assets',
+    dependencies: [],
+    html5Compatibility: true,
+    mobileCompatibility: true,
+    buildInstructions: 'vanilla',
+    exactCommitHash: 'main',
+  };
+
+  const res = await runDailyDiscoveryPipeline({
+    dryRun: false,
+    offline: true,
+    rootDir: root,
+    candidates: [incomingCandidate],
+  });
+
+  // Incoming candidate must be filtered out as duplicate because its normalized name matches the rejected candidate
+  assert.equal(res.evaluatedCount, 0, 'candidate with identical normalized name to rejected candidate must be filtered as duplicate');
+  const reg = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'discoveryRegistry.json'), 'utf-8'));
+  assert.equal(reg.length, 0, 'filtered candidate must not be added to registry');
+});
+
+test('regression: normalized repository URL deduplication handles trailing slashes and host case', async (t) => {
+  const root = makeTempRoot();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+
+  // Pre-seed registry with URL having a trailing slash
+  const existingSeed = {
+    candidateId: 'gh-arcade-cyber-blaster',
+    name: 'Cyber Blaster 2088',
+    originalRepoUrl: 'https://github.com/arcade-open-source/cyber-blaster-2088/',
+    discoveryDate: new Date().toISOString().split('T')[0],
+    licenseName: 'MIT',
+  };
+  fs.writeFileSync(path.join(root, 'src', 'data', 'discoveryRegistry.json'), JSON.stringify([existingSeed]), 'utf-8');
+
+  // Candidate with uppercase host and no trailing slash
+  const incomingCandidate = {
+    candidateId: 'gh-alternate-id-cyber-blaster',
+    name: 'Cyber Blaster Alt',
+    originalRepoUrl: 'HTTPS://GITHUB.COM/arcade-open-source/cyber-blaster-2088#readme',
+    author: 'author',
+    description: 'A duplicate repo.',
+    discoveryDate: new Date().toISOString().split('T')[0],
+    lastUpdateDate: '2026-01-01',
+    sourcePlatform: 'github',
+    programmingLanguage: 'JavaScript',
+    gameEngine: 'HTML5 Canvas2D',
+    popularityIndicators: { githubStars: 50, forks: 5, openIssues: 0, communityPlays: 200, trendVelocity: 'x', signalsSource: 'test', signalsDate: '2026-01-01' },
+    licenseName: 'MIT',
+    licenseUrl: 'https://example.com/LICENSE',
+    assetLicensingStatus: 'Procedural',
+    dependencies: [],
+    html5Compatibility: true,
+    mobileCompatibility: true,
+    buildInstructions: 'vanilla',
+    exactCommitHash: 'main',
+  };
+
+  const res = await runDailyDiscoveryPipeline({
+    dryRun: false,
+    offline: true,
+    rootDir: root,
+    candidates: [incomingCandidate],
+  });
+
+  assert.equal(res.evaluatedCount, 0, 'candidate with normalized equivalent URL must be deduplicated');
+});

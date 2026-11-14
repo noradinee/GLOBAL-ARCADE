@@ -39,9 +39,9 @@
   </g>
 
   <!-- Brand Title -->
-  <text x="600" y="370" fill="url(#titleGrad)" font-size="64" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="4">GLOBAL ARCADE</text>
+  <text x="600" y="370" fill="url(#titleGrad)" font-size="68" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="6">KYRAXO</text>
   <text x="600" y="420" fill="#cbd5e1" font-size="24" font-weight="700" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="2">PLAY FREE ONLINE HTML5 BROWSER GAMES</text>
-  <text x="600" y="470" fill="#38bdf8" font-size="20" font-weight="bold" font-family="'Cairo', sans-serif" text-anchor="middle">أفضل منصة ألعاب مجانية بدون تحميل أونلاين</text>
+  <text x="600" y="470" fill="#38bdf8" font-size="20" font-weight="bold" font-family="'Cairo', sans-serif" text-anchor="middle">منصة ألعاب كايراكسو المجانية بدون تحميل أونلاين</text>
 
   <!-- Feature Pills -->
   <g transform="translate(360, 520)">

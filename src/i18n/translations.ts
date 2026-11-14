@@ -114,7 +114,7 @@ export interface TranslationDictionary {
 
 export const translations: Record<Language, TranslationDictionary> = {
   en: {
-    siteTitle: 'Global Arcade',
+    siteTitle: 'KYRAXO',
     siteTagline: 'Play the Best Free HTML5 Browser Games Online',
     nav: {
       home: 'Home',
@@ -199,13 +199,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     },
     cookies: {
       title: 'Cookie & Privacy Preferences',
-      message: 'Global Arcade uses cookies and local storage to personalize game settings, save high scores, and deliver relevant advertisements.',
+      message: 'KYRAXO uses cookies and local storage to personalize game settings, save high scores, and deliver relevant advertisements.',
       acceptAll: 'Accept All',
       decline: 'Necessary Only',
       learnMore: 'Cookie Policy',
     },
     footer: {
-      description: 'Global Arcade is a premier free online gaming platform delivering high-speed, instant-play HTML5 games without downloads across desktop and mobile devices.',
+      description: 'KYRAXO is a premier free online gaming platform delivering high-speed, instant-play HTML5 games without downloads across desktop and mobile devices.',
       quickLinks: 'Quick Links',
       categories: 'Top Genres',
       legal: 'Legal & Privacy',
@@ -225,8 +225,8 @@ export const translations: Record<Language, TranslationDictionary> = {
     },
   },
   ar: {
-    siteTitle: 'جلوبال أركيد',
-    siteTagline: 'أفضل منصة ألعاب مجانية بدون تحميل أونلاين',
+    siteTitle: 'كايراكسو',
+    siteTagline: 'أفضل منصة ألعاب متصفح مجانية بدون تحميل أونلاين',
     nav: {
       home: 'الرئيسية',
       allGames: 'كل الألعاب',
@@ -310,13 +310,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     },
     cookies: {
       title: 'سياسة ملفات تعريف الارتباط والخصوصية',
-      message: 'يستخدم موقع جلوبال أركيد ملفات تعريف الارتباط لحفظ تقدمك في الألعاب وعرض الإعلانات المناسبة.',
+      message: 'يستخدم موقع كايراكسو ملفات تعريف الارتباط لحفظ تقدمك في الألعاب وعرض الإعلانات المناسبة.',
       acceptAll: 'موافق على الكل',
       decline: 'الضروري فقط',
       learnMore: 'سياسة الكوكيز',
     },
     footer: {
-      description: 'جلوبال أركيد هي منصتك الرائدة لألعاب المتصفح السريعة والمجانية بدون الحاجة لأي تحميل، متوافقة تماماً مع أجهزة الهاتف والحاسوب.',
+      description: 'كايراكسو (KYRAXO) هي منصتك الرائدة لألعاب المتصفح السريعة والمجانية بدون الحاجة لأي تحميل، متوافقة تماماً مع أجهزة الهاتف والحاسوب.',
       quickLinks: 'روابط سريعة',
       categories: 'أشهر الأقسام',
       legal: 'الشروط والخصوصية',

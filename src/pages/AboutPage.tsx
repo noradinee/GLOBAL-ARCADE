@@ -9,13 +9,13 @@ export const AboutPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'من نحن — رسالة ورؤية جلوبال أركيد'
-      : 'About Us — Mission & Vision | Global Arcade';
+      ? 'من نحن — رسالة ورؤية كايراكسو'
+      : 'About Us — Mission & Vision | KYRAXO';
 
   const seoDescription =
     lang === 'ar'
-      ? 'تعرف على جلوبال أركيد، منصتك الرائدة لألعاب الويب التفاعلية بدون تحميل وتجربة الألعاب المباشرة لجميع الفئات العمرية.'
-      : 'Learn more about Global Arcade, our mission to provide high-speed instant HTML5 games globally, and our commitment to accessible gaming.';
+      ? 'تعرف على كايراكسو، منصتك الرائدة لألعاب الويب التفاعلية بدون تحميل وتجربة الألعاب المباشرة لجميع الفئات العمرية.'
+      : 'Learn more about KYRAXO, our mission to provide high-speed instant HTML5 games globally, and our commitment to accessible gaming.';
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
@@ -34,8 +34,8 @@ export const AboutPage: React.FC = () => {
         </h1>
         <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
           {lang === 'ar'
-            ? 'جلوبال أركيد هي منصة ألعاب ويب رائدة تهدف إلى جعل تجربة اللعب الفوري عبر المتصفح متاحة للجميع حول العالم دون أي عوائق تقنية أو اشتراكات مدفوعة.'
-            : 'Global Arcade is a next-generation web gaming platform dedicated to delivering fast, friction-free browser entertainment for players worldwide without paywalls or mandatory downloads.'}
+            ? 'كايراكسو هي منصة ألعاب ويب رائدة تهدف إلى جعل تجربة اللعب الفوري عبر المتصفح متاحة للجميع حول العالم دون أي عوائق تقنية أو اشتراكات مدفوعة.'
+            : 'KYRAXO is a next-generation web gaming platform dedicated to delivering fast, friction-free browser entertainment for players worldwide without paywalls or mandatory downloads.'}
         </p>
       </div>
 
@@ -92,8 +92,8 @@ export const AboutPage: React.FC = () => {
         </h2>
         <p>
           {lang === 'ar'
-            ? 'نؤمن في جلوبال أركيد بأن مستقبل ألعاب الفيديو يكمن في تقنيات الويب المفتوحة (HTML5 و WebAssembly و WebGL). هذه التقنيات تمكن المطورين من الوصول المباشر لمليارات الأجهزة المتصلة دون الحاجة لمتجر تطبيقات مغلق أو عمولات احتكارية.'
-            : 'At Global Arcade, we believe the future of interactive entertainment is powered by open web technologies (HTML5, WebGL, WebAssembly). These standards empower independent game developers to reach billions of connected screens without app store gatekeepers or monopolistic barriers.'}
+            ? 'نؤمن في كايراكسو بأن مستقبل ألعاب الفيديو يكمن في تقنيات الويب المفتوحة (HTML5 و WebAssembly و WebGL). هذه التقنيات تمكن المطورين من الوصول المباشر لمليارات الأجهزة المتصلة دون الحاجة لمتجر تطبيقات مغلق أو عمولات احتكارية.'
+            : 'At KYRAXO, we believe the future of interactive entertainment is powered by open web technologies (HTML5, WebGL, WebAssembly). These standards empower independent game developers to reach billions of connected screens without app store gatekeepers or monopolistic barriers.'}
         </p>
         <p>
           {lang === 'ar'

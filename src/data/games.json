@@ -7,7 +7,13 @@
     "description": "Sprint through a neon-lit futuristic metropolis in this adrenaline-pumping endless runner. Jump over deadly laser barriers, double jump across hazards, and collect cyber energy cells to reach maximum velocity!",
     "descriptionAr": "انطلق بأقصى سرعة في مدينة المستقبل المليئة بالنيون في لعبة ركض لا نهائية مثيرة. اقفز فوق حواجز الليزر الفتاكة، واستخدم القفز المزدوج وتفادَ العقبات واجمع خلايا الطاقة لتحقيق أعلى سكور!",
     "category": "arcade",
-    "tags": ["runner", "cyberpunk", "endless", "jump", "reflex"],
+    "tags": [
+      "runner",
+      "cyberpunk",
+      "endless",
+      "jump",
+      "reflex"
+    ],
     "thumbnail": "/thumbnails/cyber-dash.svg",
     "gameSource": "/games/cyber-dash/index.html",
     "sourceType": "local",
@@ -17,17 +23,23 @@
     "instructions": "Jump over spikes and neon roadblocks. Time your jumps and double-jumps carefully to collect energy orbs and avoid crashing. As your score increases, the speed intensifies!",
     "instructionsAr": "اقفز فوق المسامير وحواجز النيون. اضبط توقيت القفزات والقفز المزدوج بعناية لجمع كرات الطاقة وتجنب الاصطدام. تزداد السرعة تدريجياً كلما تقدمت!",
     "controls": {
-      "desktop": ["Spacebar / Up Arrow: Jump & Double Jump", "W Key: Alternative Jump"],
-      "mobile": ["Tap screen anywhere to Jump / Double Jump"]
+      "desktop": [
+        "Spacebar / Up Arrow: Jump & Double Jump",
+        "W Key: Alternative Jump"
+      ],
+      "mobile": [
+        "Tap screen anywhere to Jump / Double Jump"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-01-15",
     "rating": 4.9,
     "ratingCount": 1420,
-    "orientation": "landscape"
+    "orientation": "landscape",
+    "lastUpdated": "2026-11-12T12:34:00.077Z"
   },
   {
     "id": "retro-snake-2077",
@@ -37,7 +49,13 @@
     "description": "The timeless arcade classic reimagined with cyberpunk neon visuals, dynamic speed boosts, and particle effects. Guide your cybernetic serpent across the mainframe grid without colliding into yourself or the boundary firewalls.",
     "descriptionAr": "اللعبة الكلاسيكية الشهيرة برؤية مستقبلية جديدة مع أضواء نيون سايبر ومؤثرات بصرية رائعة. وجه ثعبانك السيبراني داخل شبكة البيانات واجمع كرات الطاقة دون الاصطدام بالجدران أو بنفسك.",
     "category": "casual",
-    "tags": ["snake", "retro", "classic", "cyberpunk", "arcade"],
+    "tags": [
+      "snake",
+      "retro",
+      "classic",
+      "cyberpunk",
+      "arcade"
+    ],
     "thumbnail": "/thumbnails/retro-snake-2077.svg",
     "gameSource": "/games/retro-snake-2077/index.html",
     "sourceType": "local",
@@ -47,12 +65,17 @@
     "instructions": "Eat red glowing data cores to grow longer and score points. Every 50 points increases the game speed. Plan your moves ahead to avoid getting trapped in tight corners.",
     "instructionsAr": "تناول كرات الطاقة الحمراء لتزداد طولاً وتحرز النقاط. كل 50 نقطة تزداد سرعة اللعبة. خطط لمسارك مسبقاً لتتجنب الوقوع في الفخ.",
     "controls": {
-      "desktop": ["Arrow Keys or W/A/S/D: Steer Snake", "Spacebar: Start / Restart"],
-      "mobile": ["On-screen D-Pad buttons: Steer Snake"]
+      "desktop": [
+        "Arrow Keys or W/A/S/D: Steer Snake",
+        "Spacebar: Start / Restart"
+      ],
+      "mobile": [
+        "On-screen D-Pad buttons: Steer Snake"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-02-01",
     "rating": 4.8,
@@ -67,7 +90,13 @@
     "description": "Engage your mind with an addictive, relaxing block puzzle game. Place vibrant polyomino shapes strategically onto the 8x8 grid to form full rows and columns. Clear lines to score points and make room for upcoming shapes!",
     "descriptionAr": "شغّل عقلك مع لعبة ألغاز الكتل الممتعة والمريحة للأعصاب. ضع الأشكال الملونة بذكاء داخل الشبكة لتكوين صفوف وأعمدة مكتملة. امسح الخطوط للحصول على النقاط وافسح المجال للقطع الجديدة!",
     "category": "puzzle",
-    "tags": ["puzzle", "blocks", "brain", "relaxing", "logic"],
+    "tags": [
+      "puzzle",
+      "blocks",
+      "brain",
+      "relaxing",
+      "logic"
+    ],
     "thumbnail": "/thumbnails/hexa-block-puzzle.svg",
     "gameSource": "/games/hexa-block-puzzle/index.html",
     "sourceType": "local",
@@ -77,12 +106,16 @@
     "instructions": "Pick one of the 3 available shapes at the bottom by clicking it, then click on the grid where you wish to place it. Clear multiple rows and columns simultaneously for huge combo bonuses.",
     "instructionsAr": "اختر واحدة من القطع الثلاث المتاحة بالأسفل بالنقر عليها، ثم انقر على المكان المراد بالشبكة لوضعها. امسح عدة صفوف وأعمدة في وقت واحد للحصول على مكافآت مضاعفة.",
     "controls": {
-      "desktop": ["Mouse Click: Select shape & place on grid"],
-      "mobile": ["Touch Tap: Select shape & place on grid"]
+      "desktop": [
+        "Mouse Click: Select shape & place on grid"
+      ],
+      "mobile": [
+        "Touch Tap: Select shape & place on grid"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-01-20",
     "rating": 4.7,
@@ -97,7 +130,13 @@
     "description": "Command an orbital defense fighter revolving around a vulnerable planetary shield. Intercept waves of hostile asteroids, rogue drones, and alien space invaders before they breach the planetary core!",
     "descriptionAr": "تحكم في مقاتلة دفاعية تدور في مدار كوكب مهدد بالخطر. اعترض موجات الكويكبات المعادية، والمسبارات الفضائية والغزاة قبل أن يخترقوا قلب الكوكب ويدمروه!",
     "category": "action",
-    "tags": ["space", "shooter", "defense", "arcade", "scifi"],
+    "tags": [
+      "space",
+      "shooter",
+      "defense",
+      "arcade",
+      "scifi"
+    ],
     "thumbnail": "/thumbnails/space-orbit-defender.svg",
     "gameSource": "/games/space-orbit-defender/index.html",
     "sourceType": "local",
@@ -107,12 +146,18 @@
     "instructions": "Move your mouse or finger around the central planet to position your interceptor. Click or tap to fire photon cannons at approaching threats. Protect the core health at all costs.",
     "instructionsAr": "حرك الفأرة أو إصبعك حول الكوكب المركزي لتوجيه المقاتلة. انقر لإطلاق مدافع الفوتون نحو الأهداف المقتربة. احمِ طاقة الكوكب مهما كلف الثمن.",
     "controls": {
-      "desktop": ["Mouse Movement: Orbit around planet", "Mouse Left Click or Space: Fire Torpedoes"],
-      "mobile": ["Touch & Drag: Orbit planet", "Touch Tap: Fire Torpedoes"]
+      "desktop": [
+        "Mouse Movement: Orbit around planet",
+        "Mouse Left Click or Space: Fire Torpedoes"
+      ],
+      "mobile": [
+        "Touch & Drag: Orbit planet",
+        "Touch Tap: Fire Torpedoes"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-02-10",
     "rating": 4.8,
@@ -127,7 +172,13 @@
     "description": "Tear up the asphalt in high-performance neon supercars! Master the art of counter-steering and momentum drifting around tight chicanes and hairpins to set record lap times across the championship circuit.",
     "descriptionAr": "أشعل الأسفلت بسيارات رياضية خارقة ومضيئة! احترف فن التفحيط والانزلاق المدروس حول المنعطفات الحادة لتسجيل أسرع وقت ممكن في جولات السباق.",
     "category": "racing",
-    "tags": ["racing", "drift", "cars", "speed", "time-trial"],
+    "tags": [
+      "racing",
+      "drift",
+      "cars",
+      "speed",
+      "time-trial"
+    ],
     "thumbnail": "/thumbnails/speed-racer-drift.svg",
     "gameSource": "/games/speed-racer-drift/index.html",
     "sourceType": "local",
@@ -137,12 +188,19 @@
     "instructions": "Accelerate into corners and steer hard to induce drift. Release throttle or brake momentarily to stabilize your trajectory. Complete 3 laps as fast as possible to enter the leaderboard.",
     "instructionsAr": "زد سرعتك نحو المنعطفات ولف المقود بقوة لبدء التفحيط. اضغط الفرامل لتثبيت المسار. أكمل 3 لفات في أسرع وقت لتتصدر قائمة الأبطال.",
     "controls": {
-      "desktop": ["W / Up Arrow: Accelerate", "S / Down Arrow: Brake / Reverse", "A / Left Arrow: Steer Left", "D / Right Arrow: Steer Right"],
-      "mobile": ["On-screen touch steering and throttle pedals"]
+      "desktop": [
+        "W / Up Arrow: Accelerate",
+        "S / Down Arrow: Brake / Reverse",
+        "A / Left Arrow: Steer Left",
+        "D / Right Arrow: Steer Right"
+      ],
+      "mobile": [
+        "On-screen touch steering and throttle pedals"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-02-22",
     "rating": 4.9,
@@ -157,7 +215,13 @@
     "description": "The ultimate arcade table tennis duel! Play solo against a smart responsive AI bot or challenge a friend side-by-side on the same keyboard or touchscreen in exhilarating 1v1 paddle action.",
     "descriptionAr": "المواجهة الكبرى في كرة الطاولة بأسلوب الأركيد! العب بمفردك ضد ذكاء اصطناعي محترف أو تحدَّ صديقك على نفس الشاشة ولوحة المفاتيح في مواجهة 1 ضد 1 حماسية حتى 7 نقاط.",
     "category": "two-player",
-    "tags": ["2-player", "sports", "ping-pong", "table-tennis", "vs-friend"],
+    "tags": [
+      "2-player",
+      "sports",
+      "ping-pong",
+      "table-tennis",
+      "vs-friend"
+    ],
     "thumbnail": "/thumbnails/ping-pong-clash.svg",
     "gameSource": "/games/ping-pong-clash/index.html",
     "sourceType": "local",
@@ -167,136 +231,22 @@
     "instructions": "Defend your goal line and angle your paddle hits to send fast curve shots past your opponent. First player to score 7 points takes victory!",
     "instructionsAr": "دافع عن خط مرماك ووجّه ضربات مضربك بزوايا حادة لترسل كرات سريعة ومباغتة لخصمك. أول من يصل إلى 7 نقاط يفوز بالمباراة!",
     "controls": {
-      "desktop": ["Player 1: W (Up) / S (Down)", "Player 2: Up Arrow / Down Arrow"],
-      "mobile": ["Player 1: Touch left half of screen", "Player 2: Touch right half of screen"]
+      "desktop": [
+        "Player 1: W (Up) / S (Down)",
+        "Player 2: Up Arrow / Down Arrow"
+      ],
+      "mobile": [
+        "Player 1: Touch left half of screen",
+        "Player 2: Touch right half of screen"
+      ]
     },
     "language": "both",
     "status": "published",
-    "author": "Global Arcade Studios",
+    "author": "KYRAXO Studios",
     "license": "Proprietary / Free Web Play",
     "releaseDate": "2025-01-28",
     "rating": 4.6,
     "ratingCount": 730,
-    "orientation": "landscape"
-  },
-  {
-    "id": "dungeon-crawler-quest",
-    "slug": "dungeon-crawler-quest",
-    "title": "Dungeon Crawler Quest",
-    "titleAr": "مغامرة سراديب الموت",
-    "description": "Embark on an epic adventure through procedurally lit catacombs. Slay skeletal guardians, discover ancient treasure chests, and equip mystical swords on your quest to liberate the forgotten kingdom.",
-    "descriptionAr": "خض مغامرة ملحمية عبر سراديب ومتاهات مظلمة. اهزم الحراس العظام، وافتح صناديق الكنوز الأثرية وتسلح بالسيوف السحرية لإنقاذ المملكة المفقودة.",
-    "category": "adventure",
-    "tags": ["adventure", "dungeon", "rpg", "quest", "fantasy"],
-    "thumbnail": "/thumbnails/dungeon-crawler.svg",
-    "gameSource": "/games/cyber-dash/index.html",
-    "sourceType": "local",
-    "featured": false,
-    "trending": false,
-    "popularityScore": 88,
-    "instructions": "Navigate perilous corridors, open sealed gates, and defeat dungeon bosses to collect the three divine relics.",
-    "instructionsAr": "تنقل في الممرات الخطيرة، وافتح البوابات المغلقة، واهزم زعماء السراديب لجمع الآثار المقدسة الثلاثة.",
-    "controls": {
-      "desktop": ["WASD or Arrows: Move Hero", "Space / J: Attack with Sword"],
-      "mobile": ["Touch on-screen action controls"]
-    },
-    "language": "both",
-    "status": "published",
-    "author": "Pixel Quest Labs",
-    "license": "Open Web License",
-    "releaseDate": "2025-01-05",
-    "rating": 4.5,
-    "ratingCount": 620,
-    "orientation": "landscape"
-  },
-  {
-    "id": "candy-bubble-pop",
-    "slug": "candy-bubble-pop",
-    "title": "Candy Bubble Pop",
-    "titleAr": "فرقعة فقاعات الحلوى",
-    "description": "A delightful, colorful bubble shooter designed for kids and casual gamers! Match three or more delicious candy bubbles of the same color to pop them and clear the sweet sky.",
-    "descriptionAr": "لعبة فرقعة فقاعات الحلوى الملونة الممتعة للأطفال ومحبي الألعاب الخفيفة! طابق 3 فقاعات حلوى أو أكثر من نفس اللون لتفجيرها وإخلاء السماء الحلوة.",
-    "category": "kids",
-    "tags": ["kids", "bubble-shooter", "candy", "casual", "colorful"],
-    "thumbnail": "/thumbnails/candy-bubble-pop.svg",
-    "gameSource": "/games/hexa-block-puzzle/index.html",
-    "sourceType": "local",
-    "featured": false,
-    "trending": false,
-    "popularityScore": 89,
-    "instructions": "Aim the candy cannon towards clusters of matching bubbles. Shoot bubbles to drop hanging candy bunches and earn bonus stars!",
-    "instructionsAr": "صوّب مدفع الحلوى نحو مجموعات الفقاعات المتطابقة. أطلق لتسقط عناقيد الحلوى وتحصل على النجوم الإضافية!",
-    "controls": {
-      "desktop": ["Mouse Aim & Click to shoot bubble"],
-      "mobile": ["Touch aim line & tap to shoot"]
-    },
-    "language": "both",
-    "status": "published",
-    "author": "Sugar Pop Studio",
-    "license": "Creative Commons Free",
-    "releaseDate": "2025-01-10",
-    "rating": 4.7,
-    "ratingCount": 940,
-    "orientation": "portrait"
-  },
-  {
-    "id": "galaxy-battle-royale",
-    "slug": "galaxy-battle-royale",
-    "title": "Galaxy Battle Royale",
-    "titleAr": "معركة المجرة الملكية",
-    "description": "Deploy into intense multiplayer aerial dogfights! Scavenge laser upgrades, avoid the closing cosmic plasma ring, and be the last starfighter surviving in the galaxy arena.",
-    "descriptionAr": "انزل إلى معارك طيران ملحمية متعددة اللاعبين! اجمع ترقيات أسلحة الليزر، وتجنب حلقة البلازما الكونية المتقلصة وكن آخر مقاتل فضاء صامد في المجرة.",
-    "category": "multiplayer",
-    "tags": ["multiplayer", "battle-royale", "space", "dogfight", "pvp"],
-    "thumbnail": "/thumbnails/galaxy-battle.svg",
-    "gameSource": "/games/space-orbit-defender/index.html",
-    "sourceType": "local",
-    "featured": true,
-    "trending": true,
-    "popularityScore": 97,
-    "instructions": "Navigate your spaceship inside the safe orbital zone, pick up weapon crates, and eliminate rival pilot craft before the storm overtakes you.",
-    "instructionsAr": "قُد سفينتك الفضائية داخل المنطقة الآمنة، والتقط صناديق الأسلحة، واقضِ على الطيارين المنافسين قبل أن تبتلعك العاصفة الكونية.",
-    "controls": {
-      "desktop": ["WASD: Maneuver", "Mouse Aim: Steer Cannon", "Left Click: Primary Fire"],
-      "mobile": ["Dual virtual touch joysticks"]
-    },
-    "language": "both",
-    "status": "published",
-    "author": "Nebula Games",
-    "license": "Open Web License",
-    "releaseDate": "2025-02-15",
-    "rating": 4.9,
-    "ratingCount": 2100,
-    "orientation": "landscape"
-  },
-  {
-    "id": "penalty-kick-master",
-    "slug": "penalty-kick-master",
-    "title": "Penalty Kick Master",
-    "titleAr": "أستاذ ضربات الجزاء",
-    "description": "Step up to the penalty spot in the world championship finals! Curve your shot around the defensive wall, outwit the goalkeeper, and score spectacular top-corner goals.",
-    "descriptionAr": "تقدم إلى نقطة الجزاء في نهائي بطولة العالم! سدد كرات لولبية ملتفة حول حائط الصد، وخدع حارس المرمى وسجل أهدافاً ساحرة في الزاوية التسعين.",
-    "category": "sports",
-    "tags": ["soccer", "football", "penalty", "sports", "kick"],
-    "thumbnail": "/thumbnails/penalty-kick.svg",
-    "gameSource": "/games/ping-pong-clash/index.html",
-    "sourceType": "local",
-    "featured": false,
-    "trending": false,
-    "popularityScore": 90,
-    "instructions": "Swipe or drag your mouse to flick the ball towards the net. The speed and curve of your flick determine the flight path and spin of your kick.",
-    "instructionsAr": "اسحب الفأرة أو إصبعك لركل الكرة نحو الشباك. تحدد سرعة وانحناء سحبتك مسار ودوران الكرة بدقة.",
-    "controls": {
-      "desktop": ["Mouse Drag & Release: Aim and Kick Ball"],
-      "mobile": ["Touch Swipe: Kick ball with curve"]
-    },
-    "language": "both",
-    "status": "published",
-    "author": "Kickoff Arena",
-    "license": "Open Web License",
-    "releaseDate": "2025-01-18",
-    "rating": 4.7,
-    "ratingCount": 1340,
     "orientation": "landscape"
   },
   {
@@ -307,7 +257,13 @@
     "description": "Stack sliding neon blocks with surgical precision! Slice off overhangs, trigger multiplier chords with perfect alignments, and construct the tallest glowing cyber skyscraper.",
     "descriptionAr": "قم برص كتل النيون المنزلقة بدقة جراحية! اقطع الحواف الزائدة وحقق ضربات متتالية متقنة لبناء أطول ناطحة سحاب سيبرانية متوهجة.",
     "category": "arcade",
-    "tags": ["arcade", "stack", "timing", "neon", "reflex"],
+    "tags": [
+      "arcade",
+      "stack",
+      "timing",
+      "neon",
+      "reflex"
+    ],
     "thumbnail": "/thumbnails/tower-stack-neon.svg",
     "gameSource": "/games/tower-stack-neon/index.html",
     "sourceType": "local",
@@ -317,8 +273,12 @@
     "instructions": "Tap or press Space when the sliding block aligns over the tower. Perfect placements reward bonus combos and expand your score multiplier.",
     "instructionsAr": "انقر على الشاشة أو اضغط المسافة عندما تتطابق الكتلة المنزلقة مع البرج. الرص المتقن يمنحك مضاعف نقاط وبونص متتالي.",
     "controls": {
-      "desktop": ["Spacebar or Left Click: Place Block"],
-      "mobile": ["Tap screen anywhere to place block"]
+      "desktop": [
+        "Spacebar or Left Click: Place Block"
+      ],
+      "mobile": [
+        "Tap screen anywhere to place block"
+      ]
     },
     "language": "both",
     "status": "published",
@@ -337,7 +297,13 @@
     "description": "Propel your space capsule through orbital gravity wells! Time your tangential launches across deep space planets while evading cosmic voids and asteroid fields.",
     "descriptionAr": "انطلق بكبسولتك الفضائية عبر حقول الجاذبية للكواكب! اضبط توقيت قفزتك المدارية لتنتقل من كوكب لآخر دون أن تضيع في الفضاء السحيق.",
     "category": "casual",
-    "tags": ["space", "gravity", "physics", "timing", "casual"],
+    "tags": [
+      "space",
+      "gravity",
+      "physics",
+      "timing",
+      "casual"
+    ],
     "thumbnail": "/thumbnails/gravity-orbit-jump.svg",
     "gameSource": "/games/gravity-orbit-jump/index.html",
     "sourceType": "local",
@@ -347,8 +313,12 @@
     "instructions": "Orbit the current planet and tap or press Space to launch into space towards the next gravitational field.",
     "instructionsAr": "دُر حول الكوكب الحالي واضغط المسافة أو المس الشاشة للانطلاق في خط مستقيم نحو حقل الجاذبية للكوكب التالي.",
     "controls": {
-      "desktop": ["Spacebar or Left Click: Launch from Orbit"],
-      "mobile": ["Tap screen anywhere to Launch"]
+      "desktop": [
+        "Spacebar or Left Click: Launch from Orbit"
+      ],
+      "mobile": [
+        "Tap screen anywhere to Launch"
+      ]
     },
     "language": "both",
     "status": "published",
@@ -357,6 +327,48 @@
     "releaseDate": "2025-02-20",
     "rating": 4.8,
     "ratingCount": 2400,
+    "orientation": "portrait"
+  },
+  {
+    "id": "pilot-2048",
+    "slug": "2048-classic",
+    "title": "2048 Classic",
+    "titleAr": "لعبة 2048 الكلاسيكية",
+    "description": "The world-famous sliding tile puzzle game! Combine matching numbers to reach the legendary 2048 tile in this highly addictive brain teaser.",
+    "descriptionAr": "لعبة الألغاز الشهيرة عالمياً لدمج الأرقام! ادمج المربعات المتطابقة لتصل إلى الرقم الأسطوري 2048 في تحدٍ عقلي ممتع ومثير.",
+    "category": "puzzle",
+    "tags": [
+      "puzzle",
+      "math",
+      "brain",
+      "2048",
+      "classic",
+      "casual"
+    ],
+    "thumbnail": "/thumbnails/pilot-2048.svg",
+    "gameSource": "/games/pilot-2048/index.html",
+    "sourceType": "local",
+    "featured": true,
+    "trending": true,
+    "popularityScore": 98,
+    "instructions": "Use your arrow keys, WASD, or swipe on touchscreen to move the tiles. When two tiles with the same number touch, they merge into one! Reach 2048 to win.",
+    "instructionsAr": "استخدم مفاتيح الأسهم أو اسحب بإصبعك على شاشة الجوال لتحريك المربعات. عندما يتلامس مربعان يحملان نفس الرقم، يندمجان في مربع واحد! حقق 2048 للفوز.",
+    "controls": {
+      "desktop": [
+        "Arrow Keys / WASD: Slide Tiles",
+        "R: Restart New Game"
+      ],
+      "mobile": [
+        "Touch Swipe: Slide Tiles in any direction"
+      ]
+    },
+    "language": "both",
+    "status": "published",
+    "author": "Gabriele Cirulli",
+    "license": "MIT",
+    "releaseDate": "2025-02-01",
+    "rating": 4.9,
+    "ratingCount": 3850,
     "orientation": "portrait"
   }
 ]

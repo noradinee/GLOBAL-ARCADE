@@ -12,6 +12,13 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+*.bat
+data/admin-auth.json
+
+# Archives & deployment tarballs
+*.tar.gz
+*.tgz
+*.zip
 
 # Logs
 npm-debug.log*

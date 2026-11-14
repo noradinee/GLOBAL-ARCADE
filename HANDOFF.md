@@ -5,139 +5,75 @@
 > **Editing lock:** Before starting work, the assigned agent must set **Editing Status** to `ACTIVE`, record the **Active Editor**, and set **Work started**. After finishing or handing over, the agent must update the relevant sections, set **Editing Status** to `IDLE` (or hand off clearly), and update **Last updated**. Never modify the project when another agent is recorded as `ACTIVE` unless the user explicitly resolves the conflict.
 
 ## 1. Project Information
-- **Project name:** GLOBAL-ARCADE
+- **Project name:** GLOBAL-ARCADE (KYRAXO Platform)
 - **Project path (workspace-relative):** Projects/GLOBAL-ARCADE
-- **Project type:** Web App (React SPA)
-- **Project specification file:** README.md (and docs/PRODUCT_STRATEGY.md)
+- **Project type:** Web App (React SPA + Node.js Production Server)
+- **Production Host:** https://kyraxo.com
 - **Repository / Git initialized:** Yes; per-project Git inside Projects/GLOBAL-ARCADE/. Remote: https://github.com/noradinee/GLOBAL-ARCADE.git
-- **Primary tech stack:** React 18, TypeScript 5, Vite 5, Tailwind CSS 3, React Router 6
-- **Allocated local port(s):** Frontend (Vite default) 5173 — verify availability before binding
-- **Current branch / commit (if Git):** main; 823f50972732a17253f038a69e9f6239903246ff
+- **Primary tech stack:** React 18, TypeScript 5, Vite 5, Tailwind CSS 3, React Router 6, Node.js http server, Argon2id (hash-wasm)
+- **Allocated local port(s):** Production server runs on PORT 3100 (due to local port 3000 collision)
+- **Current branch:** main
 - **Active Editor:** None
 - **Editing Status:** IDLE
-- **Work started (date/time, timezone):** N/A
-- **Last working agent:** OpenCode (this session)
-- **Last updated (date/time, timezone):** 2026-11-11 (session)
-- **Assignment / quota context (at handoff):** Single agent session; no quota data verified.
+- **Work started:** 2026-11-14
+- **Last working agent:** Antigravity (Implementation) & OpenCode (Independent Architecture & Security Reviewer)
+- **Last updated:** 2026-11-14T15:45:00Z
+- **Stage Status:** Stage S5 Complete (Verified & Audited)
 
-## 2. Current Objective
-- **Active goal:** Establish project handoff baseline and prepare repository for push to origin (remote configured).
-- **Scope of this handoff:** Created HANDOFF.md; recorded current Git/remote state; no source code changes.
-- **Out of scope:** Pushing to remote (requires explicit user approval); running full build/test suite; feature work.
-- **Acceptance criteria:**
-  - [x] HANDOFF.md created from shared template
-  - [ ] Remote push executed (pending explicit user approval)
-  - [ ] Build verified (not run this session)
+## 2. Current Objective & Scope
+- **Active goal:** Stage S5 — Real-World Development Pilot on Production Repository.
+- **Scope executed:**
+  1. Brand Identity & Domain Alignment to KYRAXO / كايراكسو across all pages, components, meta tags, legal pages, and artwork.
+  2. Administrative Surface Hardening: removed `/admin` and `/inbox` from public header navigation; enforced client-side `AdminLoginModal` session guard on `/inbox` and `/admin`; protected server endpoints with Argon2id, CSRF headers, and production fail-closed security.
+  3. Game Catalog Integrity: removed 4 ghost duplicate games; indexed `pilot-2048` (2048 Classic) with dedicated vector SVG thumbnail, MIT license, Clear Sans Apache-2.0 font license, and bilingual metadata.
+  4. Technical SEO: Schema.org BreadcrumbList with absolute URLs, CollectionPage JSON-LD on category pages, VideoGame JSON-LD on game pages, regenerated sitemap.xml (28 URLs at https://kyraxo.com), robots.txt.
+  5. Visual Redesign: Enhanced hero section, card interactions, and mobile drawer.
+  6. Independent Audit & Condition Discharge: OpenCode audit executed, all 3 conditions resolved.
+- **Out of scope:** Stage S6 (awaiting explicit Owner authorization); Live Hetzner production deployment; DNS or registrar modifications.
 
 ## 3. Completed Tasks
 
 | Task | Status | Notes / Verification | Related files |
 |---|---|---|---|
-| Configure git remote `origin` | Done | `git remote -v` confirms https://github.com/noradinee/GLOBAL-ARCADE.git (fetch/push) | .git/config |
-| Create HANDOFF.md | Done | Copied from Shared/HANDOFF-TEMPLATE.md and filled initial state | HANDOFF.md |
+| Comprehensive Website Audit | Done | Audited branding, catalog, security, SEO, and visual hierarchy | KYRAXO_WEBSITE_COMPREHENSIVE_AUDIT_S5.md |
+| Baseline Visual Evidence | Done | Captured 6 baseline desktop & mobile screenshots | baseline_evidence/ |
+| Brand Identity Migration | Done | Replaced all "Global Arcade" / "جلوبال أركيد" with KYRAXO / كايراكسو across code, legal pages, badges, and og-banner.svg | index.html, src/pages/*, src/data/*, public/og-banner.svg |
+| Canonical Domain Alignment | Done | Pointed canonical URLs, robots.txt, and sitemap.xml to https://kyraxo.com | public/sitemap.xml, public/robots.txt, src/utils/seo.ts |
+| Admin Route Hardening | Done | Removed admin links from Header; added getSession() guard + AdminLoginModal to DiscoveryInboxPage & AdminDashboardPage | src/components/common/Header.tsx, src/pages/DiscoveryInboxPage.tsx |
+| Server API Protection | Done | Dual-key rate-limiting, proxy IP extraction hardening, audit-log previousStatus fix, and production fail-closed auth | server/auth.js, server/api-router.js |
+| Catalog Integrity & 2048 Classic | Done | Purged 4 ghost duplicates; added pilot-2048 with MIT license and custom SVG artwork | src/data/games.json, public/games/pilot-2048/, public/thumbnails/pilot-2048.svg |
+| Technical SEO Enhancements | Done | Schema.org BreadcrumbList, CollectionPage, and VideoGame JSON-LD verified | src/components/common/Breadcrumb.tsx, src/pages/CategoryPage.tsx |
+| Post-Implementation Evidence | Done | Captured 6 post-implementation screenshots across desktop, mobile, 2048 player, and route lock | post_evidence/ |
+| Independent OpenCode Audit | Done | Dispatched to OpenCode (opencode/glm-5.3-flash-free); verdict PASS WITH CONDITIONS | OPENCODE_PHASE2_S5_FINAL_AUDIT.md |
+| Condition Discharge & Verification | Done | Resolved all 3 OpenCode conditions (branding completeness, server security, repo hygiene) | .gitignore, server/auth.js, src/pages/* |
+| Full Regression Test Suite | Done | 276 / 276 tests passing 100% green | tests/*.test.js |
+| Security Audit Gate | Done | All 9 games approved with 0 findings | scripts/security-audit.js |
+| Production Build | Done | Vite build succeeded with 0 errors in 5.93s | dist/ |
 
 ## 4. Pending Tasks
 
-| Priority | Task | Owner/Next agent (suggested) | Dependencies / Blockers | Acceptance criteria |
+| Priority | Task | Owner/Next agent | Dependencies / Blockers | Acceptance criteria |
 |---|---|---|---|---|
-| High | Push `main` to origin | any available agent | User approval required (no push without explicit approval) | Remote branch `origin/main` exists and matches local HEAD |
-| Medium | Run build (`npm run build`) to verify | any available agent | None | `tsc && vite build` exits 0 |
-| Medium | Run lint (`npm run lint`) | any available agent | None | No errors |
-| Low | Manual UI/browser QA | any available agent | Dev server | App loads, routes work |
+| High | Stage S5 Git Commit | Antigravity | Review git status | Clean commit on `main` |
+| High | Present S5 Final Report to Owner | Antigravity | Stage S5 verification complete | Comprehensive report submitted |
+| High | Await Owner Authorization for S6 | Owner | Stage S5 acceptance | Explicit authorization received before S6 |
 
-## 5. Modified Files
+## 5. Errors, Findings and Fixes
 
-| File path | Change type | Summary of change | Reviewed? |
-|---|---|---|---|
-| HANDOFF.md | Created | Initial handoff document from shared template | Yes |
-| .git/config | Modified (local, untracked by repo) | Added remote origin | N/A |
+| Finding | Severity | Area | Description | Resolution | Status |
+|---|---|---|---|---|---|
+| OpenCode Finding 1 | Medium | Branding | 39 residual "Global Arcade" strings in production bundle (legal pages, badges, og-banner.svg) | Replaced all 39 strings with KYRAXO / كايراكسو; re-verified bundle with 0 remaining matches | RESOLVED |
+| OpenCode Finding 2 | Medium | Server Auth | Hardcoded fallback password active if no env set in production | Implemented fail-closed production check in `server/auth.js` | RESOLVED |
+| OpenCode Finding 3 | Low | Repo Hygiene | Untracked deployment tarballs and IP in batch script | Added `*.tar.gz`, `*.bat`, `data/admin-auth.json` to `.gitignore`; removed stray files | RESOLVED |
+| OpenCode Finding 4 | Low | Server Audit | `previousStatus` logged after game mutation in `api-router.js` | Captured `previousStatus` prior to state mutation | RESOLVED |
+| OpenCode Finding 5 | Low | Rate Limiter | Direct `x-forwarded-for` trust could allow spoofed IP rate limiting | Restricted `x-forwarded-for` header trust strictly to local reverse proxy loopback sockets | RESOLVED |
 
-## 6. Technical Decisions
+## 6. Verification Census
 
-| Decision | Rationale | Alternatives considered | Impact / Follow-up |
-|---|---|---|---|
-| Keep HANDOFF.md uncommitted until push | Avoid committing without review; user controls push | Commit now | Commit + push together after approval |
-
-## 7. Errors and Known Issues
-
-| ID | Severity | Area/File | Description | Reproduction steps | Workaround | Status |
-|---|---|---|---|---|---|---|
-| (none) | — | — | No errors recorded this session | — | — | — |
-
-## 8. Tests Performed and Results
-
-| Test / Check | Command or method | Result | Evidence / Notes |
-|---|---|---|---|
-| Git remote verification | `git remote -v` | Pass | origin fetch/push URLs confirmed |
-| Git status | `git status` | Pass | Working tree clean prior to HANDOFF.md creation |
-| Build | `npm run build` | Not run | Not executed this session |
-| Lint | `npm run lint` | Not run | Not executed this session |
-
-- **Environment used for testing:** Windows (PowerShell), node_modules present
-- **Not tested (and why):** Build/lint/browser QA not run this session; focus was remote configuration and handoff setup.
-
-## 9. Verification Checklist (Reusable)
-
-| Category | Check | Status | Evidence / notes |
-|---|---|---|---|
-| A. File verification | Modified files were inspected (actual files reviewed) | PASS | HANDOFF.md created and reviewed; git config verified via `git remote -v` |
-| A. File verification | Changes are consistent with task requirements / acceptance criteria | PASS | Remote + handoff created as requested |
-| A. File verification | Unrelated files were left untouched (or changes explained) | PASS | Only HANDOFF.md added; .git/config remote added |
-| B. Technical verification | Relevant tests/checks were actually executed (or explicitly not run) | REPORTED, NOT INDEPENDENTLY VERIFIED | Only git commands run; build/lint not run |
-| B. Technical verification | Build, syntax, runtime, or lint checks run when needed | NOT RUN | Build/lint not run this session |
-| B. Technical verification | Exact commands/methods and results are recorded | PASS | Section 8 |
-| B. Technical verification | Failed or skipped tests/checks are disclosed | PASS | Build/lint marked Not run |
-| C. Functional verification | Required features/behaviors were tested | NOT RUN | No runtime testing performed |
-| C. Functional verification | Important edge cases considered/tested where relevant | NOT RUN | N/A this session |
-| C. Functional verification | Persistence/data integrity checked where relevant | NOT APPLICABLE | No data persistence changes |
-| D. UI & browser QA | Application opened in a real browser (if UI changed/relevant) | NOT RUN | No UI changes this session |
-| D. UI & browser QA | Desktop/mobile/responsive checks performed where relevant | NOT RUN | N/A this session |
-| D. UI & browser QA | Accessibility considerations checked where relevant | NOT RUN | N/A this session |
-| D. UI & browser QA | Automated checks distinguished from manual/browser QA | PASS | Section 8 separates git checks from build/lint/browser QA |
-| E. Independent review | Second opinion/review needed and performed (if applicable) | NOT APPLICABLE | Single-agent session |
-| E. Independent review | Unresolved findings documented | PASS | None |
-| F. Handoff verification | `HANDOFF.md` updated with current state | PASS | This file |
-| F. Handoff verification | Modified files listed | PASS | Section 5 |
-| F. Handoff verification | Known issues and next actions documented | PASS | Sections 7, 11 |
-| F. Handoff verification | Git status recorded (or N/A stated) | PASS | Section 10 |
-| F. Handoff verification | Editing status correctly set (`IDLE` or clearly handed off) | PASS | Section 1: IDLE |
-
-## 10. Current Git Status
-- **Repository path:** Projects/GLOBAL-ARCADE
-- **Branch:** main
-- **HEAD commit:** e805fd3 — docs: update HANDOFF.md with commit/push status
-- **Working tree status:** Clean
-- **Staged changes:** None
-- **Unstaged changes:** None
-- **Untracked files:** None
-- **Last commit:** e805fd3 docs: update HANDOFF.md with commit/push status
-- **Checkpoint/commit created for handoff?** Yes — 679a9d9 (pre-push); push update pending commit
-- **Notes:** Remote origin configured. Pushed `main` to origin (upstream tracking set). Working tree clean.
-
-## 11. Next Task
-- **Task:** Obtain user approval, then push `main` to origin (HANDOFF.md committed through e805fd3).
-- **Why this is next:** Remote configured; repository ready to publish.
-- **Starting point (files/areas):** Git remote/branch state; HANDOFF.md
-- **Steps (suggested):**
-  1. Confirm with user whether to commit HANDOFF.md first.
-  2. If yes, `git add HANDOFF.md && git commit -m "docs: add HANDOFF.md"`.
-  3. `git push -u origin main`.
-  4. Update HANDOFF.md Section 10 with push result.
-- **Acceptance criteria:**
-  - [ ] `origin/main` exists and matches local HEAD
-  - [ ] Working tree clean (or intended untracked files documented)
-- **Risks / watch-outs:** Push requires network/auth; ensure credentials available; do not push without explicit approval.
-
-## 12. Instructions for the Next Agent
-- **Read before acting:** AGENTS.md, this HANDOFF.md, README.md
-- **Constraints to respect:** No git commit/push/deploy without explicit user approval; no paid deps; preserve working functionality; never delete without permission.
-- **Assumptions made:** Remote repository exists and user has push access; default branch is `main`.
-- **Questions / decisions needed from user:** Whether to commit HANDOFF.md before push; whether to push now.
-- **Recommended agent for next step:** any available agent with git/network access.
-- **Editing status reminder:** Before starting, confirm **Editing Status** is `IDLE`. If found `ACTIVE` due to a crash or disconnect, do not wipe changes; execute the Crash Recovery Protocol (audit changes non-destructively, present them to the user, and obtain explicit user approval before checkpointing or claiming the lock). Before assigning/starting, verify agent quota/availability and required capabilities per Shared/AGENT-ROLES.md and HUB-STATUS.md (evidence-based; do not assume). Before starting dev servers, verify port availability and document assigned ports. After finishing, update sections 3–11 and 13, complete the Verification Checklist (Section 9) with evidence-based statuses, record actual tests and Git status, set **Editing Status: IDLE**, and update **Last updated**.
-
-## 13. Last Updated
-- **Updated by:** OpenCode
-- **Date/time (timezone):** 2026-11-11 (session)
-- **Change summary:** HANDOFF.md finalized and committed (e805fd3); remote configured; push pending approval.
-- **Confidence level:** High — based on verified git commands.
+| Check | Tool / Command | Result |
+|---|---|---|
+| Production Build | `npm run build` | ✅ PASSED (1644 modules transformed, 0 errors, 5.93s) |
+| Test Census | `node --test tests/*.test.js` | ✅ PASSED (276 passed, 0 failed, 0 skipped, 10.2s) |
+| Security Audit | `npm run audit` | ✅ PASSED (9 / 9 games approved, 0 findings) |
+| Branding Census | `git grep -i "global arcade"` | ✅ PASSED (0 occurrences in src/ and public/) |
+| Bundle Census | `Select-String 'global arcade' dist/` | ✅ PASSED (0 occurrences in production dist/) |

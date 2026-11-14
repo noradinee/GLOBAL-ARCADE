@@ -30,7 +30,7 @@ export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) =>
   };
 
   return (
-    <div className="group relative bg-dark-900/90 hover:bg-dark-850 border border-dark-800/90 hover:border-brand-purple/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-glow-purple flex flex-col">
+    <div className="group relative bg-dark-900/90 hover:bg-dark-850 border border-dark-800/90 hover:border-brand-cyan/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-glow-cyan hover:-translate-y-1 flex flex-col">
       <Link
         to={`/game/${game.slug}`}
         onClick={handleCardClick}

@@ -18,14 +18,14 @@ export const FavoritesPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'ألعابي المفضلة — جلوبال أركيد'
-      : 'My Favorite Games — Global Arcade';
+      ? 'ألعابي المفضلة — كايراكسو'
+      : 'My Favorite Games — KYRAXO';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Your bookmarked favorite HTML5 games on Global Arcade. Return anytime to continue playing."
+        description="Your bookmarked favorite HTML5 games on KYRAXO. Return anytime to continue playing."
         canonicalUrl={`${window.location.origin}/favorites`}
         lang={lang}
       />

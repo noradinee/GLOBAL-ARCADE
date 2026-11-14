@@ -7,15 +7,75 @@ import path from 'node:path';
 import { discoverFromGitHub } from '../scripts/discovery/discover-github.js';
 import { runDailyDiscoveryPipeline } from '../scripts/discovery/orchestrator.js';
 
+const MOCK_GITHUB_ITEMS = [
+  {
+    id: 1,
+    name: 'cyber-blaster',
+    owner: { login: 'arcade-author-1' },
+    html_url: 'https://github.com/arcade-author-1/cyber-blaster',
+    description: 'Fast canvas shooter',
+    pushed_at: '2025-01-01T00:00:00Z',
+    language: 'JavaScript',
+    stargazers_count: 120,
+    forks_count: 15,
+    open_issues_count: 2,
+    topics: ['html5-game', 'canvas'],
+    license: { spdx_id: 'MIT' },
+  },
+  {
+    id: 2,
+    name: 'neon-drift',
+    owner: { login: 'arcade-author-2' },
+    html_url: 'https://github.com/arcade-author-2/neon-drift',
+    description: 'WebGL drifting game',
+    pushed_at: '2025-01-05T00:00:00Z',
+    language: 'TypeScript',
+    stargazers_count: 85,
+    forks_count: 10,
+    open_issues_count: 1,
+    topics: ['webgl-game', 'phaser'],
+    license: { spdx_id: 'Apache-2.0' },
+  },
+  {
+    id: 3,
+    name: 'retro-crawler',
+    owner: { login: 'arcade-author-3' },
+    html_url: 'https://github.com/arcade-author-3/retro-crawler',
+    description: 'LittleJS dungeon crawler',
+    pushed_at: '2025-01-10T00:00:00Z',
+    language: 'JavaScript',
+    stargazers_count: 65,
+    forks_count: 8,
+    open_issues_count: 0,
+    topics: ['littlejs', 'html5-game'],
+    license: { spdx_id: 'MIT' },
+  },
+];
+
+function createMockGitHubFetch(items = MOCK_GITHUB_ITEMS) {
+  return async () => ({
+    ok: true,
+    status: 200,
+    headers: {
+      get: (header) => {
+        if (header === 'x-ratelimit-remaining') return '60';
+        if (header === 'x-ratelimit-reset') return '1893456000';
+        return null;
+      },
+    },
+    json: async () => ({ items }),
+  });
+}
+
 test('github: discovery returns unique repositories', async () => {
-  const res = await discoverFromGitHub({ maxResults: 8 });
+  const res = await discoverFromGitHub({ maxResults: 8, fetch: createMockGitHubFetch() });
   assert.ok(res.length > 0);
   const urls = res.map(c => c.originalRepoUrl);
   assert.equal(new Set(urls).size, urls.length, 'duplicate URLs in discovery');
 });
 
 test('github: diversity across multiple topics (queries not single source)', async () => {
-  const res = await discoverFromGitHub({ maxResults: 10 });
+  const res = await discoverFromGitHub({ maxResults: 10, fetch: createMockGitHubFetch() });
   // Should surface more than one distinct author/repo family
   const authors = new Set(res.map(c => c.author));
   assert.ok(authors.size >= 3, `expected diverse authors, got ${authors.size}`);
@@ -123,8 +183,8 @@ test('max_candidates: rejected candidates do not consume eligible limit', async 
   assert.equal(res.retainedEligible, 1, 'expected 1 retained eligible');
   assert.equal(res.evaluatedCount, 2, 'expected rejected (GPL) + first eligible (Cyber) evaluated; second eligible deferred');
   const reg = JSON.parse(fs.readFileSync(path.join(dir, 'src', 'data', 'discoveryRegistry.json'), 'utf-8'));
-  const approved = reg.filter(c => c.reviewerDecision === 'APPROVE');
-  assert.equal(approved.length, 1, 'expected exactly 1 approved retained');
+  const eligible = reg.filter(c => c.publicationEligibility === 'ELIGIBLE');
+  assert.equal(eligible.length, 1, 'expected exactly 1 eligible retained');
   // rejected candidate recorded
   assert.ok(fs.existsSync(path.join(dir, 'discovery', 'rejected', 'gh-retro-miner-gpl.json')), 'rejected candidate not archived');
 });

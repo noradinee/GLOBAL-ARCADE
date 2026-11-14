@@ -61,8 +61,8 @@ export const GameDetailPage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? `${title} — العب مجاناً اون لاين بدون تحميل | جلوبال أركيد`
-      : `${title} — Play Free Online HTML5 Game | Global Arcade`;
+      ? `${title} — العب مجاناً اون لاين بدون تحميل | كايراكسو`
+      : `${title} — Play Free Online HTML5 Game | KYRAXO`;
 
   const canonicalUrl = `${window.location.origin}/game/${game.slug}`;
 
@@ -87,7 +87,7 @@ export const GameDetailPage: React.FC = () => {
     },
     author: {
       '@type': 'Organization',
-      name: game.author || 'Global Arcade Studios',
+      name: game.author || 'KYRAXO Studios',
     },
     offers: {
       '@type': 'Offer',

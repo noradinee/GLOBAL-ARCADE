@@ -60,18 +60,18 @@ export const HomePage: React.FC = () => {
 
   const seoTitle =
     lang === 'ar'
-      ? 'جلوبال أركيد — العاب مجانية بدون تحميل اون لاين | العاب متصفح HTML5'
-      : 'Global Arcade — Play Free Online HTML5 Browser Games | No Download';
+      ? 'كايراكسو — ألعاب مجانية بدون تحميل أونلاين | العاب متصفح HTML5'
+      : 'KYRAXO — Play Free Online HTML5 Browser Games | No Download';
 
   const seoDescription =
     lang === 'ar'
-      ? 'العب أفضل ألعاب المتصفح المجانية بدون تحميل على جلوبال أركيد. ألعاب أركيد، سباق، ذكاء، قتال وألعاب لشخصين باللغتين العربية والإنجليزية بجودة عالية وسرعة فائقة.'
-      : 'Play hundreds of top free online browser games on Global Arcade. Instant HTML5 play without download or installation. Action, racing, puzzle, 2-player & arcade games.';
+      ? 'العب أفضل ألعاب المتصفح المجانية بدون تحميل على كايراكسو (KYRAXO). ألعاب أركيد، سباق، ذكاء، قتال وألعاب لشخصين باللغتين العربية والإنجليزية بجودة عالية وسرعة فائقة.'
+      : 'Play hundreds of top free online browser games on KYRAXO. Instant HTML5 play without download or installation. Action, racing, puzzle, 2-player & arcade games.';
 
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Global Arcade',
+    name: 'KYRAXO',
     url: window.location.origin,
     potentialAction: {
       '@type': 'SearchAction',
@@ -295,13 +295,13 @@ export const HomePage: React.FC = () => {
       <article className="mt-16 bg-dark-900/60 border border-dark-800/80 rounded-2xl p-6 sm:p-8 text-slate-400 text-xs sm:text-sm leading-relaxed space-y-4">
         <h2 className="text-base sm:text-lg font-bold text-white">
           {lang === 'ar'
-            ? 'مرحباً بكم في جلوبال أركيد — أفضل بوابة ألعاب HTML5 مجانية'
-            : 'Welcome to Global Arcade — The Premier Free HTML5 Gaming Portal'}
+            ? 'مرحباً بكم في كايراكسو — أفضل بوابة ألعاب HTML5 مجانية'
+            : 'Welcome to KYRAXO — The Premier Free HTML5 Gaming Portal'}
         </h2>
         <p>
           {lang === 'ar'
-            ? 'جلوبال أركيد هي منصة ترفيهية شاملة صممت خصيصاً لتوفر لمحبي الألعاب تجربة لعب فورية وسريعة بدون الحاجة لتنزيل أي برامج أو تثبيت ملفات. تعمل جميع الألعاب لدينا بتقنية HTML5 الحديثة المتوافقة مع أجهزة الكمبيوتر، الهواتف الذكية، وأجهزة التابلت بنظامي أندرويد وiOS.'
-            : 'Global Arcade is a comprehensive gaming destination designed to give players around the world instant, free access to top-tier browser games without requiring downloads or software installs. Powered by modern HTML5 technology, every game loads immediately in your web browser across desktop PCs, smartphones, and tablets.'}
+            ? 'كايراكسو هي منصة ترفيهية شاملة صممت خصيصاً لتوفر لمحبي الألعاب تجربة لعب فورية وسريعة بدون الحاجة لتنزيل أي برامج أو تثبيت ملفات. تعمل جميع الألعاب لدينا بتقنية HTML5 الحديثة المتوافقة مع أجهزة الكمبيوتر، الهواتف الذكية، وأجهزة التابلت بنظامي أندرويد وiOS.'
+            : 'KYRAXO is a comprehensive gaming destination designed to give players around the world instant, free access to top-tier browser games without requiring downloads or software installs. Powered by modern HTML5 technology, every game loads immediately in your web browser across desktop PCs, smartphones, and tablets.'}
         </p>
         <p>
           {lang === 'ar'

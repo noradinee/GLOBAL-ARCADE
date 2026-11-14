@@ -3,8 +3,17 @@ import { PlayedGameRecord } from '../types/profile';
 import gamesData from '../data/games.json';
 import categoriesData from '../data/categories.json';
 
-const allGames = gamesData as Game[];
+let allGames = gamesData as Game[];
 const allCategories = categoriesData as GameCategory[];
+
+/**
+ * A game is publicly visible when its status is the canonical `published` value
+ * (what the catalog uses) or the legacy `active` value still written by the
+ * admin console. Anything else (draft / unlisted / disabled) stays hidden.
+ */
+export function isGameVisible(status?: string): boolean {
+  return status === 'published' || status === 'active';
+}
 
 export interface GameFilterOptions {
   category?: string;
@@ -15,40 +24,68 @@ export interface GameFilterOptions {
 }
 
 export const gameService = {
+  /**
+   * Replaces the bundled catalog snapshot with the live server-side catalog.
+   * Required because the production bundle freezes `games.json` at build time:
+   * without this, a game published after the last build would never appear.
+   * Never throws — a failed refresh keeps the last known catalog.
+   */
+  async refreshCatalog(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/catalog/games', {
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
+      });
+      if (!response.ok) return false;
+      const payload = await response.json();
+      const games = Array.isArray(payload?.games) ? payload.games : null;
+      if (!games || games.length === 0) return false;
+      allGames = games as Game[];
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /** Returns the currently loaded catalog snapshot (bundled or live). */
+  getCatalogSnapshot(): Game[] {
+    return allGames;
+  },
+
   getAllGames(): Game[] {
-    return allGames.filter(g => g.status === 'published');
+    return allGames.filter(g => isGameVisible(g.status));
   },
 
   getGameBySlug(slug: string): Game | undefined {
-    return allGames.find(g => g.slug === slug && g.status === 'published');
+    return allGames.find(g => g.slug === slug && isGameVisible(g.status));
   },
 
   getGamesByCategory(categorySlug: GameCategorySlug | string): Game[] {
     return allGames.filter(
-      g => g.category.toLowerCase() === categorySlug.toLowerCase() && g.status === 'published'
+      g => g.category.toLowerCase() === categorySlug.toLowerCase() && isGameVisible(g.status)
     );
   },
 
   getFeaturedGames(): Game[] {
-    return allGames.filter(g => g.featured && g.status === 'published');
+    return allGames.filter(g => g.featured && isGameVisible(g.status));
   },
 
   getTrendingGames(): Game[] {
     return allGames
-      .filter(g => g.trending && g.status === 'published')
+      .filter(g => g.trending && isGameVisible(g.status))
       .sort((a, b) => b.popularityScore - a.popularityScore);
   },
 
   getPopularGames(limit = 10): Game[] {
     return [...allGames]
-      .filter(g => g.status === 'published')
+      .filter(g => isGameVisible(g.status))
       .sort((a, b) => b.popularityScore - a.popularityScore)
       .slice(0, limit);
   },
 
   getRecentlyAdded(limit = 8): Game[] {
     return [...allGames]
-      .filter(g => g.status === 'published')
+      .filter(g => isGameVisible(g.status))
       .sort((a, b) => {
         const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
         const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
@@ -59,7 +96,7 @@ export const gameService = {
 
   getRelatedGames(currentGame: Game, limit = 6): Game[] {
     return allGames
-      .filter(g => g.id !== currentGame.id && g.status === 'published')
+      .filter(g => g.id !== currentGame.id && isGameVisible(g.status))
       .filter(
         g =>
           g.category === currentGame.category ||

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { AdSlot } from './AdSlot';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 import { X } from 'lucide-react';
 
 interface InterstitialModalProps {
@@ -42,11 +43,29 @@ export const InterstitialModal: React.FC<InterstitialModalProps> = ({
     return () => clearInterval(interval);
   }, [isOpen, countdownSeconds]);
 
+  const { handleBackdropClick } = useModalDismiss({
+    isOpen,
+    onClose: () => {
+      if (canSkip) onClose();
+    },
+    closeOnEscape: canSkip,
+    closeOnBackdrop: canSkip,
+    lockBodyScroll: true,
+  });
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-dark-900 border border-dark-700 rounded-2xl p-6 shadow-2xl flex flex-col items-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative w-full max-w-lg bg-dark-900 border border-dark-700 rounded-2xl p-6 shadow-2xl flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Skip / Close Button */}
         <div className="w-full flex justify-between items-center mb-4">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">

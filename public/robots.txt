@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /inbox
 Disallow: /private/
 
-Sitemap: https://globalarcade.games/sitemap.xml
+Sitemap: https://kyraxo.com/sitemap.xml
