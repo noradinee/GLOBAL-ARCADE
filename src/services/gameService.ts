@@ -19,7 +19,8 @@ export interface GameFilterOptions {
   category?: string;
   device?: 'all' | 'mobile' | 'desktop';
   players?: 'all' | 'single' | 'two-player';
-  sort?: 'trending' | 'rating' | 'popular' | 'recent';
+  sort?: 'trending' | 'rating' | 'popular' | 'recent' | 'plays' | 'az' | 'za';
+  letter?: string;
   query?: string;
 }
 
@@ -66,20 +67,34 @@ export const gameService = {
     );
   },
 
+  getOriginalGames(): Game[] {
+    return allGames
+      .filter(g => (g.isOriginal || g.author?.toLowerCase().includes('kyraxo') || g.author?.toLowerCase().includes('noureddine')) && isGameVisible(g.status))
+      .sort((a, b) => ((b.priority || 0) - (a.priority || 0)) || (b.popularityScore - a.popularityScore));
+  },
+
   getFeaturedGames(): Game[] {
-    return allGames.filter(g => g.featured && isGameVisible(g.status));
+    return allGames.filter(g => (g.featured || g.isOriginal) && isGameVisible(g.status));
   },
 
   getTrendingGames(): Game[] {
     return allGames
-      .filter(g => g.trending && isGameVisible(g.status))
-      .sort((a, b) => b.popularityScore - a.popularityScore);
+      .filter(g => (g.trending || g.isOriginal) && isGameVisible(g.status))
+      .sort((a, b) => {
+        const aBoost = (a.isOriginal ? 1000 : 0) + (a.priority || 0);
+        const bBoost = (b.isOriginal ? 1000 : 0) + (b.priority || 0);
+        return (bBoost + b.popularityScore) - (aBoost + a.popularityScore);
+      });
   },
 
   getPopularGames(limit = 10): Game[] {
     return [...allGames]
       .filter(g => isGameVisible(g.status))
-      .sort((a, b) => b.popularityScore - a.popularityScore)
+      .sort((a, b) => {
+        const aBoost = (a.isOriginal ? 1000 : 0) + (a.priority || 0);
+        const bBoost = (b.isOriginal ? 1000 : 0) + (b.priority || 0);
+        return (bBoost + b.popularityScore) - (aBoost + a.popularityScore);
+      })
       .slice(0, limit);
   },
 
@@ -182,35 +197,67 @@ export const gameService = {
       }
     }
 
+    // Letter filter (A-Z, #, or Arabic letters)
+    if (options.letter && options.letter !== 'all') {
+      const l = options.letter.trim().toUpperCase();
+      if (l === '#') {
+        // Non-letter prefixes (numbers, symbols like 2048, 123)
+        result = result.filter(g => !/^[A-Za-z\u0621-\u064A]/.test(g.title));
+      } else {
+        result = result.filter(g => {
+          const tEn = (g.title || '').trim().toUpperCase();
+          const tAr = (g.titleAr || '').trim().toUpperCase();
+          return tEn.startsWith(l) || tAr.startsWith(l);
+        });
+      }
+    }
+
     // Text search
     if (options.query && options.query.trim()) {
       const q = options.query.trim().toLowerCase();
       result = result.filter(g => {
+        const benchMatch = (g.benchmarkGame || '').toLowerCase().includes(q) || (g.benchmarkGameAr || '').toLowerCase().includes(q);
+        const simMatch = (g.similarTo || []).some(s => s.toLowerCase().includes(q));
+        const kwMatch = (g.searchKeywords || []).some(k => k.toLowerCase().includes(q));
         return (
           g.title.toLowerCase().includes(q) ||
           g.titleAr.toLowerCase().includes(q) ||
           g.description.toLowerCase().includes(q) ||
           g.descriptionAr.toLowerCase().includes(q) ||
           g.category.toLowerCase().includes(q) ||
-          g.tags.some(t => t.toLowerCase().includes(q))
+          g.tags.some(t => t.toLowerCase().includes(q)) ||
+          benchMatch ||
+          simMatch ||
+          kwMatch
         );
       });
     }
 
-    // Sorting
+    // Sorting (with top-tier priority boost for KYRAXO Originals)
     const sort = options.sort || 'trending';
+    const getBoost = (g: Game) => (g.isOriginal ? 10000 : 0) + ((g.priority || 0) * 100);
+
     if (sort === 'trending') {
-      result.sort((a, b) => b.popularityScore - a.popularityScore);
+      result.sort((a, b) => (getBoost(b) + b.popularityScore) - (getBoost(a) + a.popularityScore));
     } else if (sort === 'rating') {
-      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    } else if (sort === 'popular') {
-      result.sort((a, b) => (b.ratingCount || 0) - (a.ratingCount || 0));
+      result.sort((a, b) => (getBoost(b) + (b.rating || 0) * 10) - (getBoost(a) + (a.rating || 0) * 10));
+    } else if (sort === 'popular' || sort === 'plays') {
+      result.sort((a, b) => {
+        const scoreA = getBoost(a) + (a.ratingCount || 0) * 10 + (a.popularityScore || 0);
+        const scoreB = getBoost(b) + (b.ratingCount || 0) * 10 + (b.popularityScore || 0);
+        return scoreB - scoreA;
+      });
     } else if (sort === 'recent') {
       result.sort((a, b) => {
+        if (a.isOriginal !== b.isOriginal) return a.isOriginal ? -1 : 1;
         const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
         const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
         return dateB - dateA;
       });
+    } else if (sort === 'az') {
+      result.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === 'za') {
+      result.sort((a, b) => b.title.localeCompare(a.title));
     }
 
     return result;
@@ -218,6 +265,53 @@ export const gameService = {
 
   searchGames(query: string, categoryFilter?: string): Game[] {
     return this.filterGames({ query, category: categoryFilter });
+  },
+
+  getSearchSuggestions(query: string, limit = 8): { game: Game; matchedTitle: string }[] {
+    if (!query || !query.trim()) return [];
+    const q = query.trim().toLowerCase();
+    const published = this.getAllGames();
+
+    const matched = published.filter(g => {
+      const en = (g.title || '').toLowerCase();
+      const ar = (g.titleAr || '').toLowerCase();
+      const tags = (g.tags || []).map(t => t.toLowerCase());
+      const cat = (g.category || '').toLowerCase();
+      const bench = (g.benchmarkGame || '').toLowerCase();
+      const benchAr = (g.benchmarkGameAr || '').toLowerCase();
+      const sim = (g.similarTo || []).map(s => s.toLowerCase());
+      const kw = (g.searchKeywords || []).map(k => k.toLowerCase());
+      return (
+        en.includes(q) ||
+        ar.includes(q) ||
+        tags.some(t => t.includes(q)) ||
+        cat.includes(q) ||
+        bench.includes(q) ||
+        benchAr.includes(q) ||
+        sim.some(s => s.includes(q)) ||
+        kw.some(k => k.includes(q))
+      );
+    });
+
+    matched.sort((a, b) => {
+      const aStartsEn = a.title.toLowerCase().startsWith(q) ? 4 : 0;
+      const bStartsEn = b.title.toLowerCase().startsWith(q) ? 4 : 0;
+      const aStartsAr = (a.titleAr || '').toLowerCase().startsWith(q) ? 4 : 0;
+      const bStartsAr = (b.titleAr || '').toLowerCase().startsWith(q) ? 4 : 0;
+      const aExactMatch = (a.title.toLowerCase() === q || (a.titleAr || '').toLowerCase() === q) ? 10 : 0;
+      const bExactMatch = (b.title.toLowerCase() === q || (b.titleAr || '').toLowerCase() === q) ? 10 : 0;
+      const aScore = aExactMatch + Math.max(aStartsEn, aStartsAr) * 100 + (a.ratingCount || 0) * 0.1 + a.popularityScore;
+      const bScore = bExactMatch + Math.max(bStartsEn, bStartsAr) * 100 + (b.ratingCount || 0) * 0.1 + b.popularityScore;
+      return bScore - aScore;
+    });
+
+    return matched.slice(0, limit).map(g => {
+      const isArabicMatch = g.titleAr && g.titleAr.toLowerCase().includes(q) && !g.title.toLowerCase().includes(q);
+      return {
+        game: g,
+        matchedTitle: isArabicMatch ? g.titleAr : g.title,
+      };
+    });
   },
 
   getAllCategories(): GameCategory[] {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { gameService } from '../services/gameService';
@@ -20,11 +20,21 @@ import {
   User,
   ArrowLeft,
   Sparkles,
+  Share2,
+  Copy,
+  Check,
+  MessageCircle,
+  Send,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 export const GameDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t, lang, isRtl } = useLanguage();
+
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0); // First FAQ open by default
 
   const game = slug ? gameService.getGameBySlug(slug) : undefined;
   const category = game ? gameService.getCategoryBySlug(game.category) : undefined;
@@ -34,6 +44,8 @@ export const GameDetailPage: React.FC = () => {
   // Scroll to top on slug change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setOpenFaq(0);
+    setCopiedLink(false);
   }, [slug]);
 
   if (!game) {
@@ -59,43 +71,177 @@ export const GameDetailPage: React.FC = () => {
   const instructions = lang === 'ar' ? game.instructionsAr : game.instructions;
   const categoryName = category ? (lang === 'ar' ? category.nameAr : category.name) : game.category;
 
-  const seoTitle =
-    lang === 'ar'
-      ? `${title} — العب مجاناً اون لاين بدون تحميل | كايراكسو`
+  // Lookalike Competitor Benchmark SEO
+  const benchmarkName = lang === 'ar' ? (game.benchmarkGameAr || game.benchmarkGame) : game.benchmarkGame;
+
+  const seoTitle = benchmarkName
+    ? lang === 'ar'
+      ? `${title} — العب اون لاين (بديل ${benchmarkName} مجاناً) | كايراكسو`
+      : `${title} — Play Online (Free ${benchmarkName} Web Alternative) | KYRAXO`
+    : lang === 'ar'
+      ? `${title} — العب مجاناً اون لاين بدون تحميل | العاب كايراكسو`
       : `${title} — Play Free Online HTML5 Game | KYRAXO`;
+
+  const seoDescription = benchmarkName
+    ? lang === 'ar'
+      ? `العب الآن لعبة ${title} مجاناً وبدون تحميل على كايراكسو! أفضل بديل ويب سريع ومطور لـ ${benchmarkName}. متوافقة 100% مع الموبايل والكمبيوتر وبأعلى جودة.`
+      : `Play ${title} online for free on KYRAXO! The ultimate browser alternative to ${benchmarkName}. No download or installation required. 100% free HTML5 gameplay on mobile and PC.`
+    : description;
+
+  const seoKeywords = Array.from(
+    new Set(
+      (game.searchKeywords || [])
+        .concat(game.tags || [])
+        .concat(game.similarTo || [])
+        .concat(benchmarkName ? [benchmarkName, `games like ${game.benchmarkGame || ''}`] : [])
+    )
+  ).join(', ');
 
   const canonicalUrl = `${window.location.origin}/game/${game.slug}`;
 
-  // Structured Data Schema for VideoGame according to Schema.org standard
-  const gameSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'VideoGame',
-    name: game.title,
-    headline: title,
-    description: game.description,
-    image: `${window.location.origin}${game.thumbnail}`,
-    genre: game.category,
-    applicationCategory: 'Game',
-    operatingSystem: 'Any, Web Browser',
-    url: canonicalUrl,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: game.rating || 4.8,
-      ratingCount: game.ratingCount || 500,
-      bestRating: '5',
-      worstRating: '1',
-    },
-    author: {
-      '@type': 'Organization',
-      name: game.author || 'KYRAXO Studios',
-    },
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-    },
+  // Social sharing handlers
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(canonicalUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
   };
+
+  const shareText = lang === 'ar'
+    ? `العب الآن لعبة ${title} مجاناً وبدون تحميل على كايراكسو! 🎮🔥`
+    : `Play ${title} for free online on KYRAXO! No download required. 🎮🔥`;
+
+  const shareWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n${canonicalUrl}`)}`;
+  const shareTelegram = `https://t.me/share/url?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(shareText)}`;
+  const shareTwitter = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(canonicalUrl)}`;
+
+  // Dedicated Lookalike Benchmark FAQ for Rich Snippets
+  const benchmarkFaq = benchmarkName
+    ? lang === 'ar'
+      ? {
+          q: `هل لعبة ${title} تشبه لعبة ${benchmarkName}؟`,
+          a: `نعم! تقدم لعبة ${title} تجربة لعب ممتعة ومجانية ومطورة مستوحاة من أسلوب وميكانيكية ${benchmarkName}، وتعمل مباشرة عبر المتصفح بتقنية HTML5 الحديثة على الهواتف الذكية وأجهزة الكمبيوتر بدون تحميل وبدون مساحة تخزين.`
+        }
+      : {
+          q: `Is ${title} similar to ${benchmarkName}?`,
+          a: `Yes! ${title} is an exciting, free HTML5 web alternative inspired by ${benchmarkName}. It is fully optimized for instant browser play on both mobile and desktop with zero downloads.`
+        }
+    : null;
+
+  // Tailored Game FAQs for Users and Google Search Snippets
+  const faqs = lang === 'ar' ? [
+    ...(benchmarkFaq ? [benchmarkFaq] : []),
+    {
+      q: `كيف تلعب ${title} على الموبايل والكمبيوتر؟`,
+      a: `${instructions} يمكنك اللعب بلمس الشاشة وسحب أصابعك على جميع الهواتف الذكية (iOS و Android)، أو استخدام الفأرة ولوحة المفاتيح على الكمبيوتر.`
+    },
+    {
+      q: `هل لعبة ${title} مجانية بالكامل وبدون تحميل؟`,
+      a: `نعم، لعبة ${title} مجانية 100% وتعمل مباشرة عبر المتصفح بتقنية HTML5 الحديثة بدون الحاجة لتثبيت أي برامج أو تسجيل دخول.`
+    },
+    {
+      q: `ما هي ميزات وتصنيف لعبة ${title}؟`,
+      a: `تنتمي اللعبة إلى تصنيف ${categoryName}، وتتميز باستجابة فورية بدون بطء، وتوافق تام مع متصفحات جوجل كروم وسفاري وفايرفوكس وإيدج.`
+    },
+    {
+      q: `هل يمكنني مشاركة اللعبة وتحدي الأصدقاء؟`,
+      a: `بالتأكيد! يمكنك نسخ رابط اللعبة أو مشاركتها بضغطة زر عبر واتساب وتيليجرام وتحدي أصدقائك لتسجيل أعلى النقاط القياسية.`
+    }
+  ] : [
+    ...(benchmarkFaq ? [benchmarkFaq] : []),
+    {
+      q: `How do I play ${title} on mobile and desktop?`,
+      a: `${instructions} Simply touch, tap, and drag on your smartphone or tablet, or use your keyboard and mouse controls on PC.`
+    },
+    {
+      q: `Is ${title} completely free without downloads?`,
+      a: `Yes! ${title} is 100% free to play directly in your web browser. There are no downloads, subscriptions, or installations required.`
+    },
+    {
+      q: `What devices and browsers support ${title}?`,
+      a: `It runs seamlessly on all modern devices including iPhone, Android, iPad, Mac, and Windows PC across Chrome, Safari, Edge, and Firefox.`
+    },
+    {
+      q: `Can I share ${title} with friends?`,
+      a: `Yes, use the quick share buttons below to send the game to friends on WhatsApp, Telegram, or X and see who gets the highest score!`
+    }
+  ];
+
+  // Comprehensive Google Schema Graph (VideoGame + BreadcrumbList + FAQPage)
+  const gameSchema = [
+    {
+      '@type': 'VideoGame',
+      name: game.title,
+      headline: title,
+      description: seoDescription,
+      image: `${window.location.origin}${game.thumbnail}`,
+      genre: game.category,
+      keywords: seoKeywords,
+      isSimilarTo: game.similarTo || (game.benchmarkGame ? [game.benchmarkGame] : []),
+      applicationCategory: 'Game',
+      operatingSystem: 'Any, Web Browser, iOS, Android, Windows, macOS',
+      inLanguage: ['ar', 'en'],
+      playMode: game.category === 'two-player' ? 'MultiPlayer' : 'SinglePlayer',
+      url: canonicalUrl,
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: game.rating || 4.9,
+        ratingCount: game.ratingCount || 520,
+        bestRating: '5',
+        worstRating: '1',
+      },
+      author: {
+        '@type': 'Organization',
+        name: game.author || 'KYRAXO Studios',
+        url: window.location.origin,
+      },
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: lang === 'ar' ? 'الرئيسية' : 'Home',
+          item: window.location.origin,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: lang === 'ar' ? 'التصنيفات' : 'Categories',
+          item: `${window.location.origin}/categories`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: categoryName,
+          item: `${window.location.origin}/category/${game.category}`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 4,
+          name: title,
+          item: canonicalUrl,
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(f => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: f.a,
+        },
+      })),
+    },
+  ];
 
   const breadcrumbItems = [
     { label: t.nav.categories, path: '/categories' },
@@ -107,7 +253,8 @@ export const GameDetailPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description={description}
+        description={seoDescription}
+        keywords={seoKeywords}
         canonicalUrl={canonicalUrl}
         ogImage={game.thumbnail}
         ogType="game"
@@ -121,21 +268,102 @@ export const GameDetailPage: React.FC = () => {
       {/* Main Game Section with Player and Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 my-4">
         {/* Left Column: Player & Game Details (3 cols) */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-4 sm:gap-6">
+          {/* Banner Ad positioned directly above game */}
+          <AdSlot placement="above-game" className="!my-0 !mb-1" />
+
           {/* Responsive Game Player Component */}
           <GamePlayer game={game} />
 
           {/* Interactive Game Reaction & Rating Widget */}
           <GameRatingWidget gameId={game.id} />
 
+          {/* VIRAL SOCIAL SHARE BAR */}
+          <div className="bg-dark-900 border border-dark-800 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-2 text-white font-bold text-xs sm:text-sm">
+              <Share2 className="w-4 h-4 text-brand-cyan" />
+              <span>{lang === 'ar' ? 'شارك اللعبة مع أصدقائك:' : 'Share this game:'}</span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* WhatsApp */}
+              <a
+                href={shareWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                title="WhatsApp"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>واتساب</span>
+              </a>
+
+              {/* Telegram */}
+              <a
+                href={shareTelegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-400 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                title="Telegram"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>تيليجرام</span>
+              </a>
+
+              {/* Twitter / X */}
+              <a
+                href={shareTwitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                title="X (Twitter)"
+              >
+                <span>𝕏</span>
+                <span>تويتر</span>
+              </a>
+
+              {/* Copy Link Button */}
+              <button
+                onClick={handleCopyLink}
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all border ${
+                  copiedLink
+                    ? 'bg-brand-emerald text-white border-brand-emerald shadow-glow-emerald'
+                    : 'bg-dark-850 hover:bg-dark-800 text-slate-300 border-dark-700'
+                }`}
+                title="Copy Link"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedLink ? (lang === 'ar' ? 'تم النسخ!' : 'Copied!') : (lang === 'ar' ? 'نسخ الرابط' : 'Copy Link')}</span>
+              </button>
+            </div>
+          </div>
+
           {/* Ad Slot safely positioned below game with safe margin */}
           <AdSlot placement="below-game" className="my-2" />
 
           {/* Game Overview / Description Card */}
           <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5 sm:p-7 space-y-4">
-            <div className="flex items-center gap-2 border-b border-dark-800 pb-3">
-              <Gamepad2 className="w-5 h-5 text-brand-purple" />
-              <h2 className="text-lg font-black text-white">{t.game.description}</h2>
+            <div className="flex items-center gap-4 border-b border-dark-800 pb-4">
+              <img
+                src={game.thumbnail}
+                alt={title}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-brand-cyan/40 shadow-glow-cyan shrink-0"
+              />
+              <div className="flex flex-col gap-1">
+                <h2 className="text-lg sm:text-xl font-black text-white">{title}</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-brand-violet/20 text-brand-cyan font-bold text-xs border border-brand-violet/30 uppercase">
+                    {categoryName}
+                  </span>
+                  {benchmarkName && (
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs shadow-sm">
+                      <span>⭐</span>
+                      <span>{lang === 'ar' ? `بديل مجاني لـ ${benchmarkName}` : `Free ${benchmarkName} Alternative`}</span>
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-400">★ {game.rating} ({game.ratingCount} {t.game.votes})</span>
+                </div>
+              </div>
             </div>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
               {description}
@@ -207,6 +435,45 @@ export const GameDetailPage: React.FC = () => {
                   #{tag}
                 </Link>
               ))}
+            </div>
+          </div>
+
+          {/* INTERACTIVE SEO FAQ SECTION (Poki / CrazyGames Ranking Engine) */}
+          <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5 sm:p-7 space-y-3">
+            <div className="flex items-center gap-2 border-b border-dark-800 pb-3">
+              <HelpCircle className="w-5 h-5 text-brand-cyan" />
+              <h2 className="text-lg font-black text-white">
+                {lang === 'ar' ? `الأسئلة الشائعة حول لعبة ${title}` : `Frequently Asked Questions about ${title}`}
+              </h2>
+            </div>
+
+            <div className="space-y-2.5 pt-2">
+              {faqs.map((faq, idx) => {
+                const isOpen = openFaq === idx;
+                return (
+                  <div
+                    key={idx}
+                    className="border border-dark-800 rounded-xl overflow-hidden bg-dark-850/60 transition-colors"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : idx)}
+                      className="w-full p-3.5 sm:p-4 text-left rtl:text-right flex items-center justify-between gap-3 font-bold text-xs sm:text-sm text-white hover:text-brand-cyan transition-colors"
+                    >
+                      <span>{faq.q}</span>
+                      {isOpen ? (
+                        <ChevronUp className="w-4 h-4 text-brand-cyan shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
+                      )}
+                    </button>
+                    {isOpen && (
+                      <div className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-dark-800/80 pt-2.5 animate-fadeIn">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

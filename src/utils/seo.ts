@@ -1,16 +1,20 @@
+export type SupportedLanguage = 'en' | 'ar' | 'fr' | 'es' | 'de' | 'pt';
+
 export interface SEOProps {
   title: string;
   description: string;
+  keywords?: string;
   canonicalUrl?: string;
   ogImage?: string;
   ogType?: 'website' | 'article' | 'game';
   schemaData?: Record<string, any> | Record<string, any>[];
-  lang?: 'en' | 'ar';
+  lang?: SupportedLanguage | string;
 }
 
 export function updatePageSEO({
   title,
   description,
+  keywords,
   canonicalUrl = window.location.href,
   ogImage = '/og-banner.png',
   ogType = 'website',
@@ -36,6 +40,9 @@ export function updatePageSEO({
   // Standard Meta
   setMetaTag('name', 'description', description);
   setMetaTag('name', 'title', title);
+  if (keywords) {
+    setMetaTag('name', 'keywords', keywords);
+  }
 
   // Open Graph
   setMetaTag('property', 'og:title', title);
@@ -70,7 +77,10 @@ export function updatePageSEO({
     const script = document.createElement('script');
     script.id = 'seo-jsonld-schema';
     script.type = 'application/ld+json';
-    script.text = JSON.stringify(schemaData);
+    const jsonContent = Array.isArray(schemaData)
+      ? { '@context': 'https://schema.org', '@graph': schemaData }
+      : schemaData;
+    script.text = JSON.stringify(jsonContent);
     document.head.appendChild(script);
   }
 }
