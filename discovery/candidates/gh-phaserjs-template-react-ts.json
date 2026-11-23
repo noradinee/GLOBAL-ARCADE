@@ -1,0 +1,56 @@
+{
+  "candidateId": "gh-phaserjs-template-react-ts",
+  "name": "Template React Ts",
+  "originalRepoUrl": "https://github.com/phaserjs/template-react-ts",
+  "author": "phaserjs",
+  "description": "A Phaser 3 TypeScript project template that demonstrates React communication and uses Vite for bundling",
+  "discoveryDate": "2026-11-23",
+  "lastUpdateDate": "2026-04-21",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "Phaser 3 / WebGL",
+  "popularityIndicators": {
+    "githubStars": 202,
+    "forks": 67,
+    "openIssues": 2,
+    "communityPlays": 707,
+    "trendVelocity": "202 stars / 67 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-23"
+  },
+  "licenseName": "MIT",
+  "licenseUrl": "https://api.github.com/licenses/mit",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [
+    "phaser"
+  ],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "main",
+  "licensingStatus": "VERIFIED_COMMERCIAL_USE",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "REJECTED",
+  "qualityClassification": "TEMPLATE",
+  "qualityEvidence": [
+    "Matched non-game keyword \"template\" → classified as TEMPLATE.",
+    "html5Compatibility=true.",
+    "Playable evidence: webgl.",
+    "Game engine reported: Phaser 3 / WebGL.",
+    "Rejected: not a complete playable game (TEMPLATE)."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 20,
+    "technicalQualityScore": 17,
+    "mobileScore": 5,
+    "maintenanceScore": 6,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 58
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "Asset provenance is unspecified. Code license verified, but visual/audio assets require human confirmation."
+}
