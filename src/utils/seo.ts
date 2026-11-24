@@ -9,6 +9,7 @@ export interface SEOProps {
   ogType?: 'website' | 'article' | 'game';
   schemaData?: Record<string, any> | Record<string, any>[];
   lang?: SupportedLanguage | string;
+  robots?: string;
 }
 
 export function updatePageSEO({
@@ -20,6 +21,7 @@ export function updatePageSEO({
   ogType = 'website',
   schemaData,
   lang = 'en',
+  robots = 'index, follow',
 }: SEOProps) {
   if (typeof document === 'undefined') return;
 
@@ -40,6 +42,7 @@ export function updatePageSEO({
   // Standard Meta
   setMetaTag('name', 'description', description);
   setMetaTag('name', 'title', title);
+  setMetaTag('name', 'robots', robots);
   if (keywords) {
     setMetaTag('name', 'keywords', keywords);
   }

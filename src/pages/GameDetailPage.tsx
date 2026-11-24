@@ -367,9 +367,6 @@ export const GameDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 my-4">
         {/* Left Column: Player & Game Details (3 cols) */}
         <div className="lg:col-span-3 flex flex-col gap-4 sm:gap-6">
-          {/* Banner Ad positioned directly above game */}
-          <AdSlot placement="above-game" className="!my-0 !mb-1" />
-
           {/* Responsive Game Player Component */}
           <GamePlayer game={game} />
 
@@ -457,7 +454,7 @@ export const GameDetailPage: React.FC = () => {
           </div>
 
           {/* Ad Slot safely positioned below game with safe margin */}
-          <AdSlot placement="below-game" className="my-2" />
+          <AdSlot placement="below-game" className="my-6" />
 
           {/* Game Overview / Description Card */}
           <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5 sm:p-7 space-y-4">
@@ -564,6 +561,19 @@ export const GameDetailPage: React.FC = () => {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Editorial Strategy & Safety Guide */}
+          <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5 sm:p-7 space-y-3">
+            <h2 className="text-lg font-black text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-brand-purple" />
+              <span>{lang === 'ar' ? `نصائح اللعب وتحسين النقاط في ${title}` : `Player Strategy & Review Notes for ${title}`}</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              {lang === 'ar'
+                ? `تنتمي لعبة ${title} إلى فئة ${categoryName} على منصة كايراكسو، وهي مصممة للعمل بسلاسة على شاشات الهواتف والحواسيب مع حفظ تلقائي لأفضل نتيجة محلية في متصفحك. راقب أنماط الحركة في المراحل الأولى لتكوين سلسلة نقاط متواصلة وتفادي العقبات المفاجئة مع تسارع وتيرة اللعب.`
+                : `${title} is curated in the ${categoryName} collection on KYRAXO and runs directly in modern desktop and mobile browsers without downloads. Focus on early rhythm and pattern recognition before difficulty ramps up, switch to Theatre or Fullscreen mode for clearer peripheral timing, and track your personal best right beneath the player.`}
+            </p>
           </div>
 
           {/* INTERACTIVE SEO FAQ SECTION (Poki / CrazyGames Ranking Engine) */}

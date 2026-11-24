@@ -7,6 +7,7 @@ export type AdProviderName =
 
 export type AdSlotPlacement =
   | 'header-top'
+  | 'above-game'
   | 'sidebar'
   | 'below-game'
   | 'in-feed'
@@ -22,6 +23,7 @@ export interface AdProviderConfig {
 
 export interface AdSlotConfig {
   id: string;
+  slotId?: string;
   placement: AdSlotPlacement;
   activeProvider: AdProviderName;
   desktopSize: [number, number];

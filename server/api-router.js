@@ -17,19 +17,28 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { inboxApiMiddleware } from '../scripts/discovery/inbox-api-middleware.js';
+import { CouncilService } from './council-service.js';
+import { TelemetryStore } from './telemetry-store.js';
+import { DiscoveryRegistry } from './discovery-registry.js';
 
 export class ApiRouter {
   /**
    * @param {Object} options
    * @param {import('./engine/continuous-engine.js').ContinuousEngine} options.engine
    * @param {import('./auth.js').AuthManager} options.authManager
+   * @param {CouncilService} [options.councilService]
+   * @param {TelemetryStore} [options.telemetryStore]
    * @param {string} [options.rootDir]
    */
   constructor(options) {
     this.engine = options.engine;
     this.authManager = options.authManager;
     this.rootDir = options.rootDir || process.cwd();
+    this.councilService = options.councilService || new CouncilService({ rootDir: this.rootDir });
+    this.telemetryStore = options.telemetryStore || new TelemetryStore({ rootDir: this.rootDir });
+    this.discoveryRegistry = options.discoveryRegistry || new DiscoveryRegistry({ rootDir: this.rootDir });
     this.startTime = Date.now();
+    this.contactRateMap = new Map();
   }
 
   /**
@@ -54,6 +63,21 @@ export class ApiRouter {
     // after the last frontend build are immediately visible to players.
     if (pathname === '/api/catalog/games' && (method === 'GET' || method === 'HEAD')) {
       return this.handleCatalog(req, res);
+    }
+
+    // 1c. Council Cloud Sync Bridge (Authenticated via HMAC-SHA256 signature + nonce + timestamp)
+    if (pathname === '/api/council/sync' && method === 'POST') {
+      return this.handleCouncilSync(req, res);
+    }
+
+    // 1d. Native Telemetry Ingestion (Public, non-blocking beacon)
+    if (pathname === '/api/telemetry/event' && method === 'POST') {
+      return this.handleTelemetryEvent(req, res);
+    }
+
+    // 1e. Public Contact Form Submission (Rate-limited)
+    if (pathname === '/api/contact' && method === 'POST') {
+      return this.handleContactSubmission(req, res);
     }
 
     // 2. Authentication endpoints
@@ -116,6 +140,117 @@ export class ApiRouter {
       });
       req.on('error', reject);
     });
+  }
+
+  /**
+   * Reads raw body string for cryptographic signature verification.
+   */
+  async readRawBody(req) {
+    return new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', chunk => {
+        data += chunk;
+        if (data.length > 10 * 1024 * 1024) {
+          reject(new Error('Payload too large'));
+        }
+      });
+      req.on('end', () => resolve(data));
+      req.on('error', reject);
+    });
+  }
+
+  /**
+   * Handles incoming client telemetry events (pageviews, game starts, heartbeats)
+   */
+  async handleTelemetryEvent(req, res) {
+    try {
+      const eventData = await this.parseBody(req);
+      this.telemetryStore.recordEvent(eventData, req);
+      return this.sendJson(res, 200, { success: true });
+    } catch {
+      return this.sendJson(res, 200, { success: true });
+    }
+  }
+
+  /**
+   * Handles public contact form submissions with rate limiting and validation.
+   */
+  async handleContactSubmission(req, res) {
+    try {
+      const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+      const now = Date.now();
+      const windowMs = 10 * 60 * 1000;
+      const recent = (this.contactRateMap.get(ip) || []).filter(ts => now - ts < windowMs);
+      if (recent.length >= 5) {
+        return this.sendError(res, 429, 'Too many inquiries sent recently. Please try again later.');
+      }
+
+      const body = await this.parseBody(req);
+      const name = String(body.name || '').trim();
+      const email = String(body.email || '').trim();
+      const subject = String(body.subject || 'general').trim().slice(0, 60);
+      const message = String(body.message || '').trim();
+
+      if (name.length < 2 || name.length > 100) {
+        return this.sendError(res, 400, 'Please enter a valid name (2-100 characters).');
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) {
+        return this.sendError(res, 400, 'Please enter a valid email address.');
+      }
+      if (message.length < 10 || message.length > 3000) {
+        return this.sendError(res, 400, 'Message must be between 10 and 3000 characters.');
+      }
+
+      recent.push(now);
+      this.contactRateMap.set(ip, recent);
+
+      const dataDir = path.join(this.rootDir, 'data');
+      fs.mkdirSync(dataDir, { recursive: true });
+      const record = {
+        id: `msg-${now}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: new Date(now).toISOString(),
+        name,
+        email,
+        subject,
+        message,
+        ip,
+      };
+      fs.appendFileSync(path.join(dataDir, 'contact-messages.jsonl'), JSON.stringify(record) + '\n', 'utf8');
+      return this.sendJson(res, 200, { success: true, id: record.id });
+    } catch (err) {
+      return this.sendError(res, 400, err.message || 'Unable to process contact submission.');
+    }
+  }
+
+  /**
+   * Handles authenticated synchronization from the local Council node.
+   */
+  async handleCouncilSync(req, res) {
+    try {
+      const bodyString = await this.readRawBody(req);
+      const authResult = this.councilService.verifySyncRequest(req.headers, bodyString);
+      if (!authResult.valid) {
+        return this.sendError(res, 401, authResult.error || 'Unauthorized Sync Request');
+      }
+
+      let payload = {};
+      try {
+        payload = JSON.parse(bodyString);
+      } catch {
+        return this.sendError(res, 400, 'Invalid JSON body');
+      }
+
+      const syncResult = this.councilService.processSyncPayload(payload);
+      const signed = this.councilService.signResponsePayload(authResult.requestId, syncResult);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      for (const [k, v] of Object.entries(signed.headers)) {
+        res.setHeader(k, v);
+      }
+      return res.end(signed.jsonString);
+    } catch (err) {
+      return this.sendError(res, 500, `SYNC_ERROR: ${err.message}`);
+    }
   }
 
   sendJson(res, statusCode, payload) {
@@ -214,7 +349,7 @@ export class ApiRouter {
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
       if (req.method === 'HEAD') {
         res.end();
         return;
@@ -527,12 +662,177 @@ export class ApiRouter {
         });
       }
 
+      // 2b. Native Internal Server Telemetry Engine (Zero Google Dependency)
+      if (pathname === '/api/admin/traffic-analytics' && method === 'GET') {
+        const period = url.searchParams.get('period') || '7d';
+        const gamesPath = path.join(this.rootDir, 'src/data/games.json');
+        let games = [];
+        if (fs.existsSync(gamesPath)) {
+          try {
+            games = JSON.parse(fs.readFileSync(gamesPath, 'utf-8'));
+          } catch { /* ignore */ }
+        }
+
+        const summary = this.telemetryStore.getAnalyticsSummary(games, period);
+        return this.sendJson(res, 200, summary);
+      }
+
       // 3. Durable Audit Logs
       if (pathname === '/api/admin/audit-logs' && method === 'GET') {
         const action = url.searchParams.get('action') || undefined;
         const limit = Number(url.searchParams.get('limit') || 100);
         const logs = this.authManager.getAuditLogs({ action, limit });
         return this.sendJson(res, 200, { logs, count: logs.length });
+      }
+
+      // 4. Council Unified Owner Control Center Endpoints (Stage S8)
+      if (pathname === '/api/admin/council/overview' && method === 'GET') {
+        return this.sendJson(res, 200, this.councilService.getExecutiveOverview());
+      }
+
+      if (pathname === '/api/admin/council/operations' && method === 'GET') {
+        return this.sendJson(res, 200, this.councilService.getOperationsTelemetry());
+      }
+
+      if (pathname === '/api/admin/council/tasks' && method === 'GET') {
+        const status = url.searchParams.get('status') || undefined;
+        const search = url.searchParams.get('search') || undefined;
+        return this.sendJson(res, 200, this.councilService.getTasks({ status, search }));
+      }
+
+      if (pathname === '/api/admin/council/games' && method === 'GET') {
+        return this.sendJson(res, 200, this.councilService.getGameCatalog());
+      }
+
+      if (pathname === '/api/admin/council/deployments' && method === 'GET') {
+        return this.sendJson(res, 200, this.councilService.getDeploymentRecords());
+      }
+
+      if (pathname === '/api/admin/council/deployments/probe' && method === 'POST') {
+        try {
+          const results = await this.councilService.runLiveSmokeProbes();
+          return this.sendJson(res, 200, results);
+        } catch (err) {
+          return this.sendError(res, 500, `PROBE_ERROR: ${err.message}`);
+        }
+      }
+
+      // 5. Phase 4: Game Discovery & APK Intake Registry Endpoints
+      if (pathname === '/api/admin/discovery/registry' && method === 'GET') {
+        const search = url.searchParams.get('search') || undefined;
+        const detectedType = url.searchParams.get('type') || undefined;
+        const downloadStatus = url.searchParams.get('download') || undefined;
+        const conversionStatus = url.searchParams.get('conversion') || undefined;
+
+        const records = this.discoveryRegistry.getAll({ search, detectedType, downloadStatus, conversionStatus });
+        const summary = this.discoveryRegistry.getSummary();
+        return this.sendJson(res, 200, { summary, count: records.length, records });
+      }
+
+      if (pathname === '/api/admin/discovery/analyze-url' && method === 'POST') {
+        const body = await this.parseBody(req).catch(() => ({}));
+        const targetUrl = (body.url || '').trim();
+        if (!targetUrl) {
+          return this.sendError(res, 400, 'Missing "url" parameter in request payload.');
+        }
+
+        const { GameSourceAnalyzer } = await import('../scripts/discovery/game-source-analyzer.js');
+        const analyzer = new GameSourceAnalyzer();
+        const analysis = await analyzer.analyzeUrl(targetUrl);
+
+        const registered = [];
+        if (analysis.games && Array.isArray(analysis.games)) {
+          for (const g of analysis.games) {
+            const { record, isNew } = this.discoveryRegistry.registerCandidate({
+              gameTitle: g.gameTitle,
+              sourceWebsite: g.sourceWebsite,
+              pageUrl: g.pageUrl,
+              detectedType: g.detectedType,
+              technologyDetails: g.technologyDetails,
+              downloadUrl: g.downloadUrl,
+              evidence: g.evidence,
+              licenseStatus: g.licenseStatus,
+              reuseAllowed: g.reuseAllowed,
+              logMessage: `Discovered via Admin API from ${targetUrl}`,
+            });
+            registered.push({ id: record.id, isNew, title: record.gameTitle, type: record.detectedType });
+          }
+        }
+
+        return this.sendJson(res, 200, { analysis, registered });
+      }
+
+      // Reports Center
+      if (pathname === '/api/admin/reports' && method === 'GET') {
+        const type = url.searchParams.get('type') || undefined;
+        return this.sendJson(res, 200, { reports: this.councilService.getReportsList({ type }) });
+      }
+
+      const reportMatch = pathname.match(/^\/api\/admin\/reports\/([a-zA-Z0-9_-]+)$/);
+      if (reportMatch && method === 'GET') {
+        try {
+          const content = this.councilService.getReportContent(reportMatch[1]);
+          return this.sendJson(res, 200, { reportId: reportMatch[1], content });
+        } catch (e) {
+          return this.sendError(res, 404, e.message);
+        }
+      }
+
+      // Notifications Center
+      if (pathname === '/api/admin/notifications' && method === 'GET') {
+        const severity = url.searchParams.get('severity') || undefined;
+        const category = url.searchParams.get('category') || undefined;
+        const readParam = url.searchParams.get('read');
+        const read = readParam !== null && readParam !== undefined ? readParam === 'true' : undefined;
+        return this.sendJson(res, 200, { notifications: this.councilService.getNotifications({ severity, category, read }) });
+      }
+
+      const notifReadMatch = pathname.match(/^\/api\/admin\/notifications\/([a-zA-Z0-9_-]+)\/read$/);
+      if (notifReadMatch && method === 'POST') {
+        const body = await this.parseBody(req).catch(() => ({}));
+        const read = body.read !== false;
+        return this.sendJson(res, 200, this.councilService.setNotificationRead(notifReadMatch[1], read));
+      }
+
+      // Owner Decisions (D6)
+      if (pathname === '/api/admin/decisions' && method === 'GET') {
+        return this.sendJson(res, 200, { decisions: this.councilService.getDecisions() });
+      }
+
+      const decisionMatch = pathname.match(/^\/api\/admin\/decisions\/([a-zA-Z0-9_-]+)\/respond$/);
+      if (decisionMatch && method === 'POST') {
+        const body = await this.parseBody(req);
+        if (typeof body.approved !== 'boolean') {
+          return this.sendError(res, 400, 'approved boolean field is required');
+        }
+        const outcome = this.councilService.submitOwnerDecision(
+          decisionMatch[1],
+          body.approved,
+          req.adminUser?.username || 'NOUR',
+          body.rationale
+        );
+        this.authManager.logAudit({
+          action: 'D6_DECISION_SUBMITTED',
+          decisionId: decisionMatch[1],
+          approved: body.approved,
+          rationale: body.rationale,
+        });
+        return this.sendJson(res, 200, outcome);
+      }
+
+      // Permitted Operations Commands
+      if (pathname === '/api/admin/operations/command' && method === 'POST') {
+        const body = await this.parseBody(req);
+        try {
+          const outcome = this.councilService.queueOwnerCommand(body, req.adminUser?.username || 'NOUR');
+          this.authManager.logAudit({
+            action: 'COUNCIL_COMMAND_QUEUED',
+            command: body,
+          });
+          return this.sendJson(res, 200, { success: true, command: outcome });
+        } catch (e) {
+          return this.sendError(res, 400, e.message);
+        }
       }
 
       this.sendError(res, 404, 'Unknown admin endpoint');

@@ -7,6 +7,8 @@ import { Mail, Send, CheckCircle2, MessageSquare } from 'lucide-react';
 export const ContactPage: React.FC = () => {
   const { t, lang } = useLanguage();
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,10 +16,27 @@ export const ContactPage: React.FC = () => {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.message) {
+    if (!formData.name || !formData.email || !formData.message || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const resp = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const payload = await resp.json().catch(() => ({}));
+      if (!resp.ok || !payload.success) {
+        throw new Error(payload.error || payload.message || (lang === 'ar' ? 'تعذر إرسال الرسالة، يرجى التحقق من الحقول.' : 'Unable to send message. Please check your entries.'));
+      }
       setSubmitted(true);
+      setFormData({ name: '', email: '', subject: 'general', message: '' });
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : (lang === 'ar' ? 'حدث خطأ أثناء الإرسال.' : 'Submission failed.'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -67,6 +86,23 @@ export const ContactPage: React.FC = () => {
             >
               contact@kyraxo.com
             </a>
+          </div>
+
+          <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <Mail className="w-5 h-5 text-brand-purple" />
+              <h3 className="font-bold text-white text-sm">
+                {lang === 'ar' ? 'الخصوصية وحقوق النشر' : 'Privacy & DMCA Inquiries'}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 mb-1">
+              {lang === 'ar' ? 'مسؤول حماية البيانات:' : 'Data Protection:'}{' '}
+              <a href="mailto:privacy@kyraxo.com" className="font-mono text-brand-cyan hover:underline">privacy@kyraxo.com</a>
+            </p>
+            <p className="text-xs text-slate-400">
+              {lang === 'ar' ? 'إخطارات حقوق النشر:' : 'Copyright Agent:'}{' '}
+              <a href="mailto:dmca@kyraxo.com" className="font-mono text-brand-cyan hover:underline">dmca@kyraxo.com</a>
+            </p>
           </div>
 
           <div className="bg-dark-900 border border-dark-800 rounded-2xl p-5">
@@ -165,12 +201,19 @@ export const ContactPage: React.FC = () => {
                 />
               </div>
 
+              {submitError && (
+                <div className="p-3 rounded-xl bg-brand-rose/15 border border-brand-rose/30 text-brand-rose text-xs font-semibold">
+                  {submitError}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan text-white text-sm font-bold shadow-glow-purple hover:opacity-95 transition-all flex items-center justify-center gap-2"
+                disabled={submitting}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan text-white text-sm font-bold shadow-glow-purple hover:opacity-95 disabled:opacity-60 transition-all flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
-                <span>{lang === 'ar' ? 'إرسال الرسالة' : 'Send Message'}</span>
+                <span>{submitting ? (lang === 'ar' ? 'جاري الإرسال...' : 'Sending...') : (lang === 'ar' ? 'إرسال الرسالة' : 'Send Message')}</span>
               </button>
             </form>
           )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AdSlotPlacement } from '../../types/ads';
 import { adService } from '../../services/adService';
 import { useLanguage } from '../../context/LanguageContext';
@@ -11,63 +11,88 @@ interface AdSlotProps {
 }
 
 export const AdSlot: React.FC<AdSlotProps> = ({ placement, className = '', customClass = '' }) => {
-  const { t } = useLanguage();
-  const adContainerRef = useRef<HTMLDivElement>(null);
+  const { t, lang } = useLanguage();
+  const insRef = useRef<HTMLModElement>(null);
+  const [isUnfilled, setIsUnfilled] = useState(false);
 
   const slotConfig = adService.getSlotConfig(placement);
   const adsEnabled = adService.isAdsEnabled();
-  const isDevMock = adService.isDevMockMode();
   const activeProvider = adService.getActiveProvider(placement);
+  const publisherId = adService.getPublisherId('adsense') || 'ca-pub-1216297804150458';
+  const slotId = slotConfig?.slotId?.trim() || '';
+  const isAdSense = activeProvider === 'adsense';
+
+  // Only render manual AdSense <ins> units when a real AdSense slotId exists.
+  // Before approval (or before manual units are created), Google Auto Ads in <head>
+  // handles review and serving without showing empty "ADVERTISEMENT" placeholder boxes.
+  const shouldRenderAd = adsEnabled && Boolean(slotConfig) && (!isAdSense || Boolean(slotId));
 
   useEffect(() => {
-    // If live provider is active and consent is given, this is the safe injection hook
-    if (adsEnabled && !isDevMock && slotConfig) {
-      // In production with live approved publisher account, inject provider tag here
-    }
-  }, [adsEnabled, isDevMock, slotConfig]);
+    if (!shouldRenderAd || !isAdSense) return;
 
-  if (!adsEnabled || !slotConfig) return null;
+    try {
+      const win = window as unknown as { adsbygoogle?: Array<Record<string, unknown>> };
+      win.adsbygoogle = win.adsbygoogle || [];
+      win.adsbygoogle.push({});
+    } catch {
+      // Suppress errors when adblocker blocks script
+    }
+
+    const node = insRef.current;
+    if (!node || typeof MutationObserver === 'undefined') return;
+
+    const checkStatus = () => {
+      if (node.getAttribute('data-ad-status') === 'unfilled') {
+        setIsUnfilled(true);
+      }
+    };
+    checkStatus();
+
+    const observer = new MutationObserver(checkStatus);
+    observer.observe(node, { attributes: true, attributeFilter: ['data-ad-status'] });
+    return () => observer.disconnect();
+  }, [shouldRenderAd, isAdSense, placement]);
+
+  if (!shouldRenderAd || !slotConfig || isUnfilled) return null;
 
   const [dWidth, dHeight] = slotConfig.desktopSize;
-  const [mWidth, mHeight] = slotConfig.mobileSize;
 
   return (
     <div
-      className={`my-6 flex flex-col items-center justify-center select-none ${className} ${customClass}`}
+      className={`my-4 sm:my-6 flex flex-col items-center justify-center select-none w-full ${className} ${customClass}`}
       data-ad-placement={placement}
       data-ad-provider={activeProvider}
     >
-      {/* Required ad disclaimer badge to prevent accidental clicks */}
-      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-        <Megaphone className="w-3 h-3 text-slate-600" />
+      <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+        <Megaphone className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500" />
         <span>{t.ads.advertisement}</span>
       </div>
 
-      {/* Responsive Slot Container */}
       <div
-        ref={adContainerRef}
         style={{
-          minWidth: `${mWidth}px`,
-          minHeight: `${mHeight}px`,
+          maxWidth: `${dWidth}px`,
+          minHeight: `${Math.min(dHeight, 90)}px`,
         }}
-        className="relative bg-dark-900/80 border border-dark-800 rounded-xl overflow-hidden flex flex-col items-center justify-center p-3 text-center transition-all shadow-inner"
+        className="relative w-full bg-dark-900/40 border border-dark-800/80 rounded-xl overflow-hidden flex items-center justify-center p-2 text-center"
       >
-        {isDevMock ? (
-          <div className="space-y-2 py-4 px-6 flex flex-col items-center justify-center max-w-sm">
-            <div className="px-2.5 py-1 rounded-md bg-dark-800 text-[11px] font-mono text-brand-purple border border-dark-700">
-              Slot: {placement} • {activeProvider}
-            </div>
-            <p className="text-xs text-slate-400">
-              {t.ads.devNotice}
-            </p>
-            <div className="text-[10px] text-slate-500 font-mono">
-              Desktop: {dWidth}x{dHeight} | Mobile: {mWidth}x{mHeight}
-            </div>
-          </div>
+        {isAdSense ? (
+          <ins
+            ref={insRef}
+            className="adsbygoogle"
+            style={{
+              display: 'block',
+              width: '100%',
+              minHeight: `${Math.min(dHeight, 90)}px`,
+              textAlign: 'center',
+            }}
+            data-ad-client={publisherId}
+            data-ad-slot={slotId}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">
-            {/* Live ad container target */}
-            <span>{t.ads.sponsored}</span>
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <span>{lang === 'ar' ? 'مساحة إعلانية' : 'Sponsor Space'}</span>
           </div>
         )}
       </div>

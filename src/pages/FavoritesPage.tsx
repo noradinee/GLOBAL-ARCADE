@@ -36,6 +36,7 @@ export const FavoritesPage: React.FC = () => {
         description="Your bookmarked favorite HTML5 games on KYRAXO. Return anytime to continue playing."
         canonicalUrl={`${window.location.origin}/favorites`}
         lang={lang}
+        robots="noindex, follow"
       />
 
       <Breadcrumb items={[{ label: t.nav.favorites }]} />

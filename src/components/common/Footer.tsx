@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
-import { Gamepad2, ShieldCheck, Zap, Heart, Shield } from 'lucide-react';
+import { Gamepad2, ShieldCheck, Zap, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -167,16 +167,6 @@ export const Footer: React.FC = () => {
               <li>
                 <Link to="/cookies" className="hover:text-brand-cyan transition-colors">
                   {t.footer.cookiePolicy}
-                </Link>
-              </li>
-              <li className="pt-2 border-t border-dark-800">
-                <Link
-                  to="/admin"
-                  className="text-slate-600 hover:text-slate-400 text-xs transition-colors flex items-center gap-1.5"
-                  aria-label="KYRAXO Staff Portal"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>KYRAXO Portal</span>
                 </Link>
               </li>
             </ul>

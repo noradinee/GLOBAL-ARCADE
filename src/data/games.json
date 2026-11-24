@@ -907,8 +907,8 @@
     "slug": "metroxe-one-html-page-challenge",
     "title": "One Html Page Challenge",
     "titleAr": "تحدي مصفوفة HTML الواحدة",
-    "description": "Can you create something cool without modern tools?",
-    "descriptionAr": "تحدي نيون سيبراني تفاعلي مبني داخل صفحة HTML واحدة. تحكم في موجات الجسيمات والمصفوفات الرقمية واستكشف الفيزياء الحركية بدون أي إضافات.",
+    "description": "An interactive single-HTML-page particle matrix physics experiment inspired by minimalist web craft. Move your cursor or tap the screen to repel neon particles and spawn dynamic geometric constellations.",
+    "descriptionAr": "تجربة تفاعلية لفيزياء الجسيمات والمصفوفات الرقمية داخل صفحة HTML واحدة. حرّك المؤشر أو المس الشاشة لصناعة تموجات النيون وتشكيل الروابط الهندسية بدون أي إضافات.",
     "category": "arcade",
     "tags": [
       "canvas",
@@ -949,8 +949,12 @@
     "instructions": "Use keyboard controls or tap on screen to play.",
     "instructionsAr": "استخدم لوحة المفاتيح أو شاشة اللمس للتحكم واللعب.",
     "controls": {
-      "desktop": ["Arrow Keys / Spacebar"],
-      "mobile": ["Touch controls on screen"]
+      "desktop": [
+        "Arrow Keys / Spacebar"
+      ],
+      "mobile": [
+        "Touch controls on screen"
+      ]
     },
     "language": "both",
     "status": "published",
@@ -14847,8 +14851,8 @@
     "slug": "yenemy-io",
     "title": "Yenemy",
     "titleAr": "لعبة Yenemy — Yenemy",
-    "description": "Experience arcade excitement in Yenemy! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Yenemy! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Outmaneuver agile rival bots in this fast-paced top-down arcade survival arena. Collect energy pickups, time your dashes cleanly, and climb the scoreboard without touching hazards.",
+    "descriptionAr": "ناور خصومك بسرعة في حلبة البقاء التنافسية. اجمع نقاط الطاقة، وتفادَ العقبات، وحقق أعلى سلسلة انتصارات عبر التوقيت الدقيق.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -17238,8 +17242,8 @@
     "slug": "the-floor-is-lying",
     "title": "The Floor Is Lying",
     "titleAr": "لعبة The Floor Is Lying — The Floor Is Lying",
-    "description": "Experience arcade excitement in The Floor Is Lying! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في The Floor Is Lying! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Test your instincts across shifting, deceptive platforms where solid tiles vanish beneath your feet. Leap carefully from safe zone to safe zone as the pace accelerates.",
+    "descriptionAr": "اختبر سرعة بديهتك فوق منصات مخادعة يتلاشى بعضها تحت قدميك. اقفز بدقة من منطقة آمنة لأخرى قبل سقوط البلاط.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -17365,8 +17369,8 @@
     "slug": "evo-pit",
     "title": "Evo Pit",
     "titleAr": "لعبة Evo Pit — Evo Pit",
-    "description": "Experience arcade excitement in Evo Pit! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Evo Pit! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Battle deeper inside the neon evolution pit by absorbing weaker organisms and dodging oversized predators. Grow stronger each wave to unlock new speed and survival boosts.",
+    "descriptionAr": "خُض معارك البقاء داخل الحفرة التفاعلية عبر التهام العناصر الأصغر وتجنب الكائنات الأكبر حجماً لتطوير قوتك ومضاعفة نقاطك.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -41162,8 +41166,8 @@
     "slug": "blob-wars",
     "title": "Blob Wars",
     "titleAr": "لعبة Blob Wars — Blob Wars",
-    "description": "Experience arcade excitement in Blob Wars! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Blob Wars! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Expand your territory by splitting and launching bouncy slime blobs across tactical arenas. Capture rival nodes and control the board with smart angles and timing.",
+    "descriptionAr": "وسّع مناطق سيطرتك عبر إطلاق كرات الهلام التكتيكية داخل الحلبة. استولِ على عقد الخصوم وتحكم في اللوحة بزوايا وتوقيت ذكي.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -67849,8 +67853,8 @@
     "slug": "baboe-gun-game",
     "title": "Baboe",
     "titleAr": "لعبة Baboe — Baboe",
-    "description": "Experience arcade excitement in Baboe! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Baboe! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Blast through quirky arcade target waves in Baboe with crisp aiming and quick reloads. Chain accurate shots to rack up combo multipliers while keeping incoming hazards at bay.",
+    "descriptionAr": "صوّب بسرعة ودقة عبر موجات الأهداف المتحركة في لعبة Baboe. اجمع مضاعفات النقاط المتتالية وحافظ على خط دفاعك ضد الخصوم.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -107741,8 +107745,8 @@
     "slug": "infinix-runner-3d",
     "title": "Infinix Runner 3D",
     "titleAr": "لعبة Infinix العداء ثلاثية الأبعاد",
-    "description": "Experience arcade excitement in Infinix Runner 3D! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Infinix Runner 3D! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Sprint along futuristic suspended corridors at blistering speed, leaping gaps and sliding past barriers. Grab boost orbs along the track to push your distance record further.",
+    "descriptionAr": "اركض بأقصى سرعة عبر ممرات مستقبلية معلقة وتخطَّ الفجوات والحواجز ببراعة مع جمع كرات التسارع لتحطيم رقمك القياسي.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -121910,8 +121914,8 @@
     "slug": "grow-a-garden-obby",
     "title": "Grow a Garden Obby",
     "titleAr": "لعبة Grow a الحديقة Obby",
-    "description": "Experience arcade excitement in Grow a Garden Obby! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Grow a Garden Obby! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Combine whimsical obby platforming with cheerful garden building as you hop across blooming obstacles. Gather seeds and sunlight to cultivate rare plants between obstacle stages.",
+    "descriptionAr": "اجمع بين قفز المنصات وتنسيق الحدائق السعيدة عبر القفز فوق العقبات المزهرة وجمع البذور وأشعة الشمس لفتح نباتات جديدة.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -129307,8 +129311,8 @@
     "slug": "river-runner",
     "title": "River Runner",
     "titleAr": "لعبة River العداء",
-    "description": "Experience arcade excitement in River Runner! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في River Runner! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Pilot a nimble watercraft through winding rocky rapids filled with tight bends and floating hazards. Steer cleanly between buoys to keep momentum high down the river.",
+    "descriptionAr": "قد قاربك السريع وسط تيارات الأنهار الملتوية وتفادَ الصخور والحواجز الطافية مع المرور بين العلامات للحفاظ على سرعتك القصوى.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -129434,8 +129438,8 @@
     "slug": "music-tiles-fluffy-hop-beat",
     "title": "Music Tiles Fluffy Hop Beat",
     "titleAr": "لعبة Music Tiles Fluffy قفز Beat",
-    "description": "Experience arcade excitement in Music Tiles Fluffy Hop Beat! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Music Tiles Fluffy Hop Beat! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Bounce adorable fluffy companions across glowing rhythm tiles synced to upbeat melodies. Tap cleanly on every beat to extend your streak and hit soaring tempo stages.",
+    "descriptionAr": "اقفز بالشخصيات اللطيفة فوق البلاطات الموسيقية المتزامنة مع الإيقاع. اضغط بتوقيت دقيق مع كل نغمة لإطالة السلسلة ومواكبة التسارع.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -132886,8 +132890,8 @@
     "slug": "dunjun",
     "title": "Dunjun",
     "titleAr": "لعبة Dunjun — Dunjun",
-    "description": "Experience arcade excitement in Dunjun! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Dunjun! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Delve into compact retro dungeon rooms packed with lurking monsters, spiked traps, and hidden keys. Clear chambers methodically and manage every step to survive deeper floors.",
+    "descriptionAr": "استكشف غرف الزنزانات الكلاسيكية المليئة بالوحوش والأفخاخ والمفاتيح المخفية. خطط لكل خطوة وتفادَ المخاطر للوصول إلى الطوابق الأعمق.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -142279,8 +142283,8 @@
     "slug": "spinwhisker",
     "title": "SpinWhisker",
     "titleAr": "لعبة SpinWhisker — SpinWhisker",
-    "description": "Experience arcade excitement in SpinWhisker! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في SpinWhisker! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Guide a nimble acrobatic whisker hero through rotating neon rings and tricky spinning obstacles. Time every tap smoothly to thread tight gaps and set high scores.",
+    "descriptionAr": "وجّه البطل السريع عبر الحلقات الدوارة والعقبات النيونية المتحركة. اضبط توقيت القفز لتجاوز الفجوات الضيقة وتسجيل أعلى النقاط.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -156963,8 +156967,8 @@
     "slug": "frog-adventurethe-hero-journey",
     "title": "Frog Adventure The Hero Journey",
     "titleAr": "لعبة Frog المغامرة The البطل Journey",
-    "description": "Experience arcade excitement in Frog Adventure The Hero Journey! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Frog Adventure The Hero Journey! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Join a brave little frog on a colorful side-scrolling platform quest over lily ponds and forest ledges. Leap enemy patrols and collect gleaming flies along the path.",
+    "descriptionAr": "انطلق مع الضفدع الشجاع في مغامرة منصات عبر البرك والغابات، مع القفز فوق العقبات وجمع النقاط للوصول إلى نهاية المرحلة.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -157027,8 +157031,8 @@
     "slug": "armored-knight",
     "title": "Armored Knight",
     "titleAr": "لعبة Armored Knight — Armored Knight",
-    "description": "Experience arcade excitement in Armored Knight! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Armored Knight! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "March forward as an ironclad knight facing waves of goblin raiders and dungeon traps. Time your shield blocks and sword strikes carefully to conquer each skirmish.",
+    "descriptionAr": "تقدم كفارس مدرع في مواجهة موجات الأعداء وأفخاخ القلعة. استخدم الدرع والسيف بالتوقيت المناسب لحسم المعارك وتحقيق النصر.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -169712,8 +169716,8 @@
     "slug": "escape-tsunami-waves-for-brainrots",
     "title": "Escape Tsunami Waves for Brainrots",
     "titleAr": "لعبة الهروب Tsunami Waves for Brainrots",
-    "description": "Experience arcade excitement in Escape Tsunami Waves for Brainrots! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Escape Tsunami Waves for Brainrots! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Sprint ahead of surging tidal waves across chaotic obstacle courses without slowing down. Vault crates, grab lucky boosts, and reach elevated safety zones in time.",
+    "descriptionAr": "اركض بأقصى سرعة للهروب من أمواج تسونامي الهادرة عبر مسارات مليئة بالعقبات والصناديق حتى تصل إلى مناطق الأمان المرتفعة.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -174927,8 +174931,8 @@
     "slug": "element-clash-2d",
     "title": "Element Clash 2D",
     "titleAr": "لعبة Element صدام ثنائية الأبعاد",
-    "description": "Experience arcade excitement in Element Clash 2D! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Element Clash 2D! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Combine fire, water, and lightning abilities in brisk 2D elemental arena duels. Counter opponent elements smartly and land charged strikes to win each round.",
+    "descriptionAr": "ادمج قوى النار والماء والبرق في مبارزات ثنائية الأبعاد سريعة. اختر العنصر المضاد بذكاء وسدّد ضرباتك الحاسمة للفوز بالجولة.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -175053,8 +175057,8 @@
     "slug": "mice-rush",
     "title": "Mice Rush",
     "titleAr": "لعبة Mice اندفاع",
-    "description": "Experience arcade excitement in Mice Rush! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Mice Rush! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Lead a scurrying squad of clever mice through kitchen mazes stocked with golden cheese wedges. Dodge patrol traps and dash cleanly to the burrow before the timer ends.",
+    "descriptionAr": "قد فريق الفئران الذكية عبر متاهات المطبخ لجمع قطع الجبن الذهبي وتجنب المصائد والعودة إلى الجحر قبل انتهاء الوقت.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -194180,8 +194184,8 @@
     "slug": "brick-breack-2025",
     "title": "Brick-Break 2025",
     "titleAr": "لعبة الطوب-Break 2025",
-    "description": "Experience arcade excitement in Brick-Break 2025! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Brick-Break 2025! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Shatter vibrant multi-layer brick formations using high-speed energy balls and precision paddle rebounds. Catch falling multi-ball power-ups to clear tough stages rapidly.",
+    "descriptionAr": "حطّم صفوف الطوب الملون باستخدام كرات الطاقة والمضرب الدقيق. التقط إضافات الكرات المتعددة لتصفية المراحل المتقدمة بسرعة.",
     "category": "arcade",
     "tags": [
       "arcade",
@@ -194243,8 +194247,8 @@
     "slug": "outline-switch",
     "title": "Outline Switch",
     "titleAr": "لعبة Outline Switch — Outline Switch",
-    "description": "Experience arcade excitement in Outline Switch! Quick reflexes, fast-paced mechanics, and endless high-score chasing fun.",
-    "descriptionAr": "استمتع بتجربة أركيد كلاسيكية لا تُنسى في Outline Switch! سرعة فائقة وتحكم سلس لتحقيق أرقام قياسية جديدة.",
+    "description": "Match shapes and toggle glowing outlines at split-second speed as incoming barriers rush down the lane. Stay sharp and switch forms cleanly to keep your streak alive.",
+    "descriptionAr": "بدّل الأشكال والإطارات المضيئة في أجزاء من الثانية لمطابقة الحواجز القادمة على المسار والحفاظ على سلسلة النقاط.",
     "category": "arcade",
     "tags": [
       "arcade",

@@ -194,13 +194,13 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
         ${controlsBox}
 
         <div style="background:#161b22;border:1px solid #30363d;border-radius:16px;padding:20px;margin-bottom:28px;">
-          <h2 style="font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:12px;">Game Details & Instructions</h2>
+          <h2 style="font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:12px;">Game Details & Player Notes</h2>
           <ul style="color:#94a3b8;font-size:14px;line-height:1.8;margin:0;padding-left:20px;">
             <li><strong>Genre:</strong> <a href="/category/${encodeURIComponent(category)}" style="color:#38bdf8;text-decoration:none;text-transform:capitalize;">${escapeHtml(category)} Games</a></li>
-            <li><strong>Platform:</strong> HTML5 Web Browser (Works on Desktop, iPhone, Android, Tablet)</li>
-            <li><strong>Play Mode:</strong> Single Player / Instant Browser Play (Unblocked)</li>
-            <li><strong>Installation:</strong> 100% Free, No download or registration required</li>
+            <li><strong>Platform:</strong> HTML5 Web Browser (Desktop, iOS, Android, Tablet)</li>
+            <li><strong>Safety & Play Mode:</strong> Sandboxed In-Browser Play, Zero Download Required</li>
           </ul>
+          <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin-top:12px;">${escapeHtml(gameTitle)} is curated in our ${escapeHtml(category)} catalog and tested for responsive controls across keyboard, mouse, and touchscreen devices. Focus on consistent rhythm in early levels and use Theatre or Fullscreen mode for an unobstructed view.</p>
         </div>
 
         ${faqSection}
@@ -221,6 +221,7 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
         <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
         <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
         <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
         <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
       </p>
     </footer>`;
@@ -266,6 +267,13 @@ function generateCategoryPreRenderHtml(catSlug, gamesInCat) {
     </main>
     <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
       <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
+      <p style="margin-top:8px;">
+        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
+        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
+        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
+        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
+      </p>
     </footer>`;
 }
 
@@ -314,6 +322,12 @@ function generateHomePreRenderHtml(gamesCatalog) {
           ${gameGrid}
         </div>
       </section>
+
+      <section style="margin-top:48px;background:#161b22;border:1px solid #30363d;border-radius:16px;padding:24px;color:#cbd5e1;line-height:1.7;">
+        <h2 style="font-size:22px;font-weight:bold;color:#ffffff;margin:0 0 12px;">KYRAXO Editorial Guide: Instant HTML5 Play & Safety</h2>
+        <p style="font-size:14px;margin:0 0 10px;">Every title published on KYRAXO is curated for immediate browser compatibility using HTML5 Canvas and WebGL standards, removing downloads and plugin barriers on desktop and mobile phones.</p>
+        <p style="font-size:14px;margin:0;">Locally hosted originals execute inside isolated browser sandboxes and undergo static security checks before listing, while dedicated Kids & Puzzle genres offer family-friendly learning and logic activities.</p>
+      </section>
     </main>
     <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
       <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
@@ -321,6 +335,78 @@ function generateHomePreRenderHtml(gamesCatalog) {
         <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
         <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
         <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
+        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
+      </p>
+    </footer>`;
+}
+
+function generateCollectionPreRenderHtml(heading, intro, gamesSubset) {
+  const cards = gamesSubset.slice(0, 48).map(g => `
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:12px;">
+      <a href="/game/${encodeURIComponent(g.slug)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(g.title)}</a>
+      <p style="color:#94a3b8;font-size:12px;margin:4px 0 0;line-height:1.5;">${escapeHtml((g.description || '').slice(0, 110))}</p>
+    </div>
+  `).join('');
+  return `
+    <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;">
+      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
+    </header>
+    <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
+      <h1 style="font-size:30px;font-weight:900;color:#ffffff;margin-bottom:10px;">${escapeHtml(heading)}</h1>
+      <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:24px;">${escapeHtml(intro)}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">${cards}</div>
+    </main>
+    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
+      <p>© ${new Date().getFullYear()} KYRAXO Gaming.</p>
+      <p style="margin-top:8px;">
+        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
+        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
+        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
+        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
+      </p>
+    </footer>`;
+}
+
+function generateCategoriesPreRenderHtml(gamesCatalog) {
+  const cats = [
+    ['action', 'Action Games', 'Fast-paced reflexes, combat challenges, and precision arcade missions.'],
+    ['arcade', 'Arcade Games', 'Timeless score-chasing browser classics and modern retro hits.'],
+    ['puzzle', 'Puzzle & Logic Games', 'Brain-teasers, tile matching, word challenges, and spatial reasoning.'],
+    ['racing', 'Racing & Driving Games', 'High-speed drift tracks, highway traffic dodgers, and kart championships.'],
+    ['sports', 'Sports Games', 'Basketball, soccer penalty shootouts, tennis rallies, and billiards.'],
+    ['adventure', 'Adventure Games', 'Platform quests, dungeon exploration, and story-driven browser worlds.'],
+    ['casual', 'Casual Games', 'Relaxing tap-and-play titles ideal for quick sessions anywhere.'],
+    ['kids', 'Kids & Educational Games', 'Safe learning studios covering Arabic & English letters, counting, and art.'],
+    ['two-player', 'Two-Player Games', 'Head-to-head local arcade duels shareable on a single screen.'],
+    ['multiplayer', 'Multiplayer Games', 'Competitive territory battles and arena challenges.'],
+    ['strategy', 'Strategy & Board Games', 'Tactical tower defense, chess, checkers, Go, and turn-based planning.'],
+  ];
+  const counts = new Map();
+  gamesCatalog.forEach(g => { const c = (g.category || '').toLowerCase(); counts.set(c, (counts.get(c) || 0) + 1); });
+  const cards = cats.map(([slug, label, summary]) => `
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px;">
+      <a href="/category/${slug}" style="color:#38bdf8;font-weight:bold;font-size:16px;text-decoration:none;">${escapeHtml(label)} (${counts.get(slug) || 0})</a>
+      <p style="color:#94a3b8;font-size:13px;margin:8px 0 0;line-height:1.5;">${escapeHtml(summary)}</p>
+    </div>
+  `).join('');
+  return `
+    <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;">
+      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
+    </header>
+    <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
+      <h1 style="font-size:32px;font-weight:900;color:#ffffff;margin-bottom:10px;">All Game Categories on KYRAXO</h1>
+      <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:24px;">Browse our curated library of over 3,200 free HTML5 browser games organized by genre for instant play without installation.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">${cards}</div>
+    </main>
+    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
+      <p>© ${new Date().getFullYear()} KYRAXO Gaming.</p>
+      <p style="margin-top:8px;">
+        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
+        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
+        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
         <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
       </p>
     </footer>`;
@@ -990,6 +1076,37 @@ export function createProductionServer(options = {}) {
             html = html.replace(/<title>.*?<\/title>/i, '<title>Contact Us — KYRAXO Platform Support</title>');
             const preRendered = generateContactPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
+          } else if (pathname === '/categories') {
+            html = injectCanonical(html, 'https://kyraxo.com/categories');
+            html = html.replace(/<title>.*?<\/title>/i, '<title>All Game Categories — Browse Free Browser Games by Genre | KYRAXO</title>');
+            refreshGamesCatalog();
+            const preRendered = generateCategoriesPreRenderHtml(gamesCatalog);
+            html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
+          } else if (pathname === '/trending') {
+            html = injectCanonical(html, 'https://kyraxo.com/trending');
+            html = html.replace(/<title>.*?<\/title>/i, '<title>Trending Browser Games — What Gamers Are Playing Now | KYRAXO</title>');
+            refreshGamesCatalog();
+            const trendingList = gamesCatalog.filter(g => g && g.trending);
+            const preRendered = generateCollectionPreRenderHtml(
+              'Trending Free HTML5 Games',
+              'Discover the most played and rising browser games on KYRAXO right now, ready to launch immediately on desktop and mobile.',
+              trendingList
+            );
+            html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
+          } else if (pathname === '/popular') {
+            html = injectCanonical(html, 'https://kyraxo.com/popular');
+            html = html.replace(/<title>.*?<\/title>/i, '<title>Most Popular Online Games — Highest Rated Games | KYRAXO</title>');
+            refreshGamesCatalog();
+            const popularList = [...gamesCatalog].sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0)).slice(0, 48);
+            const preRendered = generateCollectionPreRenderHtml(
+              'Most Popular Online Games',
+              'Explore KYRAXO players all-time highest-rated arcade, puzzle, racing, sports, and strategy HTML5 games.',
+              popularList
+            );
+            html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
+          } else if (pathname === '/search' || pathname === '/favorites' || pathname.startsWith('/admin') || pathname.startsWith('/owner') || pathname.startsWith('/inbox')) {
+            html = injectCanonical(html, `https://kyraxo.com${pathname}`);
+            html = html.replace(/<meta\s+name=["']robots["'][^>]*>/i, '<meta name="robots" content="noindex, follow" />');
           } else if (pathname === '/cookies') {
             html = injectCanonical(html, 'https://kyraxo.com/cookies');
             html = html.replace(/<title>.*?<\/title>/i, '<title>Cookie Policy & Ad Preferences — KYRAXO</title>');

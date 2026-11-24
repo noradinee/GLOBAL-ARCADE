@@ -15,10 +15,28 @@
 - **Current branch:** main
 - **Active Editor:** None
 - **Editing Status:** IDLE
-- **Work started:** 2026-11-24T20:52:00Z
+- **Work started:** 2026-11-24T23:02:00Z
 - **Last working agent:** Antigravity
-- **Last updated:** 2026-11-24T22:40:00Z
-- **Stage Status:** Audit Fixes Deployed Live to Production (135.181.197.174) & Committed
+- **Last updated:** 2026-11-24T23:27:00Z
+- **Stage Status:** AdSense Readiness Optimizations Deployed Live (135.181.197.174) & Committed
+
+### Latest AdSense Readiness Pass (2026-11-24 — Second Session After `0ab6d99`)
+- **Ad Policy & Layout Compliance:**
+  - Updated `src/types/ads.ts` (`slotId?: string`) and `src/components/ads/AdSlot.tsx` so manual `<ins>` slots without an approved `slotId` are not rendered during review (Google Auto Ads in `index.html` handles review cleanly with zero empty `"ADVERTISEMENT"` placeholder boxes) and unfilled slots auto-collapse via `MutationObserver`.
+  - Removed `above-game` ad placement (`!mb-1`) touching the game viewport in `src/pages/GameDetailPage.tsx` and widened `below-game` spacing to `my-6`.
+  - Cleaned `public/ads.txt` (removed self-referencing `subdomain=kyraxo.com`; kept `google.com, pub-1216297804150458, DIRECT, f08c47fec0942fa0` and unified `contact=contact@kyraxo.com`).
+  - Removed the public `KYRAXO Portal` (`/admin`) link from `src/components/common/Footer.tsx`.
+- **Content Depth, Crawlable SSR & Contact Functionality:**
+  - Added `robots?: string` support in `src/utils/seo.ts` & `src/components/common/SEOHead.tsx`; marked user utility routes `/favorites` and `/search` as `noindex, follow` (both client-side and server-side in `server/index.js`).
+  - Added semantic crawler SSR pre-render HTML in `server/index.js` for `/categories`, `/trending`, and `/popular`, plus full legal footer links across SSR views and a rich editorial platform overview & player notes.
+  - Added bilingual editorial guide (`KYRAXO Editorial Guide`) to `src/pages/HomePage.tsx` and `Player Strategy & Review Notes` to `src/pages/GameDetailPage.tsx`.
+  - Enriched 19 short/boilerplate descriptions in `src/data/games.json` and synced 140 updated descriptions to `src/data/starterGames.json`.
+  - Wired `src/pages/ContactPage.tsx` to a real rate-limited `POST /api/contact` backend endpoint in `server/api-router.js` persisting inquiries to `data/contact-messages.jsonl`.
+- **Verification & Live Deploy Evidence:**
+  - `npx tsc --noEmit`: 0 errors; `npm run build`: clean build in 17.50s (`index-hbWXHRBS.js`); `npm test`: `304 pass, 0 fail`.
+  - Deployed to `135.181.197.174` (`backups/pre-adsense-20261124` created), restarted `global-arcade` (`healthy`).
+  - Live `https://kyraxo.com`: `/ads.txt` (`Mediapartners-Google`) `200`, `/categories` & `/trending` & `/popular` SSR `200`, `/search` & `/favorites` `noindex, follow`, `POST /api/contact` validation active (`400` on empty body), Chrome CDP across `/`, `/game/subway-metro-runner`, `/game/metroxe-one-html-page-challenge`, `/categories`, `/favorites`, `/contact`: `emptyAdBoxes: 0`, `hasAdminFooterLink: false`, `errors: []`.
+- **Next Recommended Task:** In Google AdSense dashboard, verify Google CMP ("Privacy & messaging -> European regulations") is enabled and wait for AdSense site review & `ads.txt` re-crawl.
 
 ### Latest Session Summary (2026-11-24 — Site-Wide & All-Games Audit + Remediations)
 - **Website & SEO Fixes Applied:**
