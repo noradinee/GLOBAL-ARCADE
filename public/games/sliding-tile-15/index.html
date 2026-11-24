@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>15-Puzzle Sliding Matrix — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; touch-action: none; }
+  canvas { display: block; max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+c.width = 500; c.height = 500;
+let tiles = Array.from({length: 16}, (_, i) => (i + 1) % 16);
+for (let i = 0; i < 200; i++) {
+  const blank = tiles.indexOf(0);
+  const neighbors = [];
+  if (blank % 4 > 0) neighbors.push(blank - 1);
+  if (blank % 4 < 3) neighbors.push(blank + 1);
+  if (blank >= 4) neighbors.push(blank - 4);
+  if (blank < 12) neighbors.push(blank + 4);
+  const n = neighbors[Math.floor(Math.random() * neighbors.length)];
+  [tiles[blank], tiles[n]] = [tiles[n], tiles[blank]];
+}
+let moves = 0;
+c.addEventListener('pointerdown', e => {
+  const rect = c.getBoundingClientRect();
+  const col = Math.floor(((e.clientX - rect.left) * (500 / rect.width) - 25) / 115);
+  const row = Math.floor(((e.clientY - rect.top) * (500 / rect.height) - 50) / 115);
+  if (row>=0 && row<4 && col>=0 && col<4) {
+    const idx = row * 4 + col; const b = tiles.indexOf(0);
+    const isAdj = (Math.abs(row - Math.floor(b/4)) + Math.abs(col - (b%4))) === 1;
+    if (isAdj) { [tiles[idx], tiles[b]] = [tiles[b], tiles[idx]]; moves++; draw(); }
+  }
+});
+function draw() {
+  ctx.fillStyle = '#0b1120'; ctx.fillRect(0, 0, 500, 500);
+  ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 20px monospace';
+  ctx.fillText('MOVES: ' + moves, 30, 35);
+  for (let i = 0; i < 16; i++) {
+    const val = tiles[i]; if (!val) continue;
+    const col = i % 4, row = Math.floor(i / 4);
+    const x = 25 + col * 115, y = 50 + row * 115;
+    ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.roundRect(x, y, 105, 105, 12); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = '#38bdf8'; ctx.stroke();
+    ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 36px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(val, x + 52, y + 66); ctx.textAlign = 'start';
+  }
+}
+draw();
+</script>
+</body>
+</html>

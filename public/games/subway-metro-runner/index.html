@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Metro Lane Surfer: 3D Rail Dash — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #060914; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; touch-action: none; }
+  #wrap { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 25%, #172554 0%, #060914 75%); }
+  #hud { position: absolute; top: 10px; left: 10px; right: 10px; max-width: 820px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 8px; z-index: 5; pointer-events: none; }
+  .pill { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 6px 12px; font-size: 13px; font-weight: 800; backdrop-filter: blur(8px); }
+  .pill span { color: #facc15; font-variant-numeric: tabular-nums; }
+  canvas { width: 100%; height: 100%; max-width: 920px; max-height: 100%; display: block; touch-action: none; }
+  #touch-controls { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 6; }
+  .tbtn { width: 58px; height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22); background: rgba(15,23,42,0.78); color: #fff; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); touch-action: manipulation; }
+  .tbtn:active { transform: scale(0.92); background: rgba(56,189,248,0.4); }
+  #overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(4, 7, 18, 0.78); backdrop-filter: blur(6px); z-index: 10; }
+  .panel { width: min(90vw, 440px); background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 22px; padding: 26px 22px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+  .panel h1 { font-size: 26px; font-weight: 900; background: linear-gradient(90deg, #38bdf8, #facc15); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; }
+  .panel p { font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px; }
+  .btn-go { background: linear-gradient(135deg, #38bdf8, #6366f1); color: #fff; border: 0; padding: 12px 28px; border-radius: 999px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 25px rgba(56,189,248,0.35); }
+  .btn-go:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div class="pill">DIST: <span id="sc">0</span>m</div>
+    <div class="pill">COINS: <span id="coins">0</span></div>
+    <div class="pill">BEST: <span id="best">0</span>m</div>
+  </div>
+  <canvas id="c"></canvas>
+  <div id="touch-controls">
+    <button class="tbtn" id="btnL" aria-label="Left">◀</button>
+    <button class="tbtn" id="btnUp" aria-label="Jump">▲</button>
+    <button class="tbtn" id="btnDn" aria-label="Roll">▼</button>
+    <button class="tbtn" id="btnR" aria-label="Right">▶</button>
+  </div>
+  <div id="overlay">
+    <div class="panel" id="panel">
+      <h1>METRO LANE SURFER</h1>
+      <p>Dash across 3 neon subway tracks! Dodge oncoming express trains, leap low barriers, and slide under signal gates.</p>
+      <p><b>Controls:</b> Arrow Keys / WASD · <b>Mobile:</b> Swipe or tap buttons</p>
+      <button class="btn-go" id="startBtn">START RUN</button>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const scEl = document.getElementById('sc');
+  const coinsEl = document.getElementById('coins');
+  const bestEl = document.getElementById('best');
+  const overlay = document.getElementById('overlay');
+  const panel = document.getElementById('panel');
+
+  let W = 800, H = 500, dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  function resize() {
+    W = cv.clientWidth || window.innerWidth;
+    H = cv.clientHeight || window.innerHeight;
+    cv.width = Math.floor(W * dpr);
+    cv.height = Math.floor(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  let best = Number(localStorage.getItem('kyraxo_subway_best') || 0);
+  bestEl.textContent = best;
+
+  let audioCtx = null;
+  function sfx(freq, type = 'sine', dur = 0.08, vol = 0.14) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(vol, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    } catch (_) {}
+  }
+
+  let state = 'menu';
+  let lane = 1, playerX = 0, yOffset = 0, vy = 0, isJumping = false, rollT = 0;
+  let score = 0, coins = 0, speed = 420, trackScroll = 0, spawnTimer = 0.6, lastTime = 0;
+  let objects = [], sparks = [];
+  const LANE_X = [-1, 0, 1];
+
+  function startRun() {
+    state = 'playing';
+    lane = 1; playerX = 0; yOffset = 0; vy = 0; isJumping = false; rollT = 0;
+    score = 0; coins = 0; speed = 430; spawnTimer = 0.45;
+    objects = []; sparks = [];
+    lastTime = performance.now();
+    scEl.textContent = '0';
+    coinsEl.textContent = '0';
+    overlay.style.display = 'none';
+    sfx(520, 'triangle', 0.12);
+  }
+
+  function crash() {
+    if (state === 'over') return;
+    state = 'over';
+    sfx(140, 'sawtooth', 0.25, 0.2);
+    const total = Math.floor(score);
+    if (total > best) {
+      best = total;
+      localStorage.setItem('kyraxo_subway_best', String(best));
+      bestEl.textContent = best;
+    }
+    overlay.style.display = 'flex';
+    panel.innerHTML = '<h1>RAIL CRASH!</h1>' +
+      '<p>Distance: <b>' + total + 'm</b> · Coins: <b>' + coins + '</b> · Best: <b>' + best + 'm</b></p>' +
+      '<button class="btn-go" id="retryBtn">RUN AGAIN</button>';
+    document.getElementById('retryBtn').addEventListener('click', startRun);
+  }
+
+  function moveLane(delta) {
+    if (state !== 'playing') return;
+    const next = Math.max(0, Math.min(2, lane + delta));
+    if (next !== lane) { lane = next; sfx(340, 'sine', 0.05, 0.08); }
+  }
+  function doJump() {
+    if (state !== 'playing') return;
+    if (!isJumping) { isJumping = true; rollT = 0; vy = 760; sfx(620, 'triangle', 0.09, 0.12); }
+  }
+  function doRoll() {
+    if (state !== 'playing') return;
+    rollT = 0.65;
+    if (isJumping && vy > -200) vy = -680;
+    sfx(260, 'sine', 0.07, 0.1);
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startRun);
+  document.getElementById('btnL').addEventListener('pointerdown', (e) => { e.preventDefault(); moveLane(-1); });
+  document.getElementById('btnR').addEventListener('pointerdown', (e) => { e.preventDefault(); moveLane(1); });
+  document.getElementById('btnUp').addEventListener('pointerdown', (e) => { e.preventDefault(); doJump(); });
+  document.getElementById('btnDn').addEventListener('pointerdown', (e) => { e.preventDefault(); doRoll(); });
+
+  window.addEventListener('keydown', (e) => {
+    if (state !== 'playing') {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        const b = panel.querySelector('button');
+        if (b) b.click();
+      }
+      return;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLane(-1);
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveLane(1);
+    else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { e.preventDefault(); doJump(); }
+    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); doRoll(); }
+  });
+
+  let touchX = 0, touchY = 0;
+  cv.addEventListener('touchstart', (e) => {
+    if (e.touches[0]) { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
+  }, { passive: true });
+  cv.addEventListener('touchend', (e) => {
+    if (!e.changedTouches[0] || state !== 'playing') return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if (Math.abs(dx) < 18 && Math.abs(dy) < 18) { doJump(); return; }
+    if (Math.abs(dx) > Math.abs(dy)) moveLane(dx > 0 ? 1 : -1);
+    else if (dy < 0) doJump();
+    else doRoll();
+  }, { passive: true });
+
+  function spawnWave() {
+    const blocked = new Set();
+    const pattern = Math.random();
+    if (pattern < 0.48) {
+      // 1 or 2 trains leaving at least 1 lane open
+      const count = Math.random() < 0.45 ? 2 : 1;
+      for (let i = 0; i < count; i++) {
+        const l = Math.floor(Math.random() * 3);
+        if (blocked.size < 2 && !blocked.has(l)) {
+          blocked.add(l);
+          objects.push({ type: 'train', lane: l, z: 1400, len: 220, hit: false });
+        }
+      }
+    } else if (pattern < 0.76) {
+      // Jumpable low barrier
+      const l = Math.floor(Math.random() * 3);
+      objects.push({ type: 'low', lane: l, z: 1350, len: 40, hit: false });
+    } else {
+      // High gate to roll under
+      const l = Math.floor(Math.random() * 3);
+      objects.push({ type: 'high', lane: l, z: 1350, len: 40, hit: false });
+    }
+    // Coins line on an open lane
+    const freeLanes = [0, 1, 2].filter(l => !blocked.has(l));
+    const coinLane = freeLanes[Math.floor(Math.random() * freeLanes.length)] ?? 1;
+    for (let c = 0; c < 4; c++) {
+      objects.push({ type: 'coin', lane: coinLane, z: 1180 + c * 90, hit: false });
+    }
+  }
+
+  function proj(laneVal, z) {
+    const horizonY = H * 0.28;
+    const groundBot = H * 0.88;
+    const t = Math.max(0.03, 180 / (z + 140));
+    const sx = W * 0.5 + laneVal * W * 0.24 * t;
+    const sy = horizonY + (groundBot - horizonY) * t;
+    return { x: sx, y: sy, s: t };
+  }
+
+  function update(dt) {
+    if (state !== 'playing') return;
+    speed = Math.min(920, speed + dt * 11);
+    score += (speed * dt) / 22;
+    trackScroll = (trackScroll + speed * dt) % 120;
+    scEl.textContent = String(Math.floor(score));
+
+    const targetX = LANE_X[lane];
+    playerX += (targetX - playerX) * Math.min(1, dt * 15);
+
+    if (isJumping) {
+      yOffset += vy * dt;
+      vy -= 2100 * dt;
+      if (yOffset <= 0) { yOffset = 0; vy = 0; isJumping = false; }
+    }
+    if (rollT > 0) rollT = Math.max(0, rollT - dt);
+
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      spawnWave();
+      spawnTimer = Math.max(0.42, 1.05 - (speed - 430) / 1000);
+    }
+
+    for (let i = objects.length - 1; i >= 0; i--) {
+      const o = objects[i];
+      const dz = (o.type === 'train' ? speed * 1.18 : speed) * dt;
+      o.z -= dz;
+      if (o.z < -80) { objects.splice(i, 1); continue; }
+
+      const sameLane = Math.abs(playerX - LANE_X[o.lane]) < 0.42;
+      if (!sameLane || o.hit) continue;
+
+      if (o.type === 'coin' && o.z < 120 && o.z > 25) {
+        o.hit = true;
+        coins++;
+        coinsEl.textContent = String(coins);
+        sfx(880, 'sine', 0.06, 0.09);
+        const p = proj(LANE_X[o.lane], o.z);
+        for (let k = 0; k < 6; k++) sparks.push({ x: p.x, y: p.y - 25, vx: (Math.random()-0.5)*140, vy: (Math.random()-0.7)*140, life: 0.35 });
+        objects.splice(i, 1);
+      } else if (o.type === 'train' && o.z < 115 && o.z + (o.len || 180) > 65 && yOffset < 75) {
+        crash(); return;
+      } else if (o.type === 'low' && o.z < 105 && o.z > 55 && yOffset < 36) {
+        crash(); return;
+      } else if (o.type === 'high' && o.z < 105 && o.z > 55 && rollT <= 0 && yOffset < 20) {
+        crash(); return;
+      }
+    }
+
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+      if (s.life <= 0) sparks.splice(i, 1);
+    }
+  }
+
+  function draw() {
+    const horizonY = H * 0.28;
+    const sky = ctx.createLinearGradient(0, 0, 0, horizonY);
+    sky.addColorStop(0, '#040814');
+    sky.addColorStop(1, '#1e1b4b');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, horizonY);
+
+    // City skyline silhouettes
+    ctx.fillStyle = '#0f172a';
+    for (let i = 0; i < 14; i++) {
+      const bx = (i / 14) * W;
+      const bh = 25 + ((i * 37) % 55);
+      ctx.fillRect(bx, horizonY - bh, W / 14 - 4, bh);
+    }
+
+    const ground = ctx.createLinearGradient(0, horizonY, 0, H);
+    ground.addColorStop(0, '#0f172a');
+    ground.addColorStop(1, '#020617');
+    ctx.fillStyle = ground;
+    ctx.fillRect(0, horizonY, W, H - horizonY);
+
+    // Draw 3 perspective tracks & sleeper ties
+    for (let z = 60; z < 1400; z += 120) {
+      const zz = Math.max(20, z - trackScroll);
+      const l = proj(-1.45, zz), r = proj(1.45, zz);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+      ctx.lineWidth = Math.max(1, l.s * 4);
+      ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(r.x, r.y); ctx.stroke();
+    }
+    for (let l = 0; l < 3; l++) {
+      const lx = LANE_X[l];
+      for (const off of [-0.22, 0.22]) {
+        const far = proj(lx + off, 1400), near = proj(lx + off, 20);
+        ctx.strokeStyle = l === lane ? '#38bdf8' : '#334155';
+        ctx.lineWidth = l === lane ? 3 : 2;
+        ctx.beginPath(); ctx.moveTo(far.x, far.y); ctx.lineTo(near.x, near.y); ctx.stroke();
+      }
+    }
+
+    // Sort far-to-near
+    const sorted = [...objects].sort((a, b) => b.z - a.z);
+    for (const o of sorted) {
+      const p = proj(LANE_X[o.lane], o.z);
+      const w = 130 * p.s, h = 115 * p.s;
+      if (o.type === 'coin') {
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath(); ctx.arc(p.x, p.y - 26 * p.s, Math.max(4, 15 * p.s), 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2; ctx.stroke();
+      } else if (o.type === 'train') {
+        const bodyH = h * 1.15;
+        ctx.fillStyle = '#e11d48';
+        ctx.fillRect(p.x - w / 2, p.y - bodyH, w, bodyH);
+        ctx.fillStyle = '#fda4af';
+        ctx.fillRect(p.x - w / 2, p.y - bodyH, w, Math.max(3, 10 * p.s));
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(p.x - w * 0.36, p.y - bodyH * 0.78, w * 0.72, bodyH * 0.32);
+        // Headlights
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(p.x - w * 0.28, p.y - bodyH * 0.2, Math.max(2, 7 * p.s), 0, Math.PI * 2);
+        ctx.arc(p.x + w * 0.28, p.y - bodyH * 0.2, Math.max(2, 7 * p.s), 0, Math.PI * 2);
+        ctx.fill();
+      } else if (o.type === 'low') {
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(p.x - w / 2, p.y - h * 0.42, w, h * 0.42);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(p.x - w / 2, p.y - h * 0.42, w, Math.max(3, 8 * p.s));
+      } else if (o.type === 'high') {
+        ctx.fillStyle = '#8b5cf6';
+        ctx.fillRect(p.x - w * 0.54, p.y - h * 1.15, w * 1.08, h * 0.48);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(p.x - w * 0.54, p.y - h * 1.15, Math.max(3, 8 * p.s), h * 1.15);
+        ctx.fillRect(p.x + w * 0.54 - Math.max(3, 8 * p.s), p.y - h * 1.15, Math.max(3, 8 * p.s), h * 1.15);
+      }
+    }
+
+    // Draw player
+    const pp = proj(playerX, 85);
+    const scale = pp.s;
+    const py = pp.y - yOffset * 0.95;
+    const isRolling = rollT > 0;
+    const ph = isRolling ? 32 * scale : 66 * scale;
+    const pw = 38 * scale;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.beginPath(); ctx.ellipse(pp.x, pp.y + 4, 24 * scale, 8 * scale, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.roundRect(pp.x - pw / 2, py - ph, pw, ph, 10 * scale); ctx.fill();
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath(); ctx.arc(pp.x, py - ph - 12 * scale, 13 * scale, 0, Math.PI * 2); ctx.fill();
+
+    for (const s of sparks) {
+      ctx.fillStyle = '#facc15';
+      ctx.globalAlpha = Math.max(0, s.life * 2.5);
+      ctx.fillRect(s.x, s.y, 4, 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastTime) / 1000 || 0.016);
+    lastTime = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

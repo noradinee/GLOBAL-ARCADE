@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
@@ -12,6 +12,14 @@ import { Bookmark, Gamepad2, ArrowLeft } from 'lucide-react';
 export const FavoritesPage: React.FC = () => {
   const { t, lang, isRtl } = useLanguage();
   const { favorites } = useFavorites();
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    gameService.loadFullCatalog();
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, []);
 
   const allGames = gameService.getAllGames();
   const favoritedGames = allGames.filter((g: Game) => favorites.includes(g.id));

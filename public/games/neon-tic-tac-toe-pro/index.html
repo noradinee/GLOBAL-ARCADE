@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Neon Tic-Tac-Toe Pro — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #581c87 0%, #3b0764 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #a855f7; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #180d2b; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>❌</span>
+    <span>Neon Tic-Tac-Toe Pro</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      let board = Array(9).fill(null);
+      let turn = 'X';
+      let winner = null;
+      function resetGame() { board = Array(9).fill(null); turn = 'X'; winner = null; }
+      canvas.addEventListener('pointerdown', e => {
+        if (winner) { resetGame(); return; }
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left)*(canvas.width/r.width);
+        const y = (e.clientY - r.top)*(canvas.height/r.height);
+        const col = Math.floor((x - 220) / 120);
+        const row = Math.floor((y - 70) / 120);
+        if (col>=0 && col<3 && row>=0 && row<3) {
+          const idx = row * 3 + col;
+          if (!board[idx]) {
+            board[idx] = turn; playSfx(turn==='X'?580:440, 'triangle', 0.15);
+            checkWinner();
+            turn = turn === 'X' ? 'O' : 'X';
+          }
+        }
+      });
+      function checkWinner() {
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        for(let w of wins) {
+          if (board[w[0]] && board[w[0]] === board[w[1]] && board[w[1]] === board[w[2]]) {
+            winner = board[w[0]]; playSfx(880, 'sine', 0.4); notifyParent('WIN'); return;
+          }
+        }
+      }
+      function loop() {
+        ctx.fillStyle = '#180d2b'; ctx.fillRect(0, 0, 800, 500);
+        ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 6;
+        for(let i=1; i<3; i++) {
+          ctx.beginPath(); ctx.moveTo(220 + i*120, 70); ctx.lineTo(220 + i*120, 430); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(220, 70 + i*120); ctx.lineTo(580, 70 + i*120); ctx.stroke();
+        }
+        board.forEach((val, i) => {
+          if (val) {
+            const col = i % 3; const row = Math.floor(i / 3);
+            const cx = 280 + col * 120; const cy = 130 + row * 120;
+            ctx.fillStyle = val === 'X' ? '#38bdf8' : '#ec4899';
+            ctx.font = 'bold 70px system-ui'; ctx.textAlign = 'center'; ctx.fillText(val, cx, cy + 24);
+          }
+        });
+        if (winner) {
+          ctx.fillStyle = '#facc15'; ctx.font = 'bold 36px system-ui'; ctx.textAlign = 'center';
+          ctx.fillText('Winner: ' + winner + '! (Click to play again)', 400, 475);
+        }
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

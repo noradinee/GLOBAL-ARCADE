@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Peekaboo Garden Moles — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #fed7aa 0%, #bbf7d0 100%); display: flex; flex-direction: column; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: none; }
+  header { height: 50px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 2px solid rgba(0,0,0,0.08); z-index: 10; }
+  .title { font-size: 16px; font-weight: 800; color: #78350f; }
+  .btn { background: #fff; border: 2px solid #78350f; border-radius: 10px; padding: 5px 12px; font-size: 13px; font-weight: 700; cursor: pointer; color: #78350f; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; }
+  canvas { background: #ffffff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Peekaboo Garden Moles</div>
+  <button class="btn" onclick="if(window.resetGame)resetGame()">Reset</button>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function playArp(notes, dur = 0.08) {
+  notes.forEach((f, i) => setTimeout(() => playSfx(f, 'triangle', 0.2, 0.25), i * dur * 1000));
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+function saveCanvas() {
+  playSfx(660);
+  const a = document.createElement('a');
+  a.download = 'whack-a-mole-kids.png';
+  a.href = canvas.toDataURL();
+  a.click();
+}
+
+      let holes = [{ x: 200, y: 200 }, { x: 400, y: 200 }, { x: 600, y: 200 }, { x: 300, y: 340 }, { x: 500, y: 340 }];
+      let activeMole = 0;
+      let score = 0;
+      function resetGame() { score = 0; }
+      setInterval(() => { activeMole = Math.floor(Math.random() * holes.length); }, 1000);
+      canvas.addEventListener('pointerdown', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        const h = holes[activeMole];
+        if (Math.hypot(x - h.x, y - h.y) < 55) {
+          score++; playSfx(680); activeMole = -1;
+        }
+      });
+      function loop() {
+        ctx.fillStyle = '#86efac'; ctx.fillRect(0, 0, 800, 500);
+        holes.forEach((h, i) => {
+          ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.ellipse(h.x, h.y, 60, 30, 0, 0, Math.PI * 2); ctx.fill();
+          if (i === activeMole) {
+            ctx.font = '64px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('🐹', h.x, h.y - 25);
+          }
+        });
+        ctx.font = 'bold 24px sans-serif'; ctx.fillStyle = '#15803d'; ctx.textAlign = 'center';
+        ctx.fillText('Peek-a-boo! Tap the friendly moles! Score: ' + score, 400, 50);
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

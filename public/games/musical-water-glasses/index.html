@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Musical Water Glasses — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 100%); display: flex; flex-direction: column; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: none; }
+  header { height: 50px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 2px solid rgba(0,0,0,0.08); z-index: 10; }
+  .title { font-size: 16px; font-weight: 800; color: #0284c7; }
+  .btn { background: #fff; border: 2px solid #0284c7; border-radius: 10px; padding: 5px 12px; font-size: 13px; font-weight: 700; cursor: pointer; color: #0284c7; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; }
+  canvas { background: #ffffff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Musical Water Glasses</div>
+  <button class="btn" onclick="if(window.resetGame)resetGame()">Reset</button>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function playArp(notes, dur = 0.08) {
+  notes.forEach((f, i) => setTimeout(() => playSfx(f, 'triangle', 0.2, 0.25), i * dur * 1000));
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+function saveCanvas() {
+  playSfx(660);
+  const a = document.createElement('a');
+  a.download = 'musical-water-glasses.png';
+  a.href = canvas.toDataURL();
+  a.click();
+}
+
+      const glasses = [
+        { f: 261.63, fill: 0.9, col: '#ef4444' },
+        { f: 293.66, fill: 0.78, col: '#f97316' },
+        { f: 329.63, fill: 0.65, col: '#facc15' },
+        { f: 349.23, fill: 0.52, col: '#22c55e' },
+        { f: 392.00, fill: 0.40, col: '#06b6d4' },
+        { f: 440.00, fill: 0.28, col: '#3b82f6' },
+        { f: 493.88, fill: 0.16, col: '#8b5cf6' }
+      ];
+      let hit = -1;
+      function resetGame() { hit = -1; }
+      canvas.addEventListener('pointerdown', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const idx = Math.floor((x - 80) / 95);
+        if (idx >= 0 && idx < glasses.length) {
+          hit = idx;
+          playSfx(glasses[idx].f, 'sine', 0.6, 0.4);
+          setTimeout(() => hit = -1, 200);
+        }
+      });
+      function loop() {
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, 800, 500);
+        glasses.forEach((g, i) => {
+          const x = 110 + i * 95;
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+          ctx.fillRect(x - 30, 160, 60, 200);
+          ctx.strokeRect(x - 30, 160, 60, 200);
+          // Water fill
+          const h = 200 * g.fill;
+          ctx.fillStyle = g.col;
+          ctx.fillRect(x - 28, 360 - h, 56, h);
+          if (i === hit) {
+            ctx.font = '28px sans-serif'; ctx.fillText('✨', x - 14, 130);
+          }
+        });
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

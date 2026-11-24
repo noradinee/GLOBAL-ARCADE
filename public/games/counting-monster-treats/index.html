@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Feed Cute Monsters — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #831843 0%, #500724 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #ec4899; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #2a081a; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>👾</span>
+    <span>Feed Cute Monsters</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      let need = 3;
+      let fed = 0;
+      let monsterX = 400;
+      function resetGame() { fed = 0; need = 2 + Math.floor(Math.random() * 4); }
+      canvas.addEventListener('pointerdown', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        if (y > 360 && Math.abs(x - 400) < 250) {
+          if (fed < need) {
+            fed++; playSfx(440 + fed * 80, 'sine', 0.15, 0.3);
+            if (fed === need) {
+              playSfx(784, 'triangle', 0.4, 0.4); notifyParent('WIN');
+              setTimeout(resetGame, 1200);
+            }
+          }
+        }
+      });
+      function loop() {
+        ctx.fillStyle = '#2a081a'; ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#f472b6'; ctx.font = 'bold 30px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('أطعم الوحش اللطيف ' + need + ' كعكات حلوى!', 400, 60);
+        ctx.fillStyle = '#fbcfe8'; ctx.font = '22px system-ui'; ctx.fillText('أطعمته: ' + fed + ' من ' + need, 400, 100);
+        // Monster
+        ctx.fillStyle = '#ec4899'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(300, 160, 200, 180, 50) : ctx.rect(300, 160, 200, 180); ctx.fill();
+        // Eyes
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(360, 210, 25, 0, Math.PI*2); ctx.arc(440, 210, 25, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(360, 210, 10, 0, Math.PI*2); ctx.arc(440, 210, 10, 0, Math.PI*2); ctx.fill();
+        // Mouth
+        ctx.fillStyle = fed === need ? '#22c55e' : '#831843'; ctx.beginPath(); ctx.ellipse(400, 280, 45, 30, 0, 0, Math.PI*2); ctx.fill();
+        // Treats Tray
+        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(150, 390, 500, 90);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 20px system-ui'; ctx.fillText('اضغط هنا لإطعام الكعكة 🍪', 400, 445);
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

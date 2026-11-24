@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Lights Out Cyber Grid — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; touch-action: none; }
+  canvas { display: block; max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+c.width = 500; c.height = 500;
+let grid = Array(5).fill(0).map(() => Array(5).fill(false));
+for (let i = 0; i < 7; i++) toggle(Math.floor(Math.random()*5), Math.floor(Math.random()*5), false);
+let moves = 0;
+function toggle(r, col) {
+  const dirs = [[0,0],[0,1],[0,-1],[1,0],[-1,0]];
+  for (const [dr, dc] of dirs) {
+    const nr = r + dr, nc = col + dc;
+    if (nr>=0 && nr<5 && nc>=0 && nc<5) grid[nr][nc] = !grid[nr][nc];
+  }
+}
+c.addEventListener('pointerdown', e => {
+  const rect = c.getBoundingClientRect();
+  const col = Math.floor(((e.clientX - rect.left) * (500 / rect.width) - 25) / 90);
+  const r = Math.floor(((e.clientY - rect.top) * (500 / rect.height) - 50) / 90);
+  if (r>=0 && r<5 && col>=0 && col<5) { toggle(r, col); moves++; draw(); }
+});
+function draw() {
+  ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 500, 500);
+  ctx.fillStyle = '#facc15'; ctx.font = 'bold 20px monospace';
+  ctx.fillText('MOVES: ' + moves, 30, 35);
+  let allOff = true;
+  for (let r = 0; r < 5; r++) {
+    for (let col = 0; col < 5; col++) {
+      if (grid[r][col]) allOff = false;
+      ctx.fillStyle = grid[r][col] ? '#facc15' : '#1e293b';
+      ctx.beginPath(); ctx.roundRect(25 + col * 90, 50 + r * 90, 80, 80, 12); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = grid[r][col] ? '#fef08a' : '#334155'; ctx.stroke();
+    }
+  }
+  if (allOff) {
+    ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0,0,500,500);
+    ctx.fillStyle = '#4ade80'; ctx.font = 'bold 36px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('LIGHTS OUT!', 250, 240);
+    ctx.fillStyle = '#fff'; ctx.font = '22px sans-serif';
+    ctx.fillText('Solved in ' + moves + ' clicks', 250, 290);
+    ctx.textAlign = 'start';
+  }
+}
+draw();
+</script>
+</body>
+</html>

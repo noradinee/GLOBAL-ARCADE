@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Mini Vector Tower Defense — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: #080c14; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; touch-action: none; }
+  canvas { display: block; max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+c.width = 700; c.height = 400;
+let creeps = []; let turrets = []; let score = 0; let lives = 10; let credits = 100;
+function spawn() { creeps.push({ x: 0, y: 200, hp: 30, maxHp: 30, speed: 1.5 }); }
+setInterval(spawn, 1500);
+c.addEventListener('pointerdown', e => {
+  const rect = c.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (700 / rect.width);
+  const y = (e.clientY - rect.top) * (400 / rect.height);
+  if (credits >= 40 && Math.abs(y - 200) > 40) {
+    turrets.push({ x, y, range: 120, cd: 0 }); credits -= 40;
+  }
+});
+function loop() {
+  ctx.fillStyle = '#080c14'; ctx.fillRect(0, 0, 700, 400);
+  // Path
+  ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 50; ctx.beginPath(); ctx.moveTo(0, 200); ctx.lineTo(700, 200); ctx.stroke();
+  // Creeps
+  for (let i = creeps.length - 1; i >= 0; i--) {
+    const cr = creeps[i]; cr.x += cr.speed;
+    ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(cr.x, cr.y, 14, 0, Math.PI*2); ctx.fill();
+    if (cr.x >= 700) { lives--; creeps.splice(i, 1); continue; }
+  }
+  // Turrets & Lasers
+  for (const t of turrets) {
+    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(t.x, t.y, 16, 0, Math.PI*2); ctx.fill();
+    const target = creeps.find(cr => Math.hypot(cr.x - t.x, cr.y - t.y) < t.range);
+    if (target) {
+      ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(target.x, target.y); ctx.stroke();
+      target.hp -= 0.8;
+      if (target.hp <= 0) {
+        creeps.splice(creeps.indexOf(target), 1); score += 20; credits += 15;
+      }
+    }
+  }
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 18px monospace';
+  ctx.fillText('CREDITS: ' + credits + '  LIVES: ' + lives + '  SCORE: ' + score, 20, 35);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '14px sans-serif';
+  ctx.fillText('Click off-path to place Turret (Cost: 40)', 20, 380);
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

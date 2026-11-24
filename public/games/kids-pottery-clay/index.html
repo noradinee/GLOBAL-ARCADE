@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Kids Pottery Wheel — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); display: flex; flex-direction: column; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: none; }
+  header { height: 50px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 2px solid rgba(0,0,0,0.08); z-index: 10; }
+  .title { font-size: 16px; font-weight: 800; color: #b45309; }
+  .btn { background: #fff; border: 2px solid #b45309; border-radius: 10px; padding: 5px 12px; font-size: 13px; font-weight: 700; cursor: pointer; color: #b45309; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; }
+  canvas { background: #ffffff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 100%; max-height: 100%; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Kids Pottery Wheel</div>
+  <button class="btn" onclick="if(window.resetGame)resetGame()">Reset</button>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function playArp(notes, dur = 0.08) {
+  notes.forEach((f, i) => setTimeout(() => playSfx(f, 'triangle', 0.2, 0.25), i * dur * 1000));
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+function saveCanvas() {
+  playSfx(660);
+  const a = document.createElement('a');
+  a.download = 'kids-pottery-clay.png';
+  a.href = canvas.toDataURL();
+  a.click();
+}
+
+      let radius = [80, 90, 105, 115, 110, 100, 85, 70, 75, 80];
+      let spin = 0;
+      function resetGame() { radius = [80, 90, 105, 115, 110, 100, 85, 70, 75, 80]; playSfx(250); }
+      canvas.addEventListener('pointermove', e => {
+        if (!e.buttons) return;
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        const section = Math.floor((y - 120) / 25);
+        if (section >= 0 && section < radius.length) {
+          const dist = Math.abs(x - 400);
+          radius[section] = Math.max(40, Math.min(150, dist));
+          playSfx(200 + radius[section] * 2, 'sine', 0.04);
+        }
+      });
+      function loop() {
+        spin += 0.08;
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(0, 0, 800, 500);
+        // Spinning Wheel Base
+        ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.ellipse(400, 390, 170, 35, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#64748b'; ctx.beginPath(); ctx.ellipse(400, 385, 150, 25, 0, 0, Math.PI * 2); ctx.fill();
+        // Vase shape
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        for (let i = 0; i < radius.length; i++) {
+          const y = 140 + i * 25;
+          const wobble = Math.sin(spin + i) * 3;
+          if (i === 0) ctx.moveTo(400 - radius[i] + wobble, y);
+          else ctx.lineTo(400 - radius[i] + wobble, y);
+        }
+        for (let i = radius.length - 1; i >= 0; i--) {
+          const y = 140 + i * 25;
+          const wobble = Math.sin(spin + i) * 3;
+          ctx.lineTo(400 + radius[i] + wobble, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        // Rim
+        ctx.fillStyle = '#b45309'; ctx.beginPath(); ctx.ellipse(400, 140, radius[0], 12, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '20px sans-serif'; ctx.fillStyle = '#78350f'; ctx.textAlign = 'center';
+        ctx.fillText('Touch & slide left/right to shape your clay vase! 🏺', 400, 60);
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

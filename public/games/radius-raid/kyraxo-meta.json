@@ -1,0 +1,36 @@
+{
+  "id": "radius-raid",
+  "title": "Radius Raid",
+  "spdx": "MIT AND Apache-2.0",
+  "author": "Jack Rugile",
+  "year": 2014,
+  "engine": "HTML5 Canvas2D Vector",
+  "controls": "Mouse/Touch aim & shoot, WASD/Arrows move",
+  "tags": [
+    "arcade",
+    "retro",
+    "space",
+    "shooter",
+    "action"
+  ],
+  "acquiredBy": "KYRAXO AI COUNCIL Stage S7",
+  "acquiredAt": "2026-11-14T21:39:41.045Z",
+  "originalRepo": "https://github.com/jackrugile/radius-raid-js13k",
+  "licenseUrl": "https://github.com/jackrugile/radius-raid-js13k/blob/master/LICENSE.md",
+  "components": [
+    {
+      "name": "Radius Raid Game & Vector Graphics",
+      "author": "Jack Rugile",
+      "spdx": "MIT",
+      "licenseFile": "LICENSE.md"
+    },
+    {
+      "name": "jsfxr Sound Synthesis Engine",
+      "author": "Markus Neubrand",
+      "spdx": "Apache-2.0",
+      "upstream": "https://github.com/mneubrand/jsfxr",
+      "licenseFile": "LICENSE-APACHE.txt"
+    }
+  ],
+  "noticesFile": "THIRD_PARTY_NOTICES.md"
+}

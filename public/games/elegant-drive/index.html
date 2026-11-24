@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elegant Drive</title>
+  <style>
+    :root{
+      --bg1:#0a0f1f; --bg2:#111827; --glass:rgba(255,255,255,.08); --stroke:rgba(255,255,255,.14);
+      --text:#eef4ff; --muted:#a9b7d6; --accent:#7dd3fc; --accent2:#c4b5fd; --good:#34d399; --warn:#fb7185;
+    }
+    *{box-sizing:border-box} html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(1200px 700px at 70% -10%,#1b2a52 0%,var(--bg1) 45%,#060913 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    #wrap{position:relative;width:100vw;height:100vh}
+    canvas{display:block;width:100%;height:100%}
+    .hud{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:12px;pointer-events:none}
+    .pill{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--stroke);border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .label{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+    .value{font-size:20px;font-weight:700;margin-top:2px}
+    .right{display:flex;gap:10px}
+    #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(to bottom,rgba(4,7,16,.35),rgba(4,7,16,.6))}
+    .panel{width:min(92vw,560px);padding:28px 26px;border-radius:22px;background:rgba(17,24,39,.55);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 30px 80px rgba(0,0,0,.45);text-align:center}
+    h1{margin:0 0 8px;font-size:34px;font-weight:750;letter-spacing:.02em;background:linear-gradient(90deg,#fff,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    p{margin:8px 0;color:var(--muted);line-height:1.55}
+    .keys{margin:14px 0 4px;color:#dce7ff}
+    kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-bottom-width:2px;border-radius:8px;padding:2px 8px;font:600 13px/1.4 inherit;color:#fff}
+    button{margin-top:16px;appearance:none;border:0;cursor:pointer;color:#08111f;font-weight:700;font-size:16px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,#7dd3fc,#a78bfa);box-shadow:0 10px 24px rgba(125,211,252,.25)}
+    button:hover{filter:brightness(1.06)}
+    .sub{font-size:13px;color:#95a6ca;margin-top:10px}
+    a.back{position:absolute;left:14px;bottom:14px;color:#cfe0ff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:8px 10px;border-radius:10px;backdrop-filter:blur(8px)}
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game"></canvas>
+    <div class="hud">
+      <div class="pill"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="right">
+        <div class="pill"><div class="label">Speed</div><div class="value" id="speed">0</div></div>
+        <div class="pill"><div class="label">Best</div><div class="value" id="best">0</div></div>
+      </div>
+    </div>
+    
+    <div id="overlay">
+      <div class="panel" id="panel">
+        <h1>Elegant Drive</h1>
+        <p>A modern, elegant highway drive. Glide through traffic, collect light orbs, and chain near-misses to build your score as the pace rises.</p>
+        <p class="keys"><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> to steer · <kbd>↑</kbd>/<kbd>W</kbd> boost (short)</p>
+        <p class="sub">Mobile: drag or tap left/right side to steer. Avoid collisions.</p>
+        <button id="startBtn">Start Drive</button>
+      </div>
+    </div>
+  </div>
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const speedEl = document.getElementById('speed');
+  const bestEl = document.getElementById('best');
+  const overlay = document.getElementById('overlay');
+  const panel = document.getElementById('panel');
+  const startBtn = document.getElementById('startBtn');
+  let W=0,H=0,dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+  function resize(){
+    W=innerWidth; H=innerHeight;
+    canvas.width=Math.floor(W*dpr); canvas.height=Math.floor(H*dpr);
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  addEventListener('resize', resize); resize();
+
+  const road = { lanes: 4, get width(){ return Math.min(520, W*0.72); }, get left(){ return (W-this.width)/2; }, get right(){ return (W+this.width)/2; } };
+  const laneX = i => road.left + road.width*(i+0.5)/road.lanes;
+
+  let state='menu', last=0, t=0;
+  let player, traffic = [], orbs = [], particles = [], score = 0, best=Number(localStorage.getItem('aetherDriveBest')||0), speed = 320, dist = 0, spawnT = 0, orbT = 0, boostCd = 0, boostT = 0, nearCombo = 0;
+  bestEl.textContent = best;
+  const keys = {};
+
+  function reset(){
+    state='playing'; last=performance.now(); t=0;
+    player = { lane:1.5, x: laneX(1), y: H*0.8, w: 34, h: 62, vx:0, targetLane:1, tilt:0 };
+    traffic = []; orbs = []; particles = [];
+    score=0; dist=0; speed=320; spawnT=0; orbT=0.6; boostCd=0; boostT=0; nearCombo=0;
+    overlay.style.display='none';
+    updateHud();
+  }
+
+  function gameOver(){
+    state='over';
+    best = Math.max(best, Math.floor(score));
+    localStorage.setItem('aetherDriveBest', String(best));
+    bestEl.textContent = best;
+    overlay.style.display='flex';
+    panel.innerHTML = `<h1>Drive Complete</h1>
+      <p>Score: <strong>${Math.floor(score)}</strong> · Distance: <strong>${Math.floor(dist)}m</strong> · Best: <strong>${best}</strong></p>
+      <p class="sub">Tip: stay smooth, collect orbs, and pass close to traffic for near-miss bonus.</p>
+      <button id="startBtn">Drive Again</button>`;
+    panel.querySelector('#startBtn').onclick = reset;
+  }
+
+  function updateHud(){
+    scoreEl.textContent = Math.floor(score);
+    speedEl.textContent = Math.floor(speed/10);
+    bestEl.textContent = best;
+  }
+
+  function spawnTraffic(){
+    const lane = Math.floor(Math.random()*road.lanes);
+    const minGap = 150;
+    const tooClose = traffic.some(c => c.lane===lane && c.y < minGap);
+    if(tooClose) return;
+    const w = 34 + Math.random()*10;
+    const h = 58 + Math.random()*18;
+    const v = speed * (0.35 + Math.random()*0.35);
+    const hue = [210, 260, 330, 20, 160][Math.floor(Math.random()*5)];
+    traffic.push({ lane, x: laneX(lane), y: -120, w, h, v, hue, passed:false, near:false });
+  }
+  function spawnOrb(){
+    const lane = Math.floor(Math.random()*road.lanes);
+    if(traffic.some(c=>c.lane===lane && c.y < 180)) return;
+    orbs.push({ lane, x: laneX(lane), y: -40, r: 8, t:0 });
+  }
+  function addParticles(x,y,color,count=10){
+    for(let i=0;i<count;i++){
+      const a=Math.random()*Math.PI*2, s=30+Math.random()*140;
+      particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0.4+Math.random()*0.5,max:0.9,color});
+    }
+  }
+
+  function steer(dir){
+    if(state!=='playing') return;
+    player.targetLane = Math.max(0, Math.min(road.lanes-1, player.targetLane + dir));
+  }
+  function doBoost(){
+    if(state!=='playing') return;
+    if(boostCd<=0){ boostT = 0.55; boostCd = 2.8; }
+  }
+
+  addEventListener('keydown', e=>{
+    if(['ArrowLeft','ArrowRight','ArrowUp','KeyA','KeyD','KeyW','Space'].includes(e.code)) e.preventDefault();
+    keys[e.code]=true;
+    if(state!=='playing'){ if(e.code==='Enter' || e.code==='Space') reset(); return; }
+    if(e.code==='ArrowLeft'||e.code==='KeyA') steer(-1);
+    if(e.code==='ArrowRight'||e.code==='KeyD') steer(1);
+    if(e.code==='ArrowUp'||e.code==='KeyW'||e.code==='Space') doBoost();
+  }, {passive:false});
+  addEventListener('keyup', e=> keys[e.code]=false);
+
+  let pointerX=null;
+  canvas.addEventListener('pointerdown', e=>{ if(state!=='playing'){ reset(); return; } pointerX=e.clientX; handlePointer(e.clientX); });
+  canvas.addEventListener('pointermove', e=>{ if(pointerX!=null && state==='playing') handlePointer(e.clientX); });
+  addEventListener('pointerup', ()=> pointerX=null);
+  function handlePointer(x){
+    const rel = (x - road.left) / road.width;
+    player.targetLane = Math.max(0, Math.min(road.lanes-1, Math.round(rel*road.lanes - 0.5)));
+  }
+  startBtn.onclick = reset;
+
+  function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){
+    return Math.abs(ax-bx) < (aw+bw)/2 && Math.abs(ay-by) < (ah+bh)/2;
+  }
+
+  function update(dt){
+    t += dt;
+    if(boostCd>0) boostCd -= dt;
+    if(boostT>0) boostT -= dt;
+    const boostMul = boostT>0 ? 1.35 : 1;
+    speed += dt * 7.5;
+    const worldSpeed = speed * boostMul;
+    dist += worldSpeed * dt / 12;
+    score += dt * (10 + speed*0.02) * (1 + nearCombo*0.08);
+
+    // smooth lane movement
+    const tx = laneX(player.targetLane);
+    player.x += (tx - player.x) * Math.min(1, dt*10);
+    player.tilt = (tx - player.x) * 0.03;
+
+    spawnT -= dt;
+    const interval = Math.max(0.38, 0.95 - speed/1400);
+    if(spawnT<=0){ spawnTraffic(); if(Math.random()<0.35) spawnTraffic(); spawnT = interval; }
+    orbT -= dt;
+    if(orbT<=0){ spawnOrb(); orbT = 0.8 + Math.random()*0.9; }
+
+    for(const c of traffic){
+      c.y += (worldSpeed - c.v) * dt;
+      // near miss
+      if(!c.near && Math.abs(c.y - player.y) < 70 && Math.abs(c.x - player.x) < 52 && Math.abs(c.x - player.x) > 30){
+        c.near = true; nearCombo = Math.min(10, nearCombo+1); score += 25 + nearCombo*4; addParticles(player.x, player.y-30, 'rgba(125,211,252,0.9)', 8);
+      }
+      if(!c.passed && c.y > player.y + 50){ c.passed=true; nearCombo = Math.max(0, nearCombo-0.25); }
+      if(rectsOverlap(player.x,player.y,player.w-6,player.h-8,c.x,c.y,c.w-4,c.h-6)){
+        addParticles(player.x, player.y, 'rgba(251,113,133,1)', 24);
+        updateHud(); gameOver(); return;
+      }
+    }
+    traffic = traffic.filter(c => c.y < H + 140);
+
+    for(const o of orbs){
+      o.y += worldSpeed * dt; o.t += dt;
+      const dx = o.x - player.x, dy = o.y - player.y;
+      if(dx*dx + dy*dy < (o.r+22)*(o.r+22)){
+        o.collected = true; score += 40; speed += 2; addParticles(o.x,o.y,'rgba(196,181,253,1)', 12);
+      }
+    }
+    orbs = orbs.filter(o => !o.collected && o.y < H + 60);
+
+    for(const p of particles){
+      p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= 0.98; p.vy *= 0.98;
+    }
+    particles = particles.filter(p => p.life > 0);
+    updateHud();
+  }
+
+  function roundRect(x,y,w,h,r,fill,stroke){
+    const rr=Math.min(r,w/2,h/2);
+    ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath();
+    if(fill) ctx.fill(); if(stroke) ctx.stroke();
+  }
+
+  function drawBackground(){
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#091225'); g.addColorStop(0.55,'#0b1326'); g.addColorStop(1,'#0a0f1d');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    // ambient glows
+    const r1=ctx.createRadialGradient(W*0.2,H*0.15,10,W*0.2,H*0.15,260); r1.addColorStop(0,'rgba(125,211,252,0.12)'); r1.addColorStop(1,'rgba(125,211,252,0)'); ctx.fillStyle=r1; ctx.fillRect(0,0,W,H);
+    const r2=ctx.createRadialGradient(W*0.85,H*0.1,10,W*0.85,H*0.1,320); r2.addColorStop(0,'rgba(167,139,250,0.13)'); r2.addColorStop(1,'rgba(167,139,250,0)'); ctx.fillStyle=r2; ctx.fillRect(0,0,W,H);
+  }
+
+  function drawRoad(){
+    const x=road.left, w=road.width;
+    // shoulders
+    ctx.fillStyle='rgba(255,255,255,0.03)'; roundRect(x-10, -20, w+20, H+40, 26, true, false);
+    // asphalt
+    const ag=ctx.createLinearGradient(0,0,0,H); ag.addColorStop(0,'#161e31'); ag.addColorStop(1,'#101827');
+    ctx.fillStyle=ag; roundRect(x, -20, w, H+40, 22, true, false);
+    // edge lines
+    ctx.strokeStyle='rgba(226,232,240,0.35)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x+8,0); ctx.lineTo(x+8,H); ctx.moveTo(x+w-8,0); ctx.lineTo(x+w-8,H); ctx.stroke();
+    // lane markers
+    const dashH=34, gap=26, offset=(t*speed*0.12)% (dashH+gap);
+    for(let i=1;i<road.lanes;i++){
+      const lx = road.left + w*i/road.lanes;
+      ctx.strokeStyle='rgba(148,163,184,0.28)'; ctx.lineWidth=2;
+      for(let y=-dashH-gap; y<H+dashH; y+=dashH+gap){
+        const yy=y+offset;
+        ctx.beginPath(); ctx.moveTo(lx,yy); ctx.lineTo(lx,yy+dashH*0.55); ctx.stroke();
+      }
+    }
+    // center glow
+    const cg=ctx.createLinearGradient(0,0,0,H); cg.addColorStop(0,'rgba(125,211,252,0)'); cg.addColorStop(0.5,'rgba(125,211,252,0.05)'); cg.addColorStop(1,'rgba(125,211,252,0)');
+    ctx.fillStyle=cg; ctx.fillRect(x+w*0.35,0,w*0.3,H);
+  }
+
+  function drawCar(x,y,w,h,colorA,colorB,tilt=0,isPlayer=false){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(tilt);
+
+    // Neon underglow
+    const ug = ctx.createRadialGradient(0, 0, 5, 0, 0, w * 1.2);
+    if(isPlayer) {
+      ug.addColorStop(0, 'rgba(168, 85, 247, 0.5)');
+      ug.addColorStop(1, 'rgba(168, 85, 247, 0)');
+    } else {
+      ug.addColorStop(0, 'rgba(239, 68, 68, 0.35)');
+      ug.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    }
+    ctx.fillStyle = ug;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, w * 1.1, h * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    roundRect(-w/2 + 2, -h/2 + 4, w, h, 12, true, false);
+
+    // Aerodynamic Tires (Wide Racing Slicks with Gold Calipers)
+    ctx.fillStyle = '#0f172a';
+    roundRect(-w/2 - 4, -h*0.35, 6, h*0.22, 3, true, false);
+    roundRect(w/2 - 2, -h*0.35, 6, h*0.22, 3, true, false);
+    roundRect(-w/2 - 5, h*0.12, 7, h*0.25, 3, true, false);
+    roundRect(w/2 - 2, h*0.12, 7, h*0.25, 3, true, false);
+
+    // Brake calipers
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(-w/2 - 2, -h*0.3, 2, 4);
+    ctx.fillRect(w/2, -h*0.3, 2, 4);
+
+    // Supercar Sculpted Body
+    const bodyGrad = ctx.createLinearGradient(0, -h/2, 0, h/2);
+    bodyGrad.addColorStop(0, colorA);
+    bodyGrad.addColorStop(0.5, colorB);
+    bodyGrad.addColorStop(1, '#090d16');
+    ctx.fillStyle = bodyGrad;
+    
+    ctx.beginPath();
+    ctx.moveTo(-w*0.35, -h/2);
+    ctx.lineTo(w*0.35, -h/2);
+    ctx.quadraticCurveTo(w/2, -h*0.2, w/2, 0);
+    ctx.lineTo(w*0.52, h*0.38);
+    ctx.lineTo(w*0.38, h/2);
+    ctx.lineTo(-w*0.38, h/2);
+    ctx.lineTo(-w*0.52, h*0.38);
+    ctx.lineTo(-w/2, 0);
+    ctx.quadraticCurveTo(-w/2, -h*0.2, -w*0.35, -h/2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Body highlights & side air intakes
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Side aero vents / carbon ducts
+    ctx.fillStyle = '#090d16';
+    roundRect(-w*0.48, -h*0.05, 4, h*0.22, 2, true, false);
+    roundRect(w*0.48 - 4, -h*0.05, 4, h*0.22, 2, true, false);
+
+    // Carbon fiber roof / aerodynamic cockpit canopy
+    const glassGrad = ctx.createLinearGradient(0, -h*0.22, 0, h*0.22);
+    glassGrad.addColorStop(0, '#c084fc');
+    glassGrad.addColorStop(0.4, '#0f172a');
+    glassGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = glassGrad;
+    roundRect(-w*0.28, -h*0.2, w*0.56, h*0.38, 8, true, false);
+
+    // Cockpit specular shine reflection
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.beginPath();
+    ctx.moveTo(-w*0.22, -h*0.16);
+    ctx.lineTo(-w*0.05, -h*0.16);
+    ctx.lineTo(-w*0.15, h*0.1);
+    ctx.lineTo(-w*0.25, h*0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Rear GT Carbon Spoiler
+    ctx.fillStyle = '#0f172a';
+    roundRect(-w*0.45, h*0.38, w*0.9, 6, 2, true, false);
+    ctx.strokeStyle = '#c084fc';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-w*0.45, h*0.38, w*0.9, 6);
+
+    // Headlights / Taillights
+    if (isPlayer) {
+      // Front Dual Laser Matrix LED lights
+      ctx.fillStyle = '#fbcfe8';
+      ctx.shadowColor = '#f472b6';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(-w*0.42, -h/2 + 2, 8, 4);
+      ctx.fillRect(w*0.42 - 8, -h/2 + 2, 8, 4);
+
+      // Light beams on road ahead
+      ctx.shadowBlur = 0;
+      const beam = ctx.createLinearGradient(0, -h/2, 0, -h/2 - 60);
+      beam.addColorStop(0, 'rgba(244, 114, 182, 0.4)');
+      beam.addColorStop(1, 'rgba(244, 114, 182, 0)');
+      ctx.fillStyle = beam;
+      ctx.beginPath();
+      ctx.moveTo(-w*0.4, -h/2);
+      ctx.lineTo(-w*0.6, -h/2 - 60);
+      ctx.lineTo(-w*0.2, -h/2 - 60);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(w*0.4, -h/2);
+      ctx.lineTo(w*0.6, -h/2 - 60);
+      ctx.lineTo(w*0.2, -h/2 - 60);
+      ctx.closePath();
+      ctx.fill();
+
+      // Rear Full-width OLED Cyber Tail Lightbar
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 10;
+      roundRect(-w*0.38, h/2 - 4, w*0.76, 3, 1.5, true, false);
+      ctx.shadowBlur = 0;
+
+      // Nitro exhaust flame if boosting
+      if (boostT > 0 || Math.random() < 0.25) {
+        ctx.fillStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.moveTo(-6, h/2);
+        ctx.lineTo(0, h/2 + 18 + Math.random()*12);
+        ctx.lineTo(6, h/2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else {
+      // Traffic car lights
+      ctx.fillStyle = '#f43f5e';
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 6;
+      ctx.fillRect(-w*0.38, -h/2 + 2, 7, 3);
+      ctx.fillRect(w*0.38 - 7, -h/2 + 2, 7, 3);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-w*0.38, h/2 - 4, 7, 3);
+      ctx.fillRect(w*0.38 - 7, h/2 - 4, 7, 3);
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.restore();
+  }
+
+  function draw(){
+    drawBackground();
+    drawRoad();
+
+    // orbs
+    for(const o of orbs){
+      const pulse = 1 + Math.sin(o.t*6)*0.15;
+      const rg=ctx.createRadialGradient(o.x,o.y,1,o.x,o.y,18*pulse);
+      rg.addColorStop(0,'rgba(255,255,255,0.95)'); rg.addColorStop(0.35,'rgba(125,211,252,0.9)'); rg.addColorStop(1,'rgba(167,139,250,0)');
+      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(o.x,o.y,16*pulse,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#e0f2fe'; ctx.beginPath(); ctx.arc(o.x,o.y,5,0,Math.PI*2); ctx.fill();
+    }
+
+    // traffic
+    for(const c of traffic){
+      const a=`hsla(${c.hue},85%,68%,0.95)`, b=`hsla(${c.hue},70%,42%,0.98)`;
+      drawCar(c.x,c.y,c.w,c.h,a,b,0,false);
+    }
+
+    // player
+    if(player){
+      const boostGlow = boostT>0 ? 0.25 : 0.08;
+      const pg=ctx.createRadialGradient(player.x,player.y,10,player.x,player.y,90);
+      pg.addColorStop(0,`rgba(125,211,252,${boostGlow})`); pg.addColorStop(1,'rgba(125,211,252,0)');
+      ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(player.x,player.y,90,0,Math.PI*2); ctx.fill();
+      drawCar(player.x,player.y,player.w,player.h,'#7dd3fc','#6366f1',player.tilt,true);
+    }
+
+    // particles
+    for(const p of particles){
+      const a = Math.max(0, p.life/p.max);
+      ctx.fillStyle = p.color.replace(/rgba?\(([^)]+)\)/, (m,inner)=>{ // keep rgb, adjust alpha
+        const parts = inner.split(',').map(s=>s.trim());
+        return `rgba(${parts[0]},${parts[1]},${parts[2]},${a})`;
+      });
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.2,0,Math.PI*2); ctx.fill();
+    }
+
+    if(state==='playing' && nearCombo>=2){
+      ctx.save();
+      ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='600 13px Inter,system-ui,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(`Near-miss x${Math.floor(nearCombo)}`, W/2, H*0.18);
+      ctx.restore();
+    }
+  }
+
+  function loop(now){
+    requestAnimationFrame(loop);
+    if(state!=='playing'){ draw(); return; }
+    const dt = Math.min(0.033, (now-last)/1000 || 0.016); last=now;
+    update(dt); draw();
+  }
+  requestAnimationFrame(loop);
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Arabic Letter Tracing — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #78350f 0%, #451a03 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #f59e0b; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #1c1917; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>✍️</span>
+    <span>Arabic Letter Tracing</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      const targetLetters = ['أ', 'ب', 'ج', 'د', 'ر', 'س', 'ط', 'ع', 'ف', 'م'];
+      let letIdx = 0;
+      let strokes = [];
+      let isDrawing = false;
+      let stars = 0;
+      function resetGame() { strokes = []; }
+      canvas.addEventListener('pointerdown', e => { isDrawing = true; addPoint(e); playSfx(480, 'sine', 0.05); });
+      window.addEventListener('pointermove', e => { if (isDrawing) addPoint(e); });
+      window.addEventListener('pointerup', () => {
+        isDrawing = false;
+        if (strokes.length > 35) {
+          playSfx(784, 'triangle', 0.3, 0.4);
+          stars++;
+          notifyParent('WIN');
+          setTimeout(() => { strokes = []; letIdx = (letIdx + 1) % targetLetters.length; }, 600);
+        }
+      });
+      function addPoint(e) {
+        const r = canvas.getBoundingClientRect();
+        strokes.push({ x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) });
+      }
+      function loop() {
+        ctx.fillStyle = '#1c1917'; ctx.fillRect(0, 0, 800, 500);
+        // Header info
+        ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 24px system-ui'; ctx.textAlign = 'left';
+        ctx.fillText('⭐ النجوم: ' + stars, 30, 45);
+        ctx.fillStyle = '#a8a29e'; ctx.font = '18px system-ui'; ctx.fillText('تتبع مسار الحرف بإصبعك بدقة', 30, 80);
+        // Tracing Letter Template
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.12)';
+        ctx.font = 'bold 320px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText(targetLetters[letIdx], 400, 380);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)'; ctx.lineWidth = 14; ctx.setLineDash([14, 14]);
+        ctx.strokeText(targetLetters[letIdx], 400, 380);
+        ctx.setLineDash([]);
+        // User drawn strokes
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        if (strokes.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(strokes[0].x, strokes[0].y);
+          for (let i = 1; i < strokes.length; i++) ctx.lineTo(strokes[i].x, strokes[i].y);
+          ctx.stroke();
+        }
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

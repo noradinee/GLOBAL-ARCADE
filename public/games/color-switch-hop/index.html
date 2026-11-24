@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Color Switch: Chromatic Tap Hop — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  body { background: #0b1120; color: #fff; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; touch-action: none; }
+  #hud { display: flex; justify-content: space-between; width: 450px; max-width: 95vw; padding: 10px 16px; background: #1e293b; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: 800; }
+  canvas { background: #030712; border: 1px solid #334155; border-radius: 0 0 12px 12px; box-shadow: 0 0 35px rgba(236,72,153,0.3); max-width: 95vw; max-height: 80vh; cursor: pointer; touch-action: none; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <div>SCORE: <span style="color:#facc15;" id="sc">0</span></div>
+  <div style="color:#ec4899;">COLOR SWITCH HOP</div>
+  <div>BEST: <span style="color:#38bdf8;" id="best">0</span></div>
+</div>
+<canvas id="c" width="450" height="580"></canvas>
+<script>
+(() => {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const COLORS = ['#f43f5e', '#a855f7', '#06b6d4', '#facc15'];
+  let best = Number(localStorage.getItem('kyraxo_cswitch_best') || 0);
+  document.getElementById('best').textContent = best;
+
+  let ball, score, cameraY, over, started, rings;
+
+  function makeRing(y) {
+    return { y, angle: Math.random() * Math.PI * 2, speed: (Math.random() < 0.5 ? 1 : -1) * (0.025 + Math.random() * 0.018), scored: false, hasSwitch: true, switchHit: false };
+  }
+
+  function reset() {
+    ball = { y: 450, vy: 0, colorIdx: Math.floor(Math.random() * 4), r: 10 };
+    score = 0; cameraY = 0; over = false; started = false;
+    rings = [];
+    for (let i = 0; i < 8; i++) rings.push(makeRing(300 - i * 250));
+    document.getElementById('sc').textContent = '0';
+  }
+
+  function hop() {
+    if (over) { reset(); return; }
+    started = true;
+    ball.vy = -6.2;
+  }
+
+  window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); hop(); } });
+  cv.addEventListener('pointerdown', (e) => { e.preventDefault(); hop(); });
+
+  function segColorAtAngle(rngAngle, targetAngle) {
+    // Normalize relative angle in [0, 2*PI)
+    const twoPi = Math.PI * 2;
+    const rel = (((targetAngle - rngAngle) % twoPi) + twoPi) % twoPi;
+    return Math.floor(rel / (Math.PI / 2)) % 4;
+  }
+
+  function die() {
+    over = true;
+    if (score > best) { best = score; localStorage.setItem('kyraxo_cswitch_best', String(best)); document.getElementById('best').textContent = best; }
+  }
+
+  function loop() {
+    ctx.fillStyle = '#030712'; ctx.fillRect(0, 0, cv.width, cv.height);
+
+    if (started && !over) {
+      ball.y += ball.vy;
+      ball.vy += 0.27;
+      if (ball.y < cameraY + 300) cameraY = ball.y - 300;
+      if (ball.y > cameraY + 585) die();
+
+      // Recycle rings infinitely
+      const topY = Math.min(...rings.map(r => r.y));
+      rings.forEach(r => {
+        if (r.y - cameraY > 700) {
+          Object.assign(r, makeRing(topY - 250));
+        }
+      });
+    }
+
+    ctx.save();
+    ctx.translate(0, -cameraY);
+
+    rings.forEach((rng) => {
+      rng.angle += rng.speed;
+      const cx = 225, cy = rng.y, R = 74;
+      for (let i = 0; i < 4; i++) {
+        const a1 = rng.angle + i * (Math.PI / 2);
+        const a2 = a1 + Math.PI / 2;
+        ctx.strokeStyle = COLORS[i]; ctx.lineWidth = 14;
+        ctx.beginPath(); ctx.arc(cx, cy, R, a1, a2); ctx.stroke();
+      }
+      // Star inside ring
+      if (!rng.scored) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.fill();
+        if (started && !over && Math.abs(ball.y - cy) < 16) {
+          rng.scored = true;
+          score += 1;
+          document.getElementById('sc').textContent = String(score);
+        }
+      }
+      // Color switcher orb 125px below ring
+      if (rng.hasSwitch && !rng.switchHit) {
+        const sy = cy + 125;
+        for (let i = 0; i < 4; i++) {
+          ctx.fillStyle = COLORS[i];
+          ctx.beginPath(); ctx.moveTo(cx, sy);
+          ctx.arc(cx, sy, 11, i * Math.PI / 2, (i + 1) * Math.PI / 2);
+          ctx.closePath(); ctx.fill();
+        }
+        if (started && !over && Math.abs(ball.y - sy) < 18) {
+          rng.switchHit = true;
+          ball.colorIdx = (ball.colorIdx + 1 + Math.floor(Math.random() * 3)) % 4;
+        }
+      }
+      // Check bottom intersection (angle PI/2) and top intersection (angle 3*PI/2)
+      if (started && !over) {
+        if (Math.abs(ball.y - (cy + R)) < 11) {
+          if (segColorAtAngle(rng.angle, Math.PI / 2) !== ball.colorIdx) die();
+        }
+        if (Math.abs(ball.y - (cy - R)) < 11) {
+          if (segColorAtAngle(rng.angle, 3 * Math.PI / 2) !== ball.colorIdx) die();
+        }
+      }
+    });
+
+    ctx.fillStyle = COLORS[ball.colorIdx];
+    ctx.beginPath(); ctx.arc(225, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    if (!started && !over) {
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText('Tap or Press Space to Start Hopping!', 225, 515);
+    }
+
+    if (over) {
+      ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 34px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText('WRONG COLOR!', cv.width / 2, cv.height / 2 - 18);
+      ctx.fillStyle = '#fff'; ctx.font = '15px system-ui';
+      ctx.fillText('Score: ' + score + ' | Tap or Space to Retry', cv.width / 2, cv.height / 2 + 22);
+    }
+    requestAnimationFrame(loop);
+  }
+  reset();
+  loop();
+})();
+</script>
+</body>
+</html>

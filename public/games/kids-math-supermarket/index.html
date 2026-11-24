@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Kids Math Supermarket — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #713f12 0%, #451a03 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #eab308; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #1e293b; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>🛒</span>
+    <span>Kids Math Supermarket</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      let targetCount = 4;
+      let itemCount = 0;
+      let score = 0;
+      let items = ['🍎', '🥛', '🥖', '🍌', '🧀', '🥕'];
+      let curItem = '🍎';
+      function resetGame() { itemCount = 0; targetCount = 2 + Math.floor(Math.random() * 5); curItem = items[Math.floor(Math.random()*items.length)]; }
+      resetGame();
+      canvas.addEventListener('pointerdown', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        // Tap item on shelf
+        if (Math.hypot(x - 200, y - 280) < 70) {
+          if (itemCount < targetCount) {
+            itemCount++;
+            playSfx(300 + itemCount * 70, 'sine', 0.15, 0.3);
+            if (itemCount === targetCount) {
+              score += 20; playSfx(880, 'triangle', 0.4, 0.4); notifyParent('WIN');
+              setTimeout(resetGame, 1000);
+            }
+          }
+        }
+      });
+      function loop() {
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#fde047'; ctx.font = 'bold 30px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('ضع في سلة المشتريات ' + targetCount + ' ' + curItem, 400, 60);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '20px system-ui';
+        ctx.fillText('النقاط: ' + score, 400, 100);
+        // Shelf
+        ctx.fillStyle = '#475569'; ctx.fillRect(80, 340, 240, 20);
+        ctx.font = '80px system-ui'; ctx.fillText(curItem, 200, 310);
+        // Cart
+        ctx.fillStyle = '#0284c7'; ctx.fillRect(480, 240, 240, 120);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px system-ui';
+        ctx.fillText('🛒 السلة: ' + itemCount + ' / ' + targetCount, 600, 215);
+        ctx.font = '40px system-ui';
+        for(let i = 0; i < itemCount; i++) {
+          ctx.fillText(curItem, 520 + (i % 3) * 55, 290 + Math.floor(i / 3) * 45);
+        }
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

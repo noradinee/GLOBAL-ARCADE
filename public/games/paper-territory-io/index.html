@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Paper Territory: Hexa Conquest — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  body { background: #0a0e1a; color: #fff; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; touch-action: none; }
+  #hud { display: flex; justify-content: space-between; width: 700px; max-width: 96vw; padding: 10px 16px; background: #0f172a; border-radius: 12px 12px 0 0; border: 1px solid #1e293b; font-size: 14px; font-weight: 800; }
+  canvas { background: #060913; border: 1px solid #1e293b; border-radius: 0 0 12px 12px; box-shadow: 0 0 35px rgba(6,182,212,0.28); max-width: 96vw; max-height: 76vh; touch-action: none; }
+  #tip { margin-top: 8px; font-size: 12px; color: #38bdf8; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <div>TERRITORY: <span style="color:#38bdf8;" id="pct">5.0</span>%</div>
+  <div style="color:#06b6d4;">PAPER TERRITORY</div>
+  <div>RIVALS: <span style="color:#f43f5e;" id="en">3</span></div>
+</div>
+<canvas id="c" width="700" height="500"></canvas>
+<div id="tip">Swipe on mobile or use Arrow Keys / WASD to enclose new territory!</div>
+<script>
+(() => {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const GRID = 10, COLS = 70, ROWS = 50;
+  let map, p, enemies, over, won, moveTimer;
+
+  function init() {
+    map = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    for (let r = 21; r <= 27; r++) for (let c = 31; c <= 37; c++) map[r][c] = 1;
+    p = { x: 34, y: 24, dir: [1, 0], trail: [] };
+    enemies = [
+      { x: 10, y: 10, dx: 1, dy: 0, color: '#f43f5e' },
+      { x: 58, y: 12, dx: 0, dy: 1, color: '#a855f7' },
+      { x: 14, y: 40, dx: -1, dy: 0, color: '#10b981' },
+    ];
+    over = false; won = false; moveTimer = 0;
+    updatePct();
+  }
+
+  function floodCapture() {
+    p.trail.forEach(t => { map[t.y][t.x] = 1; });
+    p.trail = [];
+    // Flood-fill outside zeros to find enclosed interior regions
+    const outside = Array.from({ length: ROWS }, () => Uint8Array(COLS));
+    const q = [];
+    for (let r = 0; r < ROWS; r++) {
+      if (map[r][0] === 0) { outside[r][0] = 1; q.push([0, r]); }
+      if (map[r][COLS - 1] === 0) { outside[r][COLS - 1] = 1; q.push([COLS - 1, r]); }
+    }
+    for (let c = 0; c < COLS; c++) {
+      if (map[0][c] === 0) { outside[0][c] = 1; q.push([c, 0]); }
+      if (map[ROWS - 1][c] === 0) { outside[ROWS - 1][c] = 1; q.push([c, ROWS - 1]); }
+    }
+    let head = 0;
+    while (head < q.length) {
+      const [cx, cy] = q[head++];
+      const nbrs = [[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]];
+      for (const [nx, ny] of nbrs) {
+        if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && map[ny][nx] === 0 && !outside[ny][nx]) {
+          outside[ny][nx] = 1;
+          q.push([nx, ny]);
+        }
+      }
+    }
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (map[r][c] === 0 && !outside[r][c]) map[r][c] = 1;
+      }
+    }
+  }
+
+  function updatePct() {
+    let owned = 0;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (map[r][c] === 1) owned++;
+    const pct = (owned / (COLS * ROWS)) * 100;
+    document.getElementById('pct').textContent = pct.toFixed(1);
+    if (pct >= 80) { won = true; over = true; }
+  }
+
+  function steer(dx, dy) {
+    if (dx !== 0 && p.dir[0] === 0) p.dir = [dx, 0];
+    if (dy !== 0 && p.dir[1] === 0) p.dir = [0, dy];
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'w') steer(0, -1);
+    if (e.key === 'ArrowDown' || e.key === 's') steer(0, 1);
+    if (e.key === 'ArrowLeft' || e.key === 'a') steer(-1, 0);
+    if (e.key === 'ArrowRight' || e.key === 'd') steer(1, 0);
+  });
+
+  let tx = 0, ty = 0;
+  cv.addEventListener('touchstart', (e) => { if (e.touches[0]) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } }, { passive: true });
+  cv.addEventListener('touchmove', (e) => {
+    if (!e.touches[0]) return;
+    e.preventDefault();
+    const dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
+    if (Math.hypot(dx, dy) > 16) {
+      if (Math.abs(dx) > Math.abs(dy)) steer(dx > 0 ? 1 : -1, 0);
+      else steer(0, dy > 0 ? 1 : -1);
+      tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+    }
+  }, { passive: false });
+
+  cv.addEventListener('click', () => { if (over) init(); });
+
+  function step() {
+    p.x += p.dir[0]; p.y += p.dir[1];
+    if (p.x < 0 || p.x >= COLS || p.y < 0 || p.y >= ROWS) { over = true; return; }
+    if (map[p.y][p.x] === 1) {
+      if (p.trail.length > 0) { floodCapture(); updatePct(); }
+    } else {
+      if (p.trail.some(t => t.x === p.x && t.y === p.y)) { over = true; return; }
+      p.trail.push({ x: p.x, y: p.y });
+    }
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const en = enemies[i];
+      if (Math.random() < 0.08) {
+        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        const d = dirs[Math.floor(Math.random() * 4)];
+        en.dx = d[0]; en.dy = d[1];
+      }
+      en.x += en.dx; en.y += en.dy;
+      if (en.x < 1 || en.x >= COLS - 1) en.dx *= -1;
+      if (en.y < 1 || en.y >= ROWS - 1) en.dy *= -1;
+      en.x = Math.max(0, Math.min(COLS - 1, en.x));
+      en.y = Math.max(0, Math.min(ROWS - 1, en.y));
+      if (p.trail.some(t => t.x === en.x && t.y === en.y)) { over = true; return; }
+      if (map[en.y][en.x] === 1 && Math.abs(en.x - p.x) + Math.abs(en.y - p.y) < 2) {
+        enemies.splice(i, 1);
+        document.getElementById('en').textContent = String(enemies.length);
+      }
+    }
+  }
+
+  function loop() {
+    moveTimer++;
+    if (moveTimer % 4 === 0 && !over) step();
+    ctx.fillStyle = '#060913'; ctx.fillRect(0, 0, cv.width, cv.height);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (map[r][c] === 1) { ctx.fillStyle = '#0284c7'; ctx.fillRect(c * GRID, r * GRID, GRID, GRID); }
+      }
+    }
+    ctx.fillStyle = 'rgba(56,189,248,0.65)';
+    p.trail.forEach(t => ctx.fillRect(t.x * GRID, t.y * GRID, GRID, GRID));
+    enemies.forEach(en => { ctx.fillStyle = en.color; ctx.fillRect(en.x * GRID - 2, en.y * GRID - 2, GRID + 4, GRID + 4); });
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(p.x * GRID - 3, p.y * GRID - 3, GRID + 6, GRID + 6);
+
+    if (over) {
+      ctx.fillStyle = 'rgba(0,0,0,0.82)'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = won ? '#4ade80' : '#f43f5e';
+      ctx.font = 'bold 34px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(won ? 'SECTOR CONQUERED!' : 'ELIMINATED!', cv.width / 2, cv.height / 2 - 14);
+      ctx.fillStyle = '#fff'; ctx.font = '15px system-ui';
+      ctx.fillText('Click or Tap to Play Again', cv.width / 2, cv.height / 2 + 22);
+    }
+    requestAnimationFrame(loop);
+  }
+  init();
+  loop();
+})();
+</script>
+</body>
+</html>

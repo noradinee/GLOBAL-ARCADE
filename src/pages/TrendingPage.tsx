@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { gameService } from '../services/gameService';
 import { SEOHead } from '../components/common/SEOHead';
@@ -9,6 +9,15 @@ import { Flame } from 'lucide-react';
 
 export const TrendingPage: React.FC = () => {
   const { t, lang } = useLanguage();
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    gameService.loadFullCatalog();
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, []);
+
   const trendingGames = gameService.getTrendingGames();
 
   const seoTitle =

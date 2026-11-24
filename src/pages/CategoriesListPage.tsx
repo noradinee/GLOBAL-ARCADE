@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { gameService } from '../services/gameService';
@@ -35,6 +35,15 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 
 export const CategoriesListPage: React.FC = () => {
   const { t, lang, isRtl } = useLanguage();
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    gameService.loadFullCatalog();
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, []);
+
   const categories = gameService.getAllCategories();
 
   const seoTitle =

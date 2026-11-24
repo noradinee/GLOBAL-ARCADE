@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { gameService } from '../services/gameService';
 import { SEOHead } from '../components/common/SEOHead';
@@ -9,6 +9,15 @@ import { Star } from 'lucide-react';
 
 export const PopularPage: React.FC = () => {
   const { t, lang } = useLanguage();
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    gameService.loadFullCatalog();
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, []);
+
   const popularGames = gameService.getPopularGames(20);
 
   const seoTitle =

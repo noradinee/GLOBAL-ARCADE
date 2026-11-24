@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Stickman Knife: Target Master — KYRAXO</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#05050a;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;touch-action:none}#hud{display:flex;justify-content:space-between;width:750px;max-width:95vw;padding:10px 16px;background:rgba(15,23,42,0.9);border-radius:10px 10px 0 0;font-size:16px;font-weight:bold}canvas{background:#0a0d18;border:1px solid #f59e0b;border-radius:0 0 10px 10px;max-width:95vw;max-height:75vh;cursor:pointer;touch-action:none}#tip{margin-top:8px;font-size:13px;color:#f59e0b}</style></head>
+<body><div id="hud"><div>KNIVES: <span style="color:#22c55e;" id="knives">7</span></div><div>SCORE: <span style="color:#facc15;" id="score">0</span></div><div>STAGE <span id="stage">1</span></div></div>
+<canvas id="c" width="750" height="480"></canvas>
+<div id="tip">Tap Screen or Space to Throw Knife! Avoid hitting embedded blades.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let score=0,stage=1,knives=7,logAngle=0,embedded=[],flyingKnife=null,over=false,msg='';
+cv.addEventListener('pointerdown',()=>{if(over){over=false;score=0;stage=1;knives=7;embedded=[];msg='';updateHud();return;}throwKnife();});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(over){over=false;score=0;stage=1;knives=7;embedded=[];msg='';updateHud();return;}throwKnife();}});
+function updateHud(){document.getElementById('knives').textContent=knives;document.getElementById('score').textContent=score;document.getElementById('stage').textContent=stage;}
+function throwKnife(){if(flyingKnife||knives<=0||over)return;flyingKnife={y:400};knives--;updateHud();}
+function loop(){
+  ctx.fillStyle='#090d18';ctx.fillRect(0,0,cv.width,cv.height);
+  if(!over)logAngle+=0.025+stage*0.005;
+  ctx.save();ctx.translate(375,180);ctx.rotate(logAngle);
+  ctx.fillStyle='#78350f';ctx.beginPath();ctx.arc(0,0,70,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#d97706';ctx.lineWidth=5;ctx.stroke();
+  embedded.forEach(a=>{ctx.save();ctx.rotate(a);ctx.fillStyle='#cbd5e1';ctx.fillRect(-4,70,8,45);ctx.restore();});
+  ctx.restore();
+  if(flyingKnife&&!over){
+    flyingKnife.y-=18;ctx.fillStyle='#cbd5e1';ctx.fillRect(371,flyingKnife.y,8,45);
+    if(flyingKnife.y<250){
+      let currentAng=-logAngle-Math.PI/2;
+      let hit=false;
+      for(let a of embedded){let diff=Math.abs((a-currentAng+Math.PI*3)%(Math.PI*2)-Math.PI);if(diff<0.24){hit=true;break;}}
+      if(hit){over=true;msg='KNIFE CLASH!';flyingKnife=null;}
+      else{
+        embedded.push(currentAng);score++;flyingKnife=null;
+        if(knives===0){stage++;knives=7+Math.min(5,stage);embedded=[];}
+        updateHud();
+      }
+    }
+  }
+  if(over){
+    ctx.fillStyle='rgba(0,0,0,0.82)';ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#f43f5e';ctx.font='bold 34px sans-serif';ctx.textAlign='center';ctx.fillText(msg,375,220);
+    ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.fillText('Score: '+score+' | Tap or Space to Restart',375,258);
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script></body></html>

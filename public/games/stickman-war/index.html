@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Stickman War: Legacy Battle — KYRAXO</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#030712;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;touch-action:none}#hud{display:flex;justify-content:space-between;width:750px;max-width:95vw;padding:10px 16px;background:rgba(15,23,42,0.9);border-radius:10px 10px 0 0;font-size:15px;font-weight:bold}canvas{background:#0c101c;border:1px solid #f59e0b;border-radius:0 0 10px 10px;max-width:95vw;max-height:70vh;touch-action:none}#btns{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}button{padding:10px 18px;background:#0284c7;border:none;color:#fff;font-weight:bold;font-size:14px;border-radius:8px;cursor:pointer;touch-action:manipulation}</style></head>
+<body>
+<div id="hud"><div>GOLD: <span style="color:#facc15;" id="gold">100</span></div><div>ALLY BASE: <span style="color:#38bdf8;" id="myBase">500</span></div><div>ENEMY BASE: <span style="color:#ef4444;" id="enBase">500</span></div></div>
+<canvas id="c" width="750" height="450"></canvas>
+<div id="btns"><button onclick="spawnWarrior(50)">SWORDSMAN (50G)</button><button onclick="spawnArcher(80)" style="background:#16a34a;">ARCHER (80G)</button><button onclick="resetBattle()" style="background:#334155;">RESTART</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let gold=100,myBase=500,enBase=500,myArmy=[],enArmy=[],result=null;
+function syncHud(){document.getElementById('gold').textContent=gold;document.getElementById('myBase').textContent=Math.round(myBase);document.getElementById('enBase').textContent=Math.round(enBase);}
+function resetBattle(){gold=100;myBase=500;enBase=500;myArmy=[];enArmy=[];result=null;syncHud();}
+setInterval(()=>{if(!result){gold+=5;document.getElementById('gold').textContent=gold;}},1000);
+setInterval(()=>{if(!result&&Math.random()<0.62)enArmy.push({x:700,hp:60,team:'en'});},3200);
+function spawnWarrior(cost){if(!result&&gold>=cost){gold-=cost;syncHud();myArmy.push({x:60,hp:65,team:'my'});}}
+function spawnArcher(cost){if(!result&&gold>=cost){gold-=cost;syncHud();myArmy.push({x:60,hp:45,team:'my',archer:true});}}
+function loop(){
+  ctx.fillStyle='#090d19';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#1e293b';ctx.fillRect(0,380,cv.width,70);
+  ctx.fillStyle='#0284c7';ctx.fillRect(20,260,40,120);
+  ctx.fillStyle='#dc2626';ctx.fillRect(690,260,40,120);
+  if(!result){
+    myArmy.forEach(u=>{
+      let target=enArmy[0];
+      if(target&&Math.abs(u.x-target.x)<(u.archer?120:25)){target.hp-=0.5;if(target.hp<=0)enArmy.shift();}
+      else if(u.x<690){u.x+=1.2;}
+      else{enBase=Math.max(0,enBase-0.5);syncHud();if(enBase<=0)result='VICTORY!';}
+    });
+    enArmy.forEach(u=>{
+      let target=myArmy[0];
+      if(target&&Math.abs(u.x-target.x)<25){target.hp-=0.5;if(target.hp<=0)myArmy.shift();}
+      else if(u.x>60){u.x-=1;}
+      else{myBase=Math.max(0,myBase-0.5);syncHud();if(myBase<=0)result='DEFEAT!';}
+    });
+  }
+  myArmy.forEach(u=>{ctx.strokeStyle='#38bdf8';ctx.lineWidth=4;ctx.beginPath();ctx.arc(u.x,340,8,0,Math.PI*2);ctx.moveTo(u.x,348);ctx.lineTo(u.x,370);ctx.stroke();});
+  enArmy.forEach(u=>{ctx.strokeStyle='#ef4444';ctx.lineWidth=4;ctx.beginPath();ctx.arc(u.x,340,8,0,Math.PI*2);ctx.moveTo(u.x,348);ctx.lineTo(u.x,370);ctx.stroke();});
+  if(result){
+    ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle=result==='VICTORY!'?'#4ade80':'#f43f5e';ctx.font='bold 38px sans-serif';ctx.textAlign='center';ctx.fillText(result,375,210);
+    ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.fillText('Click RESTART or Tap Here to Fight Again',375,248);
+  }
+  requestAnimationFrame(loop);
+}
+cv.addEventListener('click',()=>{if(result)resetBattle();});
+loop();
+</script></body></html>

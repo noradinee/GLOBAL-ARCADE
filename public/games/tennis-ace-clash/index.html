@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Tennis Ace Clash — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #3f6212 0%, #1a2e05 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #84cc16; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #1e3a8a; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>🎾</span>
+    <span>Tennis Ace Clash</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      let pY = 200; let aiY = 200;
+      let ball = { x: 400, y: 250, vx: 5, vy: 3 };
+      let pScore = 0; let aiScore = 0;
+      function resetGame() { ball = { x: 400, y: 250, vx: 5, vy: 3 }; pScore = 0; aiScore = 0; }
+      canvas.addEventListener('pointermove', e => {
+        const r = canvas.getBoundingClientRect();
+        pY = (e.clientY - r.top) * (canvas.height / r.height) - 40;
+      });
+      function loop() {
+        ctx.fillStyle = '#1e3a8a'; ctx.fillRect(0, 0, 800, 500);
+        // Court lines
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.strokeRect(60, 60, 680, 380);
+        ctx.beginPath(); ctx.moveTo(400, 60); ctx.lineTo(400, 440); ctx.stroke();
+        // AI
+        aiY += (ball.y - aiY - 40) * 0.08;
+        // Ball move
+        ball.x += ball.vx; ball.y += ball.vy;
+        if (ball.y < 70 || ball.y > 430) ball.vy *= -1;
+        if (ball.x < 90 && Math.abs(ball.y - (pY + 40)) < 50) { ball.vx = Math.abs(ball.vx) * 1.05; playSfx(520, 'sine', 0.1); }
+        if (ball.x > 710 && Math.abs(ball.y - (aiY + 40)) < 50) { ball.vx = -Math.abs(ball.vx) * 1.05; playSfx(480, 'sine', 0.1); }
+        if (ball.x < 30) { aiScore++; ball = { x: 400, y: 250, vx: 5, vy: 3 }; notifyParent('LOSE'); }
+        if (ball.x > 770) { pScore++; ball = { x: 400, y: 250, vx: -5, vy: 3 }; notifyParent('WIN'); }
+        // Paddles
+        ctx.fillStyle = '#38bdf8'; ctx.fillRect(70, pY, 15, 80);
+        ctx.fillStyle = '#ef4444'; ctx.fillRect(715, aiY, 15, 80);
+        // Ball
+        ctx.fillStyle = '#a3e635'; ctx.beginPath(); ctx.arc(ball.x, ball.y, 10, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 28px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText(pScore + ' : ' + aiScore, 400, 40);
+        requestAnimationFrame(loop);
+      }
+      loop();
+</script>
+</body>
+</html>

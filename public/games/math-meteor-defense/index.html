@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Math Meteor Defense</title>
+<style>
+*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;background:radial-gradient(circle at 50% 20%,#1b2450,#070b1a 70%);color:#eef3ff;font-family:system-ui,Segoe UI,Arial}
+#wrap{position:relative;height:100vh}canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.p{background:rgba(10,16,40,.55);border:1px solid rgba(140,170,255,.2);backdrop-filter:blur(8px);padding:8px 12px;border-radius:12px}
+.l{font-size:11px;color:#b8c8ff;text-transform:uppercase}.v{font-size:20px;font-weight:700}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,20,.58)}
+.panel{width:min(92vw,640px);background:rgba(12,18,42,.92);border:1px solid rgba(140,170,255,.22);border-radius:18px;padding:22px;text-align:center}
+h1{margin:0 0 6px;color:#a7c4ff}p{margin:8px 0;color:#d9e4ff;line-height:1.5}
+input{width:min(300px,80%);font-size:26px;padding:10px 14px;border-radius:12px;border:2px solid #3a5599;background:#081022;color:#fff;text-align:center;outline:none}
+button{margin-top:12px;background:#4f7cff;border:0;color:#fff;padding:10px 16px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+.small{font-size:13px;color:#b8c8ff}.back{position:absolute;left:10px;bottom:10px;color:#e8f0ff;text-decoration:none;background:rgba(255,255,255,.08);padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12)}
+#keypad{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:none;flex-wrap:wrap;justify-content:center;gap:5px;width:min(96vw,440px);z-index:6}
+#keypad button{margin-top:0;min-width:36px;flex:1 1 15%;padding:9px 4px;border-radius:10px;background:rgba(22,34,74,.92);border:1px solid rgba(140,170,255,.32);font-size:16px;font-weight:700;touch-action:manipulation;user-select:none}
+#keypad button.k-del{background:rgba(127,29,29,.88);border-color:rgba(251,113,133,.4)}
+#keypad button.k-go{background:linear-gradient(135deg,#38bdf8,#4f7cff);flex:1 1 22%;color:#fff}
+</style>
+</head>
+<body>
+<div id="wrap">
+<canvas id="c"></canvas>
+<div class="hud">
+  <div style="display:flex;gap:8px"><div class="p"><div class="l">Score</div><div class="v" id="score">0</div></div><div class="p"><div class="l">Level</div><div class="v" id="wave">1</div></div></div>
+  <div style="display:flex;gap:8px"><div class="p"><div class="l">Shield</div><div class="v" id="hp">100</div></div><div class="p"><div class="l">Best</div><div class="v" id="best">0</div></div></div>
+</div>
+
+<div id="keypad" aria-label="Numeric Keypad">
+  <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="del" class="k-del">⌫</button>
+  <button type="button" data-k="6">6</button><button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" data-k="0">0</button><button type="button" data-k="go" class="k-go">FIRE</button>
+</div>
+
+<div id="overlay"><div class="panel" id="panel">
+  <h1>Math Meteor Defense</h1>
+  <p><b>Nova Kade</b> defends planet <b>Aurora Prime</b>. Solve the <b>math problem</b> on each falling meteor and type or tap the answer to blast it.</p>
+  <p class="small">Includes addition, subtraction, and multiplication waves as levels rise.</p>
+  <p>Desktop: type answer + <b>Enter</b> · Mobile: use the <b>on-screen keypad</b> + <b>FIRE</b>.</p>
+  <button id="start">Launch Defense</button>
+</div></div>
+</div>
+<script>
+(()=>{
+const c=document.getElementById('c'),x=c.getContext('2d');
+const scoreEl=document.getElementById('score'),waveEl=document.getElementById('wave'),hpEl=document.getElementById('hp'),bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay'),panel=document.getElementById('panel'),startBtn=document.getElementById('start'),keypad=document.getElementById('keypad');
+let W,H,dpr=Math.max(1,Math.min(2,devicePixelRatio||1)); function rs(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';x.setTransform(dpr,0,0,dpr,0,0);} addEventListener('resize',rs); rs();
+let best=+localStorage.getItem('mathMeteorBest')||0; bestEl.textContent=best;
+let st='menu',last=0,t=0,enemies=[],parts=[],stars=[],score=0,wave=1,hp=100,spawnLeft=0,spawnT=0,input='',badFlash=0,goodFlash=0;
+for(let i=0;i<120;i++) stars.push({x:Math.random(),y:Math.random(),s:Math.random()*2+0.5});
+function setKeypadVisible(show){ keypad.style.display = show ? 'flex' : 'none'; }
+function padBottom(){ return st==='play' ? (keypad.offsetHeight || 90) + 14 : 60; }
+function hud(){scoreEl.textContent=score;waveEl.textContent=wave;hpEl.textContent=Math.max(0,hp);bestEl.textContent=best;}
+function makeProblem(){
+  let a,b,op,ans,text;
+  const lvl=wave;
+  if(lvl<=2){a=1+Math.floor(Math.random()*9); b=1+Math.floor(Math.random()*9); op='+'; ans=a+b;}
+  else if(lvl<=4){a=5+Math.floor(Math.random()*12); b=1+Math.floor(Math.random()*10); if(Math.random()<.5){op='+';ans=a+b;} else {if(b>a)[a,b]=[b,a]; op='-'; ans=a-b;}}
+  else {const r=Math.random(); if(r<.34){a=2+Math.floor(Math.random()*9); b=2+Math.floor(Math.random()*9); op='×'; ans=a*b;} else if(r<.67){a=10+Math.floor(Math.random()*20); b=1+Math.floor(Math.random()*15); op='+'; ans=a+b;} else {a=10+Math.floor(Math.random()*20); b=1+Math.floor(Math.random()*10); if(b>a)[a,b]=[b,a]; op='-'; ans=a-b;}}
+  text=`${a} ${op} ${b}`; return {text,ans:String(ans)};
+}
+function reset(){st='play';last=performance.now();t=0;enemies=[];parts=[];score=0;wave=1;hp=100;input='';spawnWave();overlay.style.display='none';setKeypadVisible(true);hud();}
+function spawnWave(){spawnLeft=4+wave*2; spawnT=.8;}
+function spawnEnemy(){const p=makeProblem(); enemies.push({x:60+Math.random()*(Math.max(120,W-120)),y:-40,vy:22+wave*3+Math.random()*8,r:34,p:p.text,ans:p.ans});}
+function boom(px,py,col,n=14){for(let i=0;i<n;i++){const a=Math.random()*6.283,s=30+Math.random()*180;parts.push({x:px,y:py,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.4+Math.random()*.4,m:.8,col});}}
+function over(){st='over';setKeypadVisible(false);best=Math.max(best,score);localStorage.setItem('mathMeteorBest',best);hud();overlay.style.display='flex';panel.innerHTML=`<h1>Shield Broken</h1><p>Aurora Prime was hit on level ${wave}.</p><p><b>Score:</b> ${score} · <b>Best:</b> ${best}</p><button id="start">Try Again</button>`;panel.querySelector('#start').onclick=reset;}
+function nextLevel(){st='break';setKeypadVisible(false); overlay.style.display='flex'; panel.innerHTML=`<h1>Level ${wave} Cleared!</h1><p>Nova Kade stabilizes the orbital shield.</p><p><b>Score:</b> ${score} · <b>Shield:</b> ${hp}</p><button id="start">Next Level</button>`; panel.querySelector('#start').onclick=()=>{wave++; hp=Math.min(100,hp+10); overlay.style.display='none'; st='play'; setKeypadVisible(true); last=performance.now(); spawnWave(); hud();};}
+startBtn.onclick=reset;
+keypad.addEventListener('pointerdown',e=>{const btn=e.target.closest('button[data-k]'); if(!btn||st!=='play')return; e.preventDefault(); const k=btn.dataset.k; if(k==='del'){input=input.slice(0,-1);} else if(k==='go'){submit();} else if(input.length<5){input+=k;}});
+addEventListener('keydown',e=>{
+  if(st!=='play'){if(e.key==='Enter'){const b=panel.querySelector('#start'); if(b)b.click();} return;}
+  if(e.key==='Backspace'){input=input.slice(0,-1); e.preventDefault(); return;}
+  if(e.key==='Enter'){submit(); e.preventDefault(); return;}
+  if(/^[0-9\-]$/.test(e.key)){input+=e.key; if(input.length>5) input=input.slice(0,5);} 
+});
+function submit(){ if(!input) return; let idx=-1,target=null; for(let i=0;i<enemies.length;i++){if(enemies[i].ans===input){if(!target||enemies[i].y>target.y){target=enemies[i];idx=i;}}}
+  if(target){enemies.splice(idx,1); score+=12+wave*2; boom(target.x,target.y,'#8fd3ff',18); goodFlash=.12; input='';}
+  else {badFlash=.18; score=Math.max(0,score-1); input='';}
+  hud(); }
+function update(dt){ t+=dt; if(badFlash>0)badFlash-=dt; if(goodFlash>0)goodFlash-=dt; spawnT-=dt; if(spawnLeft>0&&spawnT<=0){spawnEnemy(); spawnLeft--; spawnT=Math.max(.9,2.4-wave*0.1);} 
+  const floorY = H - padBottom();
+  for(const e of enemies){e.y+=e.vy*dt; if(e.y>floorY-12){e.dead=true; hp-=15; boom(e.x,floorY-16,'#ff7b8a',16); badFlash=.2;}}
+  enemies=enemies.filter(e=>!e.dead); for(const p of parts){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;} parts=parts.filter(p=>p.life>0);
+  if(hp<=0){over();return;} if(spawnLeft<=0 && enemies.length===0 && st==='play'){nextLevel();} hud(); }
+function draw(){ const bg=x.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#0b1430'); bg.addColorStop(1,'#050914'); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  x.fillStyle='#fff'; for(const s of stars){x.globalAlpha=0.4+Math.sin(t+s.x*10)*0.3; x.fillRect(s.x*W,(s.y*H+t*10)%H,s.s,s.s);} x.globalAlpha=1;
+  const floorY = H - padBottom();
+  // planet shield
+  x.fillStyle='#1a2748'; x.fillRect(0,floorY,W,H-floorY); x.strokeStyle='rgba(140,200,255,.4)'; x.lineWidth=3; x.beginPath(); x.moveTo(0,floorY); x.lineTo(W,floorY); x.stroke();
+  for(const e of enemies){ x.save(); x.translate(e.x,e.y); const grd=x.createRadialGradient(-8,-8,4,0,0,e.r); grd.addColorStop(0,'#ffcf87'); grd.addColorStop(1,'#b45309'); x.fillStyle=grd; x.beginPath(); x.arc(0,0,e.r,0,6.283); x.fill(); x.fillStyle='rgba(0,0,0,.2)'; x.beginPath(); x.arc(8,6,8,0,6.283); x.arc(-10,10,6,0,6.283); x.fill(); x.font='700 22px system-ui'; x.textAlign='center'; x.textBaseline='middle'; const tw=x.measureText(e.p).width; x.fillStyle='rgba(8,16,34,.85)'; x.fillRect(-tw/2-10,-e.r-34,tw+20,28); x.strokeStyle='rgba(167,196,255,.6)'; x.strokeRect(-tw/2-10,-e.r-34,tw+20,28); x.fillStyle='#eef3ff'; x.fillText(e.p,0,-e.r-20); x.restore(); }
+  for(const p of parts){x.globalAlpha=Math.max(0,p.life/p.m);x.fillStyle=p.col;x.fillRect(p.x,p.y,3,3);x.globalAlpha=1;}
+  const boxY = Math.max(70, floorY - 58);
+  x.fillStyle='rgba(8,16,34,.82)'; x.fillRect(W/2-130,boxY,260,46); x.strokeStyle=badFlash>0?'#ff7b8a':(goodFlash>0?'#8fd3ff':'rgba(167,196,255,.4)'); x.strokeRect(W/2-130,boxY,260,46); x.fillStyle='#fff'; x.font='700 28px ui-monospace,Consolas,monospace'; x.textAlign='center'; x.fillText(input||'?',W/2,boxY+32);
+}
+function loop(now){requestAnimationFrame(loop); if(st!=='play'){draw();return;} const dt=Math.min(.033,(now-last)/1000||.016); last=now; update(dt); draw();}
+requestAnimationFrame(loop); draw();
+})();
+</script>
+</body>
+</html>

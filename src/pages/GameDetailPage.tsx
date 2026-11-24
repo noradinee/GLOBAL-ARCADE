@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Game } from '../types/game';
 import { useLanguage } from '../context/LanguageContext';
+import { useProfile } from '../context/ProfileContext';
 import { gameService } from '../services/gameService';
 import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
@@ -27,16 +29,47 @@ import {
   Send,
   ChevronDown,
   ChevronUp,
+  Flame,
+  Code,
+  X,
+  Trophy,
 } from 'lucide-react';
 
 export const GameDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t, lang, isRtl } = useLanguage();
+  const { profile } = useProfile();
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showChallengeModal, setShowChallengeModal] = useState(false);
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
+  const [challengeCopied, setChallengeCopied] = useState(false);
+  const [embedCopied, setEmbedCopied] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0); // First FAQ open by default
 
-  const game = slug ? gameService.getGameBySlug(slug) : undefined;
+  const isEmbedMode = new URLSearchParams(window.location.search).get('embed') === '1';
+
+  const [activeGame, setActiveGame] = useState<Game | undefined>(() => slug ? gameService.getGameBySlug(slug) : undefined);
+  const [isResolvingGame, setIsResolvingGame] = useState<boolean>(() => !activeGame && Boolean(slug));
+
+  useEffect(() => {
+    const directGame = slug ? gameService.getGameBySlug(slug) : undefined;
+    if (directGame) {
+      setActiveGame(directGame);
+      setIsResolvingGame(false);
+      return;
+    }
+
+    if (slug) {
+      setIsResolvingGame(true);
+      gameService.loadFullCatalog().then(() => {
+        setActiveGame(gameService.getGameBySlug(slug));
+        setIsResolvingGame(false);
+      });
+    }
+  }, [slug]);
+
+  const game = activeGame;
   const category = game ? gameService.getCategoryBySlug(game.category) : undefined;
   const relatedGames = game ? gameService.getRelatedGames(game, 5) : [];
   const recommendedGames = gameService.getPopularGames(5).filter(g => g.id !== game?.id);
@@ -46,7 +79,18 @@ export const GameDetailPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setOpenFaq(0);
     setCopiedLink(false);
+    setShowChallengeModal(false);
+    setShowEmbedModal(false);
   }, [slug]);
+
+  if (isResolvingGame) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-full border-3 border-brand-purple border-t-transparent animate-spin" />
+        <span className="text-xs text-slate-400 font-mono">Loading game...</span>
+      </div>
+    );
+  }
 
   if (!game) {
     return (
@@ -68,6 +112,32 @@ export const GameDetailPage: React.FC = () => {
 
   const title = lang === 'ar' ? game.titleAr : game.title;
   const description = lang === 'ar' ? game.descriptionAr : game.description;
+
+  // Standalone embed player for third-party websites (AdSense safe, full screen)
+  if (isEmbedMode) {
+    return (
+      <div className="w-full h-screen bg-dark-950 flex flex-col overflow-hidden select-none">
+        <div className="flex-1 w-full h-full relative">
+          <GamePlayer game={game} />
+        </div>
+        <div className="bg-dark-900 border-t border-dark-800 px-3 py-1.5 flex items-center justify-between text-xs text-slate-300">
+          <div className="flex items-center gap-2">
+            <img src="/logo.svg" alt="KYRAXO" className="w-4 h-4" />
+            <span className="font-bold text-white">{title}</span>
+          </div>
+          <a
+            href={`https://kyraxo.com/game/${game.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-cyan hover:underline font-bold flex items-center gap-1"
+          >
+            <span>Play free on KYRAXO.com</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+    );
+  }
   const instructions = lang === 'ar' ? game.instructionsAr : game.instructions;
   const categoryName = category ? (lang === 'ar' ? category.nameAr : category.name) : game.category;
 
@@ -113,6 +183,34 @@ export const GameDetailPage: React.FC = () => {
   const shareWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n${canonicalUrl}`)}`;
   const shareTelegram = `https://t.me/share/url?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(shareText)}`;
   const shareTwitter = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(canonicalUrl)}`;
+
+  // Viral Challenge Text & Social Sharing Links
+  const personalBest = profile?.highScores?.[game.id] || 0;
+  const viralChallengeText = personalBest > 0
+    ? lang === 'ar'
+      ? `🔥 أتحداك تجيب رقم أعلى من رقمي (${personalBest} نقطة) في لعبة ${title}! العب الآن مجاناً بدون تحميل على كايراكسو:\n${canonicalUrl}`
+      : `🔥 I scored ${personalBest} points in ${title}! Can you beat my high score? Play free now on KYRAXO:\n${canonicalUrl}`
+    : lang === 'ar'
+      ? `🎮 أتحداك تهزمني في لعبة ${title}! العب الآن مجاناً بدون تحميل على كايراكسو:\n${canonicalUrl}`
+      : `🎮 I challenge you to beat me in ${title}! Play free now on KYRAXO:\n${canonicalUrl}`;
+
+  const challengeWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(viralChallengeText)}`;
+  const challengeTelegram = `https://t.me/share/url?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(viralChallengeText)}`;
+
+  const handleCopyChallenge = () => {
+    navigator.clipboard.writeText(viralChallengeText);
+    setChallengeCopied(true);
+    setTimeout(() => setChallengeCopied(false), 2500);
+  };
+
+  // Webmaster Embed Code Generation (Backlinks & Organic Syndication)
+  const embedCode = `<iframe src="https://kyraxo.com/game/${game.slug}?embed=1" width="800" height="600" frameborder="0" allowfullscreen="true" scrolling="no"></iframe>\n<p style="font-size:12px;color:#888;">Play <a href="https://kyraxo.com/game/${game.slug}" target="_blank" rel="noopener"><strong>${title}</strong></a> and thousands of <a href="https://kyraxo.com" target="_blank" rel="noopener">Free Online Games</a> on KYRAXO.</p>`;
+
+  const handleCopyEmbed = () => {
+    navigator.clipboard.writeText(embedCode);
+    setEmbedCopied(true);
+    setTimeout(() => setEmbedCopied(false), 2500);
+  };
 
   // Dedicated Lookalike Benchmark FAQ for Rich Snippets
   const benchmarkFaq = benchmarkName
@@ -173,7 +271,7 @@ export const GameDetailPage: React.FC = () => {
       name: game.title,
       headline: title,
       description: seoDescription,
-      image: `${window.location.origin}${game.thumbnail}`,
+      image: game.thumbnail.startsWith('http') ? game.thumbnail : `${window.location.origin}${game.thumbnail}`,
       genre: game.category,
       keywords: seoKeywords,
       isSimilarTo: game.similarTo || (game.benchmarkGame ? [game.benchmarkGame] : []),
@@ -278,14 +376,24 @@ export const GameDetailPage: React.FC = () => {
           {/* Interactive Game Reaction & Rating Widget */}
           <GameRatingWidget gameId={game.id} />
 
-          {/* VIRAL SOCIAL SHARE BAR */}
+          {/* VIRAL SOCIAL SHARE & CHALLENGE BAR */}
           <div className="bg-dark-900 border border-dark-800 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
             <div className="flex items-center gap-2 text-white font-bold text-xs sm:text-sm">
               <Share2 className="w-4 h-4 text-brand-cyan" />
-              <span>{lang === 'ar' ? 'شارك اللعبة مع أصدقائك:' : 'Share this game:'}</span>
+              <span>{lang === 'ar' ? 'شارك وتحدى أصدقاءك:' : 'Share & Challenge Friends:'}</span>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Challenge Friends Button */}
+              <button
+                onClick={() => setShowChallengeModal(true)}
+                className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/25 via-rose-500/25 to-purple-500/25 hover:from-amber-500/35 hover:via-rose-500/35 hover:to-purple-500/35 border border-amber-500/40 text-amber-300 hover:text-white font-black text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all group"
+                title={lang === 'ar' ? 'تحدى أصدقاءك وحطم رقمك القياسي!' : 'Challenge your friends!'}
+              >
+                <Flame className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform animate-pulse" />
+                <span>{lang === 'ar' ? '🔥 تحدى أصدقاءك' : '🔥 Challenge'}</span>
+              </button>
+
               {/* WhatsApp */}
               <a
                 href={shareWhatsApp}
@@ -319,7 +427,7 @@ export const GameDetailPage: React.FC = () => {
                 title="X (Twitter)"
               >
                 <span>𝕏</span>
-                <span>تويتر</span>
+                <span className="hidden sm:inline">تويتر</span>
               </a>
 
               {/* Copy Link Button */}
@@ -334,6 +442,16 @@ export const GameDetailPage: React.FC = () => {
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedLink ? (lang === 'ar' ? 'تم النسخ!' : 'Copied!') : (lang === 'ar' ? 'نسخ الرابط' : 'Copy Link')}</span>
+              </button>
+
+              {/* Webmaster Embed Code Button */}
+              <button
+                onClick={() => setShowEmbedModal(true)}
+                className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
+                title={lang === 'ar' ? 'أضف هذه اللعبة لموقعك أو مدونتك مجاناً' : 'Embed this game on your website'}
+              >
+                <Code className="w-3.5 h-3.5" />
+                <span>{lang === 'ar' ? 'تضمين' : 'Embed'}</span>
               </button>
             </div>
           </div>
@@ -395,7 +513,12 @@ export const GameDetailPage: React.FC = () => {
                     {t.game.desktopControls}
                   </span>
                   <ul className="space-y-1 text-slate-300">
-                    {game.controls.desktop.map((c: string, i: number) => (
+                    {(Array.isArray(game.controls?.desktop)
+                      ? game.controls.desktop
+                      : typeof game.controls?.desktop === 'string' && (game.controls.desktop as string).trim()
+                        ? [game.controls.desktop as unknown as string]
+                        : ['Mouse / Keyboard']
+                    ).map((c: string, i: number) => (
                       <li key={i} className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan" />
                         <span>{c}</span>
@@ -411,7 +534,12 @@ export const GameDetailPage: React.FC = () => {
                     {t.game.mobileControls}
                   </span>
                   <ul className="space-y-1 text-slate-300">
-                    {game.controls.mobile.map((c: string, i: number) => (
+                    {(Array.isArray(game.controls?.mobile)
+                      ? game.controls.mobile
+                      : typeof game.controls?.mobile === 'string' && (game.controls.mobile as string).trim()
+                        ? [game.controls.mobile as unknown as string]
+                        : ['Touch Controls']
+                    ).map((c: string, i: number) => (
                       <li key={i} className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-purple" />
                         <span>{c}</span>
@@ -577,6 +705,169 @@ export const GameDetailPage: React.FC = () => {
           </div>
           <GameGrid games={recommendedGames} />
         </section>
+      )}
+
+      {/* VIRAL CHALLENGE MODAL */}
+      {showChallengeModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-dark-900 border border-brand-amber/40 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-5 animate-scaleUp">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowChallengeModal(false)}
+              className="absolute top-4 right-4 rtl:right-auto rtl:left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 p-0.5 shadow-glow-amber flex items-center justify-center shrink-0">
+                <Flame className="w-7 h-7 text-white animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-white">
+                  {lang === 'ar' ? '🔥 تحدى أصدقاءك وحطم الأرقام!' : '🔥 Challenge Your Friends!'}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {lang === 'ar'
+                    ? 'شارك رسالة التحدي مع أصدقائك على واتساب وتليجرام وشاهد من يستطيع الفوز!'
+                    : 'Send a direct challenge to your friends on WhatsApp or Telegram!'}
+                </p>
+              </div>
+            </div>
+
+            {/* Personal Score Badge if available */}
+            {personalBest > 0 && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <span className="text-xs font-bold text-amber-200">
+                    {lang === 'ar' ? 'أعلى رقم قياسي حققته أنت:' : 'Your Current High Score:'}
+                  </span>
+                </div>
+                <span className="text-base font-black text-amber-300">
+                  {personalBest.toLocaleString()} {lang === 'ar' ? 'نقطة' : 'pts'}
+                </span>
+              </div>
+            )}
+
+            {/* Message Preview */}
+            <div className="bg-dark-950 border border-dark-800 rounded-2xl p-3.5 text-xs text-slate-300 space-y-1.5 select-all font-mono leading-relaxed">
+              <p className="text-[11px] text-slate-500 font-sans font-bold">
+                {lang === 'ar' ? 'معاينة رسالة التحدي:' : 'Challenge Message Preview:'}
+              </p>
+              <p className="whitespace-pre-line text-white">
+                {viralChallengeText}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <a
+                href={challengeWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>{lang === 'ar' ? 'تحدي عبر واتساب' : 'WhatsApp Challenge'}</span>
+              </a>
+
+              <a
+                href={challengeTelegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 transition-all transform active:scale-95"
+              >
+                <Send className="w-4 h-4" />
+                <span>{lang === 'ar' ? 'تحدي عبر تيليجرام' : 'Telegram Challenge'}</span>
+              </a>
+            </div>
+
+            <button
+              onClick={handleCopyChallenge}
+              className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all border ${
+                challengeCopied
+                  ? 'bg-brand-emerald text-white border-brand-emerald shadow-glow-emerald'
+                  : 'bg-dark-800 hover:bg-dark-750 text-slate-200 border-dark-700'
+              }`}
+            >
+              {challengeCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>
+                {challengeCopied
+                  ? (lang === 'ar' ? 'تم نسخ نص التحدي!' : 'Challenge Text Copied!')
+                  : (lang === 'ar' ? 'نسخ نص التحدي كاملاً' : 'Copy Challenge Text')}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* WEBMASTER EMBED MODAL */}
+      {showEmbedModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-dark-900 border border-brand-purple/40 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-4 animate-scaleUp">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowEmbedModal(false)}
+              className="absolute top-4 right-4 rtl:right-auto rtl:left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-violet to-brand-cyan p-0.5 shadow-glow-purple flex items-center justify-center shrink-0">
+                <Code className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-white">
+                  {lang === 'ar' ? '📋 تضمين اللعبة في موقعك' : '📋 Embed Game on Your Site'}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {lang === 'ar'
+                    ? 'أضف هذه اللعبة إلى موقعك أو مدونتك مجاناً بدون أي كود إضافي!'
+                    : 'Add this game to your WordPress blog, school portal, or website for free!'}
+                </p>
+              </div>
+            </div>
+
+            {/* Embed Code Snippet */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">
+                {lang === 'ar' ? 'انسخ كود HTML التالي:' : 'Copy this HTML embed snippet:'}
+              </label>
+              <textarea
+                readOnly
+                rows={4}
+                value={embedCode}
+                className="w-full bg-dark-950 border border-dark-800 rounded-xl p-3 text-xs text-brand-cyan font-mono resize-none focus:outline-none focus:border-brand-purple"
+              />
+            </div>
+
+            <button
+              onClick={handleCopyEmbed}
+              className={`w-full py-3 px-4 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all border ${
+                embedCopied
+                  ? 'bg-brand-emerald text-white border-brand-emerald shadow-glow-emerald'
+                  : 'bg-gradient-to-r from-brand-violet to-brand-purple hover:brightness-110 text-white border-brand-violet/50 shadow-glow-purple'
+              }`}
+            >
+              {embedCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>
+                {embedCopied
+                  ? (lang === 'ar' ? 'تم نسخ كود التضمين بنجاح!' : 'Embed Code Copied!')
+                  : (lang === 'ar' ? 'نسخ كود التضمين (Copy Embed Code)' : 'Copy Embed Code')}
+              </span>
+            </button>
+
+            <p className="text-[11px] text-slate-400 text-center">
+              {lang === 'ar'
+                ? '✅ اللعبة سريعة ومتجاوبة مع الموبايل والكمبيوتر وتعمل فوراً عبر الـ iframe.'
+                : '✅ Responsive, mobile-friendly HTML5 gameplay with instant loading.'}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

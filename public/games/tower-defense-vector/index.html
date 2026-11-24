@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vector Tower Defense: Neon Grid</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+body { background: #070913; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; touch-action: none; }
+#hud { display: flex; justify-content: space-between; width: 750px; max-width: 95vw; padding: 10px 16px; background: #0f172a; border-radius: 12px 12px 0 0; border: 1px solid #1e293b; font-size: 15px; font-weight: bold; }
+canvas { background: #090a16; border: 1px solid #1e293b; border-radius: 0 0 12px 12px; box-shadow: 0 0 35px rgba(52,211,153,0.25); max-width: 95vw; max-height: 75vh; cursor: crosshair; }
+#tip { margin-top: 8px; font-size: 12px; color: #34d399; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <div>GOLD: <span style="color:#facc15;" id="gold">100</span> G</div>
+  <div>LIVES: <span style="color:#f43f5e;" id="lives">20</span></div>
+  <div>WAVE: <span style="color:#38bdf8;" id="wave">1</span></div>
+</div>
+<canvas id="c" width="750" height="460"></canvas>
+<div id="tip">🛡️ Click Anywhere on Grid to Place Laser Defense Turret (Cost: 50G)</div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let gold = 100, lives = 20, wave = 1, over = false;
+let towers = [], creeps = [], bullets = [];
+
+const PATH = [
+  {x: 0, y: 120}, {x: 250, y: 120}, {x: 250, y: 320}, {x: 520, y: 320}, {x: 520, y: 150}, {x: 750, y: 150}
+];
+
+cv.addEventListener('click', e => {
+  if (over) { lives = 20; gold = 100; wave = 1; towers = []; creeps = []; over = false; return; }
+  const r = cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * (cv.width / r.width);
+  const y = (e.clientY - r.top) * (cv.height / r.height);
+  if (gold >= 50) {
+    gold -= 50;
+    towers.push({ x: x, y: y, r: 120, range: 120, cool: 0 });
+    document.getElementById('gold').textContent = gold;
+  }
+});
+
+let spawnTimer = 0;
+function loop() {
+  ctx.fillStyle = '#090a16'; ctx.fillRect(0, 0, cv.width, cv.height);
+
+  // Draw Path
+  ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 36;
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x, PATH[0].y);
+  PATH.forEach(pt => ctx.lineTo(pt.x, pt.y));
+  ctx.stroke();
+
+  if (!over) {
+    spawnTimer++;
+    if (spawnTimer % 45 === 0) {
+      creeps.push({ ptIdx: 0, x: PATH[0].x, y: PATH[0].y, hp: 5 + wave*2, maxHp: 5 + wave*2, spd: 2 });
+    }
+
+    // Move creeps
+    creeps.forEach((c, idx) => {
+      let target = PATH[c.ptIdx + 1];
+      if (target) {
+        let dx = target.x - c.x, dy = target.y - c.y;
+        let dist = Math.hypot(dx, dy);
+        if (dist < 3) { c.ptIdx++; }
+        else { c.x += (dx/dist)*c.spd; c.y += (dy/dist)*c.spd; }
+      } else {
+        lives--;
+        creeps.splice(idx, 1);
+        document.getElementById('lives').textContent = lives;
+        if (lives <= 0) over = true;
+      }
+    });
+
+    // Towers attack
+    towers.forEach(t => {
+      t.cool--;
+      if (t.cool <= 0 && creeps.length > 0) {
+        let target = creeps.find(c => Math.hypot(c.x - t.x, c.y - t.y) < t.range);
+        if (target) {
+          t.cool = 20;
+          bullets.push({ x1: t.x, y1: t.y, x2: target.x, y2: target.y, life: 6 });
+          target.hp -= 2;
+          if (target.hp <= 0) {
+            gold += 15;
+            document.getElementById('gold').textContent = gold;
+            creeps.splice(creeps.indexOf(target), 1);
+          }
+        }
+      }
+    });
+  }
+
+  // Draw Towers
+  towers.forEach(t => {
+    ctx.fillStyle = '#34d399';
+    ctx.beginPath(); ctx.arc(t.x, t.y, 14, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  // Draw Creeps
+  creeps.forEach(c => {
+    ctx.fillStyle = '#f43f5e';
+    ctx.beginPath(); ctx.arc(c.x, c.y, 10, 0, Math.PI*2); ctx.fill();
+    // HP bar
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(c.x - 12, c.y - 18, (c.hp/c.maxHp)*24, 4);
+  });
+
+  // Draw Lasers
+  bullets.forEach((b, idx) => {
+    b.life--;
+    ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+  });
+  bullets = bullets.filter(b => b.life > 0);
+
+  if (over) {
+    ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 36px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('BASE OVERRUN!', cv.width/2, cv.height/2 - 20); ctx.fillStyle='#fff'; ctx.font='16px monospace'; ctx.fillText('Tap to Restart', cv.width/2, cv.height/2 + 20);
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

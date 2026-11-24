@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProfile } from '../../context/ProfileContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -8,6 +8,16 @@ import { History, Play } from 'lucide-react';
 export const RecentlyPlayedShelf: React.FC = () => {
   const { profile } = useProfile();
   const { lang, isRtl } = useLanguage();
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    if (profile.history && profile.history.length > 0) {
+      gameService.loadFullCatalog();
+    }
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, [profile.history]);
 
   if (!profile.history || profile.history.length === 0) {
     return null;

@@ -1,9 +1,12 @@
 import { Game, GameCategory, GameCategorySlug } from '../types/game';
 import { PlayedGameRecord } from '../types/profile';
-import gamesData from '../data/games.json';
+import starterGames from '../data/starterGames.json';
 import categoriesData from '../data/categories.json';
 
-let allGames = gamesData as Game[];
+let allGames = starterGames as Game[];
+let isFullLoaded = false;
+let fullLoadPromise: Promise<Game[]> | null = null;
+const catalogListeners = new Set<(games: Game[]) => void>();
 const allCategories = categoriesData as GameCategory[];
 
 /**
@@ -13,6 +16,16 @@ const allCategories = categoriesData as GameCategory[];
  */
 export function isGameVisible(status?: string): boolean {
   return status === 'published' || status === 'active';
+}
+
+export function normalizeControlList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return [value.trim()];
+  }
+  return [];
 }
 
 export interface GameFilterOptions {
@@ -25,6 +38,43 @@ export interface GameFilterOptions {
 }
 
 export const gameService = {
+  subscribe(callback: (games: Game[]) => void): () => void {
+    catalogListeners.add(callback);
+    return () => catalogListeners.delete(callback);
+  },
+
+  isFullLoaded(): boolean {
+    return isFullLoaded;
+  },
+
+  /**
+   * Lazily loads the full 3,200+ game catalog in the background so the initial
+   * page load and First Contentful Paint remain ultra-fast (<200ms).
+   */
+  async loadFullCatalog(): Promise<Game[]> {
+    if (isFullLoaded) return allGames;
+    if (fullLoadPromise) return fullLoadPromise;
+
+    fullLoadPromise = (async () => {
+      try {
+        const fullModule = await import('../data/games.json');
+        const list = (fullModule.default || fullModule) as Game[];
+        if (Array.isArray(list) && list.length > allGames.length) {
+          allGames = list;
+          isFullLoaded = true;
+          catalogListeners.forEach((cb) => {
+            try { cb(allGames); } catch (e) { console.error(e); }
+          });
+        }
+      } catch (err) {
+        console.warn('[CATALOG] Deferred full catalog dynamic load skipped:', err);
+      }
+      return allGames;
+    })();
+
+    return fullLoadPromise;
+  },
+
   /**
    * Replaces the bundled catalog snapshot with the live server-side catalog.
    * Required because the production bundle freezes `games.json` at build time:
@@ -41,7 +91,14 @@ export const gameService = {
       const payload = await response.json();
       const games = Array.isArray(payload?.games) ? payload.games : null;
       if (!games || games.length === 0) return false;
-      allGames = games as Game[];
+      // Preserve bundled games if server returns an older/smaller snapshot
+      if (games.length < allGames.length) {
+        const serverSlugs = new Set(games.map((g: any) => g.slug));
+        const missing = allGames.filter(g => !serverSlugs.has(g.slug));
+        allGames = [...games, ...missing] as Game[];
+      } else {
+        allGames = games as Game[];
+      }
       return true;
     } catch {
       return false;
@@ -54,17 +111,40 @@ export const gameService = {
   },
 
   getAllGames(): Game[] {
-    return allGames.filter(g => isGameVisible(g.status));
+    return [...allGames]
+      .filter(g => isGameVisible(g.status))
+      .sort((a, b) => {
+        const aImported = a.id.startsWith('gpx-') || a.tags?.includes('gamepix') ? 1 : 0;
+        const bImported = b.id.startsWith('gpx-') || b.tags?.includes('gamepix') ? 1 : 0;
+        if (bImported !== aImported) return bImported - aImported;
+        return b.popularityScore - a.popularityScore;
+      });
   },
 
   getGameBySlug(slug: string): Game | undefined {
     return allGames.find(g => g.slug === slug && isGameVisible(g.status));
   },
 
+  getGameById(id: string): Game | undefined {
+    return allGames.find(g => g.id === id && isGameVisible(g.status));
+  },
+
+  getRandomGame(excludeSlug?: string): Game | null {
+    const visible = allGames.filter(g => isGameVisible(g.status) && (!excludeSlug || g.slug !== excludeSlug));
+    if (visible.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * visible.length);
+    return visible[randomIndex];
+  },
+
   getGamesByCategory(categorySlug: GameCategorySlug | string): Game[] {
-    return allGames.filter(
-      g => g.category.toLowerCase() === categorySlug.toLowerCase() && isGameVisible(g.status)
-    );
+    return allGames
+      .filter(g => g.category.toLowerCase() === categorySlug.toLowerCase() && isGameVisible(g.status))
+      .sort((a, b) => {
+        const aImported = a.id.startsWith('gpx-') || a.tags?.includes('gamepix') ? 1 : 0;
+        const bImported = b.id.startsWith('gpx-') || b.tags?.includes('gamepix') ? 1 : 0;
+        if (bImported !== aImported) return bImported - aImported;
+        return b.popularityScore - a.popularityScore;
+      });
   },
 
   getOriginalGames(): Game[] {
@@ -73,16 +153,22 @@ export const gameService = {
       .sort((a, b) => ((b.priority || 0) - (a.priority || 0)) || (b.popularityScore - a.popularityScore));
   },
 
+  getGamePixGames(): Game[] {
+    return allGames
+      .filter(g => (g.id.startsWith('gpx-') || g.tags?.includes('gamepix') || g.author?.includes('GamePix')) && isGameVisible(g.status))
+      .sort((a, b) => b.popularityScore - a.popularityScore);
+  },
+
   getFeaturedGames(): Game[] {
-    return allGames.filter(g => (g.featured || g.isOriginal) && isGameVisible(g.status));
+    return allGames.filter(g => (g.featured || g.isOriginal || g.id.startsWith('gpx-')) && isGameVisible(g.status));
   },
 
   getTrendingGames(): Game[] {
     return allGames
-      .filter(g => (g.trending || g.isOriginal) && isGameVisible(g.status))
+      .filter(g => (g.trending || g.isOriginal || g.id.startsWith('gpx-')) && isGameVisible(g.status))
       .sort((a, b) => {
-        const aBoost = (a.isOriginal ? 1000 : 0) + (a.priority || 0);
-        const bBoost = (b.isOriginal ? 1000 : 0) + (b.priority || 0);
+        const aBoost = (a.id.startsWith('gpx-') ? 800 : 0) + (a.isOriginal ? 500 : 0) + (a.priority || 0);
+        const bBoost = (b.id.startsWith('gpx-') ? 800 : 0) + (b.isOriginal ? 500 : 0) + (b.priority || 0);
         return (bBoost + b.popularityScore) - (aBoost + a.popularityScore);
       });
   },
@@ -91,8 +177,8 @@ export const gameService = {
     return [...allGames]
       .filter(g => isGameVisible(g.status))
       .sort((a, b) => {
-        const aBoost = (a.isOriginal ? 1000 : 0) + (a.priority || 0);
-        const bBoost = (b.isOriginal ? 1000 : 0) + (b.priority || 0);
+        const aBoost = (a.id.startsWith('gpx-') ? 800 : 0) + (a.isOriginal ? 500 : 0) + (a.priority || 0);
+        const bBoost = (b.id.startsWith('gpx-') ? 800 : 0) + (b.isOriginal ? 500 : 0) + (b.priority || 0);
         return (bBoost + b.popularityScore) - (aBoost + a.popularityScore);
       })
       .slice(0, limit);
@@ -182,9 +268,9 @@ export const gameService = {
     // Device filter
     if (options.device && options.device !== 'all') {
       if (options.device === 'mobile') {
-        result = result.filter(g => g.controls.mobile.length > 0);
+        result = result.filter(g => !g.controls || normalizeControlList(g.controls.mobile).length > 0);
       } else if (options.device === 'desktop') {
-        result = result.filter(g => g.controls.desktop.length > 0);
+        result = result.filter(g => !g.controls || normalizeControlList(g.controls.desktop).length > 0);
       }
     }
 
@@ -322,3 +408,28 @@ export const gameService = {
     return allCategories.find(c => c.slug.toLowerCase() === slug.toLowerCase());
   },
 };
+
+// Automatic background catalog enrichment when the browser is idle
+if (typeof window !== 'undefined') {
+  const triggerBackgroundLoad = () => {
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(
+        () => {
+          gameService.loadFullCatalog();
+        },
+        { timeout: 3500 }
+      );
+    } else {
+      setTimeout(() => {
+        gameService.loadFullCatalog();
+      }, 1200);
+    }
+  };
+
+  if (document.readyState === 'complete') {
+    triggerBackgroundLoad();
+  } else {
+    window.addEventListener('load', triggerBackgroundLoad, { once: true });
+  }
+}
+

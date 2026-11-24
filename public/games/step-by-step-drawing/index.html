@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Step by Step Drawing — KYRAXO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(135deg, #155e75 0%, #0e7490 100%); display: flex; flex-direction: column; font-family: system-ui, -apple-system, sans-serif; touch-action: none; color: #fff; }
+  header { height: 50px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+  .title { font-size: 16px; font-weight: 800; color: #06b6d4; display: flex; align-items: center; gap: 8px; }
+  .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  #game-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 6px; overflow: hidden; }
+  canvas { background: #f8fafc; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; aspect-ratio: 16/10; object-fit: contain; touch-action: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <span>🎨</span>
+    <span>Step by Step Drawing</span>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="if(window.resetGame)resetGame();">Reset</button>
+  </div>
+</header>
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+function playSfx(freq = 440, type = 'sine', dur = 0.1, vol = 0.2) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function notifyParent(eventType) {
+  try {
+    window.parent.postMessage({ type: eventType }, '*');
+  } catch(e) {}
+}
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+      let step = 1;
+      let userLines = [];
+      let isDown = false;
+      function resetGame() { userLines = []; step = 1; }
+      canvas.addEventListener('pointerdown', e => { isDown = true; addL(e); playSfx(380, 'sine', 0.05); });
+      window.addEventListener('pointermove', e => { if (isDown) addL(e); });
+      window.addEventListener('pointerup', () => isDown = false);
+      function addL(e) {
+        const r = canvas.getBoundingClientRect();
+        userLines.push({ x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height), step });
+      }
+      function nextStep() {
+        step = Math.min(4, step + 1); playSfx(550 + step * 80, 'triangle', 0.2);
+        if (step === 4) notifyParent('WIN');
+      }
+      function loop() {
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 22px system-ui'; ctx.textAlign = 'left';
+        ctx.fillText('Drawing a Cute Fish! Step ' + step + ' of 4', 30, 45);
+        // Guide steps
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 6; ctx.setLineDash([8, 8]);
+        if (step >= 1) { ctx.beginPath(); ctx.ellipse(400, 250, 140, 90, 0, 0, Math.PI*2); ctx.stroke(); }
+        if (step >= 2) { ctx.beginPath(); ctx.moveTo(270, 250); ctx.lineTo(190, 180); ctx.lineTo(190, 320); ctx.closePath(); ctx.stroke(); }
+        if (step >= 3) { ctx.beginPath(); ctx.arc(480, 220, 12, 0, Math.PI*2); ctx.stroke(); }
+        if (step >= 4) { ctx.beginPath(); ctx.arc(420, 250, 60, -0.6, 0.6); ctx.stroke(); }
+        ctx.setLineDash([]);
+        // User lines
+        ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+        if (userLines.length > 1) {
+          ctx.beginPath(); ctx.moveTo(userLines[0].x, userLines[0].y);
+          for(let i=1; i<userLines.length; i++) ctx.lineTo(userLines[i].x, userLines[i].y);
+          ctx.stroke();
+        }
+        // Next Step Button
+        ctx.fillStyle = '#0284c7'; ctx.roundRect ? ctx.roundRect(620, 20, 150, 45, 12) : ctx.rect(620, 20, 150, 45); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'center'; ctx.fillText('Next Step ➡️', 695, 48);
+        requestAnimationFrame(loop);
+      }
+      canvas.addEventListener('click', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        if (x > 620 && y < 70) nextStep();
+      });
+      loop();
+</script>
+</body>
+</html>
