@@ -10,11 +10,22 @@ export const CookieConsent: React.FC = () => {
 
   useEffect(() => {
     const consent = localStorage.getItem('global_arcade_cookie_consent');
-    if (!consent) {
-      // Small timeout so banner doesn't flash immediately on first frame
-      const timer = setTimeout(() => setShowBanner(true), 800);
-      return () => clearTimeout(timer);
-    }
+    if (consent) return;
+
+    // Avoid showing a duplicate cookie banner when Google AdSense CMP (__tcfapi / googlefc) is active
+    const win = window as unknown as { __tcfapi?: unknown; googlefc?: unknown };
+    const isGoogleCmpActive = () =>
+      typeof win.__tcfapi === 'function' || typeof win.googlefc !== 'undefined';
+
+    if (isGoogleCmpActive()) return;
+
+    // Small timeout so Google CMP has time to initialize and banner doesn't flash on first frame
+    const timer = setTimeout(() => {
+      if (!isGoogleCmpActive()) {
+        setShowBanner(true);
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleAcceptAll = () => {
@@ -30,7 +41,7 @@ export const CookieConsent: React.FC = () => {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-slideUp">
+    <div className="fixed bottom-16 md:bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-slideUp">
       <div className="bg-dark-900/95 backdrop-blur-md border border-dark-700 p-5 rounded-2xl shadow-2xl shadow-black/80 flex flex-col gap-4">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-xl bg-brand-purple/20 text-brand-purple shrink-0 mt-0.5">
