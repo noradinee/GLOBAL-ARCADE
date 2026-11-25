@@ -1,0 +1,53 @@
+{
+  "candidateId": "gh-liyupi-daxigua",
+  "name": "Daxigua",
+  "originalRepoUrl": "https://github.com/liyupi/daxigua",
+  "author": "liyupi",
+  "description": "合成大西瓜（daxigua）开源魔改与快速发布项目由程序员鱼皮整理制作，基于 Cocos2d-js 物理引擎与 Canvas 刚体碰撞实现经典的合成大西瓜 H5 休闲网页小游戏，并提供开箱即用的零代码魔改配置方案。开发者与普通玩家无需修改复杂源码，只需调整 extraSettings.js 配置文件并配合专属在线改图工具替换图片音频素材，即可轻松实现自定义水果图案、替换背景与音乐、修改分数倍率、开启无敌模式、大水果合成小水果、调节弹性与下落速度、选分弹窗以及去除广告等十五种玩法。仓库附带中文注释的 project.js 源码、Serve 与 Docker 本地运行脚本以及 Vercel 与腾讯云 Webify 一键部署教程，适合快速上线专属网页游戏。",
+  "discoveryDate": "2026-11-25",
+  "lastUpdateDate": "2026-11-23",
+  "sourcePlatform": "github",
+  "programmingLanguage": "JavaScript",
+  "gameEngine": "HTML5 Canvas2D",
+  "popularityIndicators": {
+    "githubStars": 1431,
+    "forks": 930,
+    "openIssues": 26,
+    "communityPlays": 5009,
+    "trendVelocity": "1431 stars / 930 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-25"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/liyupi/daxigua/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Playable evidence: html5 canvas, canvas2d.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 Canvas2D."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 20,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 75
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}
