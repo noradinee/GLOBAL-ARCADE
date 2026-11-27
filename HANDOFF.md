@@ -17,10 +17,20 @@
 - **Editing Status:** IDLE
 - **Work started:** 2026-11-26T18:55:00Z
 - **Last working agent:** Antigravity
-- **Last updated:** 2026-11-26T22:08:00Z
-- **Stage Status:** Multilingual SEO (11 Languages, Real Keyword Planner Data Across EN/AR/FR/ES/PT/DE/TR/ID/RU + Localized URLs + SSR + 0-Click Game CTR + Review Schema) Deployed Live (`https://kyraxo.com`, `index-V45LeRuA.js`, `308/308` tests); Sitemap Resubmitted (`26 nov. 2026`); IndexNow `200 OK`
+- **Last updated:** 2026-11-27T11:34:00Z
+- **Stage Status:** Multilingual SEO (11 Languages, Real Keyword Planner Data Across ALL 11 Languages: EN/AR/FR/ES/PT/DE/TR/ID/RU/IT/PL + Localized URLs + SSR + 0-Click Game CTR + Review Schema) Deployed Live (`https://kyraxo.com`, `index-BIv_kmdZ.js`, `308/308` tests); Sitemap Resubmitted (`26 nov. 2026`); IndexNow `200 OK`
 
-### Latest Keyword Planner Multilingual Optimization Pass (2026-11-26 — Night)
+### Latest Keyword Planner IT & PL Completion Pass (2026-11-27)
+- **Live Keyword Planner Data Extracted for Final 2 Languages (`11,517` keyword ideas in 2 CSV exports — All locations, Nov 2025 – Oct 2026):**
+  - **Italian (`it` — `5,912` rows, `Keyword_Stats_2026-11-27_at_10_36_52.csv`):** `giochi gratis` (`5M`), `giochi online gratis` (`500K`), `solitario gratis` (`500K`), `giochi di macchine` (`50K` vs `giochi di auto`), `giochi di calcio` (`50K`), `scacchi online gratis` (`50K`), `sudoku difficili` / `spider solitario gratis` (`50K`), `giochi sparatutto gratis` (`5K`, `+900% 3mo`), `tetris gratis classico` (`5K`), `giochi per 2 giocatori` (`5K`).
+  - **Polish (`pl` — `5,605` rows, `Keyword_Stats_2026-11-27_at_10_39_52.csv`):** `darmowe gry` / `gry online` / `gry za darmo` (`500K`), `gry za darmo online` (`50K`, `+900% YoY`), **`gry samochodowe` (`50K` vs `gry wyścigowe` `5K`, 10x higher)**, `gry logiczne` / `darmowe gry logiczne` / `mahjong za darmo` / `gry sudoku` (`50K`), `gry dla dzieci` / `darmowe gry dla dzieci` / `gry dla dziewczyn` (`50K`), `warcaby online` (`50K`), `strzelanka` (`50K`), `piłka nożna gry` (`5K`), `tetris za darmo` (`5K`), `gra w szachy online` (`5K`), `warcaby online 2 graczy` (`500`, `+900% YoY`).
+- **Updates Applied, Verified & Deployed Live (`135.181.197.174` / `https://kyraxo.com`):**
+  - Updated `src/data/seoTranslations.json` and `src/data/categorySeo.json` for `it` and `pl`.
+  - `npx tsc --noEmit`: 0 errors; `npm run build`: `17.73s` (`dist/assets/index-BIv_kmdZ.js`); `npm test`: **`308/308 pass, 0 fail, 0 skipped`**.
+  - Deployed delta to host & container `global-arcade` (`healthy`), verified **9/9** live Googlebot HTTPS `200 OK` responses across `/api/health`, `/it`, `/it/category/{racing,puzzle,strategy}`, `/pl`, `/pl/category/{racing,puzzle,kids}`.
+  - *Git status:* `src/data/seoTranslations.json`, `src/data/categorySeo.json`, and `HANDOFF.md` have uncommitted local changes awaiting user approval for `git commit` / `git push`.
+
+### Keyword Planner Multilingual Optimization Pass (2026-11-26 — Night)
 - **Live Keyword Planner Data Extracted Across 7 More Markets (`57,131` keyword ideas in 7 CSV exports — All locations, Nov 2025 – Oct 2026):**
   - **French (`fr` — `5,980` rows):** `jeux gratuits` (`5M`), `solitaire gratuit` (`5M`), `jeux en ligne` / `jeux gratuits en ligne` / `mahjong gratuit` (`500K`), `jeux de voiture` / `jeux de foot` / `jeux gratuits sans téléchargement` (`50K`).
   - **Spanish (`es` — `10,033` rows):** `juegos gratis` / `solitario online` (`5M`), **`juegos de carros` (`500K` vs `juegos de coches` `50K`, 10x higher)**, `juegos de futbol` / `solitario gratis` / `rompecabezas` / `minijuegos` / `juegos sin descargar` (`500K`).
