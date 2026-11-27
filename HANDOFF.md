@@ -17,10 +17,27 @@
 - **Editing Status:** IDLE
 - **Work started:** 2026-11-26T18:55:00Z
 - **Last working agent:** Antigravity
-- **Last updated:** 2026-11-27T11:34:00Z
-- **Stage Status:** Multilingual SEO (11 Languages, Real Keyword Planner Data Across ALL 11 Languages: EN/AR/FR/ES/PT/DE/TR/ID/RU/IT/PL + Localized URLs + SSR + 0-Click Game CTR + Review Schema) Deployed Live (`https://kyraxo.com`, `index-BIv_kmdZ.js`, `308/308` tests); Sitemap Resubmitted (`26 nov. 2026`); IndexNow `200 OK`
+- **Last updated:** 2026-11-27T12:40:00Z
+- **Stage Status:** Multilingual SEO (11 Languages) + GA4/GSC Indexing & Crawl-Budget Optimization Deployed Live (`https://kyraxo.com`, `index-CYZC0r9M.js`, `308/308` tests); `robots.txt` updated (`Disallow: /search`); AdSense `u/1` (`pub-1216297804150458`) verified `Getting ready` (`No current issues`)
 
-### Latest Keyword Planner IT & PL Completion Pass (2026-11-27)
+### Latest GA4 + GSC Indexing & Top-30 CTR Pass (2026-11-27 — Afternoon)
+- **Google Analytics (GA4 — `kyraxo`, Property `565081644`, 30 Oct – 26 Nov 2026):**
+  - `132` active users (`133` new, `10` returning), `199` sessions (`79.4%` engagement rate, `1m 33s` avg engagement), `1,167` views, `136` `game_start` events, `69` `game_card_click` events.
+  - Channels: Direct `123` sessions (`61.8%`), Organic Search `73` sessions (`36.7%`, `91.8%` engagement rate, `70` new users). Devices: Desktop `68.4%`, Mobile `30.1%`, Tablet `1.5%`.
+- **Google AdSense (`adsense.google.com`):**
+  - `u/1` (`noradineee92@gmail.com`, `pub-1216297804150458`) — `kyraxo.com` is **`Getting ready`** (review requested `18 Nov 2026 16:39`, ownership verified via AdSense snippet, Payments info received, **Auto ads: ON**, **Auto optimize: ON**, **Policy center: `No current issues`**, `0` alerts). Note: AdSense UI shows `Ads.txt status: Not found` (normal while `Getting ready`), while live `https://kyraxo.com/ads.txt` verified `200 OK` (`text/plain; charset=utf-8`) for `Mediapartners-Google` with `google.com, pub-1216297804150458, DIRECT, f08c47fec0942fa0`.
+  - `u/0` (`noradinee92@gmail.com`, `pub-5694162002949954`) is Closed by Google (unused for `kyraxo.com`).
+- **Google Search Console Indexing & Performance Audit (`23/11/2026` / `27/11/2026`):**
+  - `2,466` indexed, `1,210` not indexed: `810` *Détectée, actuellement non indexée*, `354` `/search?q=...` (*Autre page avec balise canonique correcte*), `38` duplicate canonicals, `6` *Explorée, actuellement non indexée* (`battleships-pirates`, `slicer-n-scale`, `west-frontier-sharpshooter-3d`, `owl-block`, `lost-things`, `checkers-legend`), `1` noindex, `1` blocked (`/admin`).
+  - Confirmed `https://www.kyraxo.com/` already returns `301 Moved Permanently` -> `https://kyraxo.com/`.
+- **Fixes Applied, Verified & Deployed Live (`135.181.197.174` / `https://kyraxo.com`):**
+  - Updated `public/robots.txt` to disallow `/search` and `/*/search` for `Googlebot`, `Bingbot`, and `*` so Google stops spending crawl budget on 354 internal `/search?q=...` URLs.
+  - Optimized `seoTitle`, `seoDescription`, and cleaned `"gamepix"` / mismatched benchmark tags on `16` games in `src/data/games.json` (`1` in `src/data/starterGames.json`): GSC #12–#30 0-click pages (`construction-site-simulator`, `bffs-pinafore-fashion`, `stickman-sniper`, `dinosaur-runner-3d`, `snake-ludo-game`, `words`, `the-visitor`, `factory-builder-1`, `traffic-io`), the `6` *Explorée, actuellement non indexée* games, and GA4 top-10 `/game/basketball`.
+  - `npx tsc --noEmit`: 0 errors; `npm run build`: `18.57s` (`dist/assets/index-CYZC0r9M.js`); `npm test`: **`308/308 pass, 0 fail, 0 skipped`**.
+  - Deployed to host & container `global-arcade` (`healthy`), verified **7/7** live Googlebot HTTPS `200 OK` responses (`/api/health`, `/robots.txt`, `/game/words`, `/game/construction-site-simulator`, `/game/stickman-sniper`, `/game/checkers-legend`, `/game/basketball`).
+  - *Git status:* `public/robots.txt`, `src/data/games.json`, `src/data/starterGames.json`, and `HANDOFF.md` have uncommitted local changes awaiting user approval for `git commit` / `git push`.
+
+### Keyword Planner IT & PL Completion Pass (2026-11-27)
 - **Live Keyword Planner Data Extracted for Final 2 Languages (`11,517` keyword ideas in 2 CSV exports — All locations, Nov 2025 – Oct 2026):**
   - **Italian (`it` — `5,912` rows, `Keyword_Stats_2026-11-27_at_10_36_52.csv`):** `giochi gratis` (`5M`), `giochi online gratis` (`500K`), `solitario gratis` (`500K`), `giochi di macchine` (`50K` vs `giochi di auto`), `giochi di calcio` (`50K`), `scacchi online gratis` (`50K`), `sudoku difficili` / `spider solitario gratis` (`50K`), `giochi sparatutto gratis` (`5K`, `+900% 3mo`), `tetris gratis classico` (`5K`), `giochi per 2 giocatori` (`5K`).
   - **Polish (`pl` — `5,605` rows, `Keyword_Stats_2026-11-27_at_10_39_52.csv`):** `darmowe gry` / `gry online` / `gry za darmo` (`500K`), `gry za darmo online` (`50K`, `+900% YoY`), **`gry samochodowe` (`50K` vs `gry wyścigowe` `5K`, 10x higher)**, `gry logiczne` / `darmowe gry logiczne` / `mahjong za darmo` / `gry sudoku` (`50K`), `gry dla dzieci` / `darmowe gry dla dzieci` / `gry dla dziewczyn` (`50K`), `warcaby online` (`50K`), `strzelanka` (`50K`), `piłka nożna gry` (`5K`), `tetris za darmo` (`5K`), `gra w szachy online` (`5K`), `warcaby online 2 graczy` (`500`, `+900% YoY`).
