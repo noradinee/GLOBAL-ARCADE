@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { getLocalizedCategorySeo, localizePath } from '../../i18n/localeRouting';
 import { GameCategory } from '../../types/game';
 import {
   Gamepad2,
@@ -42,19 +43,28 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({ categories, activeSlug
         {categories.map((cat) => {
           const IconComponent = iconMap[cat.icon] || Gamepad2;
           const isActive = activeSlug === cat.slug;
-          const title = lang === 'ar' ? cat.nameAr : cat.name;
+          const title = getLocalizedCategorySeo(cat.slug, lang)?.name || (lang === 'ar' ? cat.nameAr : cat.name);
 
           return (
             <Link
               key={cat.id}
-              to={`/category/${cat.slug}`}
+              to={localizePath(`/category/${cat.slug}`, lang)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all border ${
                 isActive
                   ? 'bg-brand-purple text-white border-brand-purple shadow-glow-purple'
                   : 'bg-dark-900/90 text-slate-300 hover:text-white border-dark-800 hover:border-dark-700 hover:bg-dark-850'
               }`}
             >
-              <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : 'text-brand-cyan'}`} />
+              {cat.thumbnail ? (
+                <img
+                  src={cat.thumbnail}
+                  alt={title}
+                  className="w-5 h-5 rounded-md object-cover border border-white/20 shadow-sm group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                />
+              ) : (
+                <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : 'text-brand-cyan'}`} />
+              )}
               <span>{title}</span>
             </Link>
           );

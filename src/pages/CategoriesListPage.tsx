@@ -6,6 +6,7 @@ import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
 import { AdSlot } from '../components/ads/AdSlot';
 import { GameCategory } from '../types/game';
+import { getLocaleSeo, getLocalizedCategorySeo, localizePath } from '../i18n/localeRouting';
 import {
   Gamepad2,
   Brain,
@@ -45,16 +46,10 @@ export const CategoriesListPage: React.FC = () => {
   }, []);
 
   const categories = gameService.getAllCategories();
+  const localeSeo = getLocaleSeo(lang);
 
-  const seoTitle =
-    lang === 'ar'
-      ? 'أقسام وتصنيفات الألعاب — تصفح جميع أنواع ألعاب المتصفح | كايراكسو'
-      : 'All Game Categories — Browse Free Browser Games by Genre | KYRAXO';
-
-  const seoDescription =
-    lang === 'ar'
-      ? 'تصفح جميع أقسام الألعاب على كايراكسو (KYRAXO). ألعاب أركيد، سباق سيارات، ألغاز، أكشن، ألعاب شخصين، وألعاب أطفال مجانية بدون تحميل.'
-      : 'Explore all game categories on KYRAXO. Find your favorite arcade, puzzle, racing, action, sports, and multiplayer browser games.';
+  const seoTitle = localeSeo.categoriesHub.seoTitle;
+  const seoDescription = localeSeo.categoriesHub.seoDesc;
 
   const breadcrumbItems = [{ label: t.category.allCategoriesTitle }];
 
@@ -63,7 +58,7 @@ export const CategoriesListPage: React.FC = () => {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        canonicalUrl={`${window.location.origin}/categories`}
+        canonicalUrl={`${window.location.origin}${localizePath('/categories', lang)}`}
         lang={lang}
       />
 
@@ -71,27 +66,28 @@ export const CategoriesListPage: React.FC = () => {
 
       <div className="my-6">
         <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
-          {t.category.allCategoriesTitle}
+          {localeSeo.categoriesHub.h1}
         </h1>
         <p className="text-sm text-slate-400 max-w-xl">
-          {t.category.exploreDesc}
+          {localeSeo.categoriesHub.subtitle}
         </p>
       </div>
 
       <AdSlot placement="header-top" className="mb-8" />
 
-      {/* Grid of 10 Category Cards */}
+      {/* Grid of Category Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {categories.map((cat: GameCategory) => {
           const IconComponent = iconMap[cat.icon] || Gamepad2;
-          const name = lang === 'ar' ? cat.nameAr : cat.name;
-          const desc = lang === 'ar' ? cat.descriptionAr : cat.description;
+          const localizedCat = getLocalizedCategorySeo(cat.slug, lang);
+          const name = localizedCat?.name || (lang === 'ar' ? cat.nameAr : cat.name);
+          const desc = localizedCat?.intro || (lang === 'ar' ? cat.descriptionAr : cat.description);
           const gamesCount = gameService.getGamesByCategory(cat.slug).length;
 
           return (
             <Link
               key={cat.id}
-              to={`/category/${cat.slug}`}
+              to={localizePath(`/category/${cat.slug}`, lang)}
               className="group bg-dark-900 border border-dark-800 hover:border-brand-purple/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-glow-purple flex flex-col justify-between"
             >
               <div>
@@ -113,7 +109,7 @@ export const CategoriesListPage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1.5 text-xs font-bold text-brand-purple group-hover:text-brand-cyan transition-colors mt-6 pt-4 border-t border-dark-800">
-                <span>{lang === 'ar' ? 'استكشف الألعاب' : 'Explore Games'}</span>
+                <span>{localeSeo.categoriesHub.exploreCta}</span>
                 <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
               </div>
             </Link>

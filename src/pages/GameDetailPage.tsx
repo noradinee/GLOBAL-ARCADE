@@ -4,6 +4,7 @@ import { Game } from '../types/game';
 import { useLanguage } from '../context/LanguageContext';
 import { useProfile } from '../context/ProfileContext';
 import { gameService } from '../services/gameService';
+import { getLocaleSeo, getLocalizedCategorySeo, localizePath } from '../i18n/localeRouting';
 import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
 import { GamePlayer } from '../components/game/GamePlayer';
@@ -139,24 +140,33 @@ export const GameDetailPage: React.FC = () => {
     );
   }
   const instructions = lang === 'ar' ? game.instructionsAr : game.instructions;
-  const categoryName = category ? (lang === 'ar' ? category.nameAr : category.name) : game.category;
+  const localizedCatSeo = getLocalizedCategorySeo(game.category, lang);
+  const categoryName = localizedCatSeo?.name || (category ? (lang === 'ar' ? category.nameAr : category.name) : game.category);
+  const localeSeo = getLocaleSeo(lang);
 
-  // Lookalike Competitor Benchmark SEO
-  const benchmarkName = lang === 'ar' ? (game.benchmarkGameAr || game.benchmarkGame) : game.benchmarkGame;
+  // Lookalike Competitor Benchmark SEO (ignore generic category buckets in <title>)
+  const GENERIC_BENCHMARKS = new Set([
+    'Classic Web Arcade Games',
+    'Toca Life & Kids Educational',
+  ]);
+  const rawBenchmark = lang === 'ar' ? (game.benchmarkGameAr || game.benchmarkGame) : game.benchmarkGame;
+  const benchmarkName = game.benchmarkGame && !GENERIC_BENCHMARKS.has(game.benchmarkGame) ? rawBenchmark : undefined;
 
-  const seoTitle = benchmarkName
-    ? lang === 'ar'
-      ? `${title} — العب اون لاين (بديل ${benchmarkName} مجاناً) | كايراكسو`
-      : `${title} — Play Online (Free ${benchmarkName} Web Alternative) | KYRAXO`
-    : lang === 'ar'
-      ? `${title} — العب مجاناً اون لاين بدون تحميل | العاب كايراكسو`
-      : `${title} — Play Free Online HTML5 Game | KYRAXO`;
+  const seoTitle = lang === 'ar'
+    ? game.seoTitleAr || (benchmarkName
+      ? `${title} — العب مجاناً اون لاين (بديل ${benchmarkName} بدون تحميل) | كايراكسو`
+      : `${title} — العب مجاناً اون لاين بدون تحميل | ألعاب كايراكسو`)
+    : lang === 'en'
+      ? game.seoTitle || `${title} — Play Free Online Browser Game | KYRAXO`
+      : `${title} — ${localeSeo.game.titleSuffix} | KYRAXO`;
 
-  const seoDescription = benchmarkName
-    ? lang === 'ar'
-      ? `العب الآن لعبة ${title} مجاناً وبدون تحميل على كايراكسو! أفضل بديل ويب سريع ومطور لـ ${benchmarkName}. متوافقة 100% مع الموبايل والكمبيوتر وبأعلى جودة.`
-      : `Play ${title} online for free on KYRAXO! The ultimate browser alternative to ${benchmarkName}. No download or installation required. 100% free HTML5 gameplay on mobile and PC.`
-    : description;
+  const seoDescription = lang === 'ar'
+    ? game.seoDescriptionAr || (benchmarkName
+      ? `العب ${title} ضمن ألعاب مجانية اون لاين وبدون تحميل على كايراكسو — بديل متصفح سريع لـ ${benchmarkName} يعمل على الجوال والكمبيوتر.`
+      : description)
+    : lang === 'en'
+      ? game.seoDescription || description
+      : `${localeSeo.game.descFallback.replace('{title}', title)} ${description}`.slice(0, 160).trim();
 
   const seoKeywords = Array.from(
     new Set(
@@ -167,7 +177,7 @@ export const GameDetailPage: React.FC = () => {
     )
   ).join(', ');
 
-  const canonicalUrl = `${window.location.origin}/game/${game.slug}`;
+  const canonicalUrl = `${window.location.origin}${localizePath(`/game/${game.slug}`, lang)}`;
 
   // Social sharing handlers
   const handleCopyLink = () => {
@@ -274,10 +284,10 @@ export const GameDetailPage: React.FC = () => {
       image: game.thumbnail.startsWith('http') ? game.thumbnail : `${window.location.origin}${game.thumbnail}`,
       genre: game.category,
       keywords: seoKeywords,
-      isSimilarTo: game.similarTo || (game.benchmarkGame ? [game.benchmarkGame] : []),
+      isSimilarTo: benchmarkName ? (game.similarTo || [game.benchmarkGame]) : [],
       applicationCategory: 'Game',
       operatingSystem: 'Any, Web Browser, iOS, Android, Windows, macOS',
-      inLanguage: ['ar', 'en'],
+      inLanguage: lang,
       playMode: game.category === 'two-player' ? 'MultiPlayer' : 'SinglePlayer',
       url: canonicalUrl,
       aggregateRating: {
@@ -305,20 +315,20 @@ export const GameDetailPage: React.FC = () => {
         {
           '@type': 'ListItem',
           position: 1,
-          name: lang === 'ar' ? 'الرئيسية' : 'Home',
-          item: window.location.origin,
+          name: t.nav.home,
+          item: `${window.location.origin}${localizePath('/', lang)}`,
         },
         {
           '@type': 'ListItem',
           position: 2,
-          name: lang === 'ar' ? 'التصنيفات' : 'Categories',
-          item: `${window.location.origin}/categories`,
+          name: t.nav.categories,
+          item: `${window.location.origin}${localizePath('/categories', lang)}`,
         },
         {
           '@type': 'ListItem',
           position: 3,
           name: categoryName,
-          item: `${window.location.origin}/category/${game.category}`,
+          item: `${window.location.origin}${localizePath(`/category/${game.category}`, lang)}`,
         },
         {
           '@type': 'ListItem',

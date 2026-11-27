@@ -7,7 +7,8 @@
     "description": "Fast-paced adrenaline combat, dodging, and reflexes testing games.",
     "descriptionAr": "ألعاب إثارة وقتال سريعة تختبر ردود أفعالك ومهاراتك الحركية.",
     "icon": "Swords",
-    "color": "from-rose-500 to-red-600"
+    "color": "from-rose-500 to-red-600",
+    "thumbnail": "/thumbnails/space-orbit-defender.svg?v=20261117cover"
   },
   {
     "id": "arcade",
@@ -17,17 +18,19 @@
     "description": "Classic retro and modern arcade thrills with instant replayability.",
     "descriptionAr": "ألعاب أركيد كلاسيكية وحديثة مميزة تقدم متعة لا تنتهي وسرعة فائقة.",
     "icon": "Gamepad2",
-    "color": "from-violet-500 to-purple-600"
+    "color": "from-violet-500 to-purple-600",
+    "thumbnail": "/thumbnails/angry-birds.svg?v=20261119"
   },
   {
     "id": "racing",
     "slug": "racing",
     "name": "Racing Games",
-    "nameAr": "ألعاب سباق",
-    "description": "High-octane drifting, street racing, and speed trials.",
-    "descriptionAr": "سباقات سيارات وسرعة فائقة وتفحيط وتحديات على حلبات مختلفة.",
+    "nameAr": "ألعاب سيارات وسباق",
+    "description": "Free online car games, drifting, street racing, and highway driving challenges.",
+    "descriptionAr": "ألعاب سيارات وسباق مجانية اون لاين بدون تحميل، تفحيط وتحديات سرعة على المتصفح.",
     "icon": "Gauge",
-    "color": "from-amber-500 to-orange-600"
+    "color": "from-amber-500 to-orange-600",
+    "thumbnail": "/thumbnails/speed-racer-drift.svg?v=20261119cars"
   },
   {
     "id": "puzzle",
@@ -37,7 +40,8 @@
     "description": "Brain teasers, logic blocks, and strategic pattern matching.",
     "descriptionAr": "ألغاز وتحديات عقلية ومطابقة كتل واختبارات ذكاء ممتعة.",
     "icon": "Brain",
-    "color": "from-cyan-500 to-blue-600"
+    "color": "from-cyan-500 to-blue-600",
+    "thumbnail": "/thumbnails/hexa-block-puzzle.svg?v=20261117cover"
   },
   {
     "id": "sports",
@@ -47,7 +51,8 @@
     "description": "Compete in table tennis, basketball, soccer, and athletic matches.",
     "descriptionAr": "مباريات كرة قدم، بينج بونج، كرة سلة ومنافسات بطولات رياضية.",
     "icon": "Trophy",
-    "color": "from-emerald-500 to-teal-600"
+    "color": "from-emerald-500 to-teal-600",
+    "thumbnail": "/thumbnails/basketball-stars-pro.svg"
   },
   {
     "id": "adventure",
@@ -57,17 +62,19 @@
     "description": "Explore strange realms, uncover secrets, and embark on journeys.",
     "descriptionAr": "استكشف عوالم غامضة وخض رحلات مشوقة مليئة بالاستكشاف والمفاجآت.",
     "icon": "Compass",
-    "color": "from-indigo-500 to-blue-700"
+    "color": "from-indigo-500 to-blue-700",
+    "thumbnail": "/thumbnails/dungeon-crawler-quest.svg?v=20261117cover"
   },
   {
     "id": "two-player",
     "slug": "two-player",
     "name": "Two Player Games",
-    "nameAr": "ألعاب لاعبين 2",
-    "description": "Play locally with friends on the same screen or keyboard.",
-    "descriptionAr": "ألعاب تنافسية وتعاونية لشخصين على نفس الجهاز أو الشاشة.",
+    "nameAr": "ألعاب شخصين",
+    "description": "Free 2 player games online to challenge friends locally on the same screen.",
+    "descriptionAr": "ألعاب شخصين اون لاين مجانية بدون تحميل للتحدي واللعب على نفس الجهاز.",
     "icon": "Users",
-    "color": "from-fuchsia-500 to-pink-600"
+    "color": "from-fuchsia-500 to-pink-600",
+    "thumbnail": "/thumbnails/ping-pong-clash.svg?v=20261117cover"
   },
   {
     "id": "multiplayer",
@@ -77,7 +84,8 @@
     "description": "Battle against opponents or cooperate in multiplayer lobbies.",
     "descriptionAr": "تحدَّ أصدقاءك ولاعبين حقيقيين في مواجهات أونلاين ملحمية.",
     "icon": "Globe",
-    "color": "from-sky-500 to-indigo-600"
+    "color": "from-sky-500 to-indigo-600",
+    "thumbnail": "/thumbnails/air-hockey-duel.svg"
   },
   {
     "id": "casual",
@@ -87,7 +95,8 @@
     "description": "Relaxing, easy-to-learn games perfect for quick coffee breaks.",
     "descriptionAr": "ألعاب خفيفة ومسلية سهلة التعلم ومثالية للاسترخاء وقضاء وقت ممتع.",
     "icon": "Coffee",
-    "color": "from-teal-400 to-emerald-600"
+    "color": "from-teal-400 to-emerald-600",
+    "thumbnail": "/thumbnails/retro-snake-2077.svg?v=20261117cover"
   },
   {
     "id": "kids",
@@ -97,6 +106,18 @@
     "description": "Safe, family-friendly, educational, and delightfully colorful games.",
     "descriptionAr": "ألعاب ملونة وآمنة للأطفال والأسرة لتنمية التفكير والمهارات الترفيهية.",
     "icon": "Sparkles",
-    "color": "from-yellow-400 to-pink-500"
+    "color": "from-yellow-400 to-pink-500",
+    "thumbnail": "/thumbnails/abc-alphabet-tracing.svg"
+  },
+  {
+    "id": "strategy",
+    "slug": "strategy",
+    "name": "Strategy Games",
+    "nameAr": "ألعاب استراتيجية",
+    "description": "Tactical tower defense, battle warfare, and commanding strategic gameplay.",
+    "descriptionAr": "ألعاب تخطيط استراتيجي ودفاع عن البرج ومعارك تكتيكية تتطلب الذكاء.",
+    "icon": "Swords",
+    "color": "from-red-600 to-amber-700",
+    "thumbnail": "/thumbnails/stickman-war.svg"
   }
 ]

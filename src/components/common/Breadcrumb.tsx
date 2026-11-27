@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { localizePath } from '../../i18n/localeRouting';
 
 export interface BreadcrumbItem {
   label: string;
@@ -13,7 +14,8 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
-  const { isRtl, t } = useLanguage();
+  const { isRtl, t, lang } = useLanguage();
+  const homePath = localizePath('/', lang);
 
   // Generate BreadcrumbList Schema for Google
   const schemaData = {
@@ -24,13 +26,13 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         '@type': 'ListItem',
         position: 1,
         name: t.nav.home,
-        item: window.location.origin,
+        item: `${window.location.origin}${homePath}`,
       },
       ...items.map((item, index) => ({
         '@type': 'ListItem',
         position: index + 2,
         name: item.label,
-        item: item.path ? `${window.location.origin}${item.path}` : window.location.href,
+        item: item.path ? `${window.location.origin}${localizePath(item.path, lang)}` : window.location.href,
       })),
     ],
   };
@@ -45,7 +47,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         <ol className="flex items-center flex-wrap gap-1.5 sm:gap-2">
           <li className="flex items-center">
             <Link
-              to="/"
+              to={homePath}
               className="flex items-center gap-1 hover:text-brand-cyan transition-colors"
             >
               <Home className="w-3.5 h-3.5" />
@@ -66,7 +68,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
                   </span>
                 ) : (
                   <Link
-                    to={item.path}
+                    to={localizePath(item.path, lang)}
                     className="hover:text-brand-cyan transition-colors truncate max-w-[150px] sm:max-w-none"
                   >
                     {item.label}

@@ -6,30 +6,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#07080c" />
     <meta name="color-scheme" content="dark" />
+
+    <!-- Google tag (gtag.js) - Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-32GLYY3LKL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-32GLYY3LKL', {
+        send_page_view: true
+      });
+    </script>
+
+    <!-- Google AdSense Verification & Auto Ads -->
+    <meta name="google-adsense-account" content="ca-pub-1216297804150458">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1216297804150458"
+         crossorigin="anonymous"></script>
     
     <!-- Primary Meta Tags -->
-    <title>KYRAXO — Free Online HTML5 Games | ألعاب كايراكسو اون لاين</title>
-    <meta name="title" content="KYRAXO — Free Online HTML5 Games | ألعاب كايراكسو اون لاين" />
-    <meta name="description" content="Play the best free online HTML5 games on KYRAXO. Instant browser play, no download needed. Arcade, puzzle, action, racing, and 2-player games in English & Arabic." />
+    <title>KYRAXO — Play Free Online Browser Games (No Downloads) | ألعاب مجانية اون لاين</title>
+    <meta name="title" content="KYRAXO — Play Free Online Browser Games (No Downloads) | ألعاب مجانية اون لاين" />
+    <meta name="description" content="Play 3,200+ free online games on KYRAXO with no downloads required. Instant browser games for PC and mobile: car racing, puzzle, action, shooting, 2-player, and kids games." />
     <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://kyraxo.com/" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kyraxo.com/" />
-    <meta property="og:title" content="KYRAXO — Free Online HTML5 Games" />
-    <meta property="og:description" content="Play top free browser games instantly without downloading. Action, racing, puzzles & more on KYRAXO." />
-    <meta property="og:image" content="/og-banner.svg" />
+    <meta property="og:title" content="KYRAXO — Play Free Online Browser Games (No Downloads)" />
+    <meta property="og:description" content="Play 3,200+ free online games without downloading on KYRAXO. Car games, puzzles, action, 2-player & kids browser games." />
+    <meta property="og:image" content="https://kyraxo.com/og-banner.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="KYRAXO — Free Online HTML5 Games" />
-    <meta property="twitter:description" content="Play top free browser games instantly without downloading on KYRAXO." />
-    <meta property="twitter:image" content="/og-banner.svg" />
+    <meta property="twitter:title" content="KYRAXO — Play Free Online Browser Games (No Downloads)" />
+    <meta property="twitter:description" content="Play 3,200+ free online games without downloading on KYRAXO. Car games, puzzles, action, 2-player & kids browser games." />
+    <meta property="twitter:image" content="https://kyraxo.com/og-banner.png" />
+
+    <!-- PWA & Mobile Web App Capabilities -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KYRAXO" />
 
     <!-- Google Fonts: Plus Jakarta Sans & Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- GamePix CDN Thumbnail Preconnect & DNS Prefetch -->
+    <link rel="preconnect" href="https://img.gamepix.com" crossorigin />
+    <link rel="dns-prefetch" href="https://img.gamepix.com" />
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            console.debug('ServiceWorker registration skipped:', err);
+          });
+        });
+      }
+    </script>
   </head>
   <body class="bg-dark-950 text-slate-100 min-h-screen selection:bg-brand-purple selection:text-white antialiased">
     <div id="root"></div>

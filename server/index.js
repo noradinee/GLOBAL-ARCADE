@@ -92,22 +92,195 @@ function injectCanonical(html, canonicalUrl) {
   return html;
 }
 
-function generateGamePreRenderHtml(game, gamesCatalog) {
-  const gameTitle = game.title || 'Play Online Game';
-  const gameDesc = (game.description || `Play ${gameTitle} online for free on KYRAXO. Instant browser play, no download needed.`).replace(/\s+/g, ' ').trim();
-  const category = (game.category || 'arcade').toLowerCase();
+/**
+ * Supported multilingual SEO routes (English at root /, others under /<lang>/...).
+ */
+const SSR_SUPPORTED_LANGS = ['en', 'ar', 'es', 'pt', 'fr', 'de', 'tr', 'id', 'ru', 'it', 'pl'];
+const SSR_LANG_PREFIXES = new Set(['ar', 'es', 'pt', 'fr', 'de', 'tr', 'id', 'ru', 'it', 'pl']);
+const SSR_LANG_LABELS = [
+  ['en', 'English'],
+  ['ar', 'العربية'],
+  ['es', 'Español'],
+  ['pt', 'Português'],
+  ['fr', 'Français'],
+  ['de', 'Deutsch'],
+  ['tr', 'Türkçe'],
+  ['id', 'Bahasa Indonesia'],
+  ['ru', 'Русский'],
+  ['it', 'Italiano'],
+  ['pl', 'Polski'],
+];
+const SSR_OG_LOCALES = {
+  en: 'en_US',
+  ar: 'ar_AR',
+  es: 'es_ES',
+  pt: 'pt_BR',
+  fr: 'fr_FR',
+  de: 'de_DE',
+  tr: 'tr_TR',
+  id: 'id_ID',
+  ru: 'ru_RU',
+  it: 'it_IT',
+  pl: 'pl_PL',
+};
 
-  const benchmarkBox = game.benchmarkGame ? `
+function parseSsrLangPath(pathname) {
+  const clean = pathname || '/';
+  const match = clean.match(/^\/([a-z]{2})(\/|$)(.*)$/i);
+  if (match && SSR_LANG_PREFIXES.has(match[1].toLowerCase())) {
+    const ssrLang = match[1].toLowerCase();
+    const rest = match[3] ? `/${match[3]}` : '/';
+    return { ssrLang, baseRoute: rest || '/' };
+  }
+  return { ssrLang: 'en', baseRoute: clean === '' ? '/' : clean };
+}
+
+function buildLocalizedUrl(baseRoute, lang) {
+  const cleanBase = !baseRoute || baseRoute === '/' ? '/' : (baseRoute.startsWith('/') ? baseRoute : `/${baseRoute}`);
+  if (!lang || lang === 'en') {
+    return `https://kyraxo.com${cleanBase}`;
+  }
+  return cleanBase === '/' ? `https://kyraxo.com/${lang}` : `https://kyraxo.com/${lang}${cleanBase}`;
+}
+
+function buildLocalizedRelPath(baseRoute, lang) {
+  const cleanBase = !baseRoute || baseRoute === '/' ? '/' : (baseRoute.startsWith('/') ? baseRoute : `/${baseRoute}`);
+  if (!lang || lang === 'en') return cleanBase;
+  return cleanBase === '/' ? `/${lang}` : `/${lang}${cleanBase}`;
+}
+
+function getCatSeoField(catSeoEntry, fieldPrefix, lang) {
+  if (!catSeoEntry) return '';
+  const suffix = lang && lang.length >= 2 ? lang[0].toUpperCase() + lang[1].toLowerCase() : 'En';
+  return catSeoEntry[`${fieldPrefix}${suffix}`] || catSeoEntry[`${fieldPrefix}En`] || '';
+}
+
+function buildSsrFooterHtml(currentBaseRoute = '/') {
+  const langBar = SSR_LANG_LABELS.map(([code, label]) =>
+    `<a href="${escapeHtml(buildLocalizedRelPath(currentBaseRoute, code))}" hreflang="${code}" style="color:#94a3b8;margin:4px 6px;text-decoration:none;font-size:12px;">${escapeHtml(label)}</a>`
+  ).join(' ');
+  return `
+    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
+      <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
+      <p style="margin-top:8px;">
+        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
+        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
+        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
+        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
+        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
+      </p>
+      <p style="margin-top:12px;line-height:1.9;">${langBar}</p>
+    </footer>`;
+}
+
+/**
+ * Injects distinct bidirectional hreflang alternate links + x-default for a base route across all 11 languages.
+ */
+function injectHreflang(html, baseRouteOrFullUrl) {
+  let cleanBase = baseRouteOrFullUrl || '/';
+  if (cleanBase.startsWith('http://') || cleanBase.startsWith('https://')) {
+    try {
+      cleanBase = parseSsrLangPath(new URL(cleanBase).pathname).baseRoute;
+    } catch {
+      cleanBase = '/';
+    }
+  } else {
+    cleanBase = parseSsrLangPath(cleanBase).baseRoute;
+  }
+
+  const tags = SSR_SUPPORTED_LANGS.map(lang =>
+    `    <link rel="alternate" hreflang="${lang}" href="${escapeHtml(buildLocalizedUrl(cleanBase, lang))}" />`
+  ).join('\n');
+  const xDefault = `    <link rel="alternate" hreflang="x-default" href="${escapeHtml(buildLocalizedUrl(cleanBase, 'en'))}" />`;
+  const hreflangBlock = `${tags}\n${xDefault}`;
+  let out = html.replace(/\s*<link\s+rel=["']alternate["']\s+hreflang=["'][^"']*["'][^>]*\/?>/gi, '');
+  if (out.includes('</head>')) {
+    return out.replace('</head>', `${hreflangBlock}\n  </head>`);
+  }
+  return out;
+}
+
+/**
+ * Updates <html lang="..." dir="...">, head metadata, keywords, Open Graph, Twitter cards, canonical, and hreflang for SSR responses.
+ */
+function applyHeadMeta(html, { title, description, keywords, canonicalUrl, baseRoute, lang, ogType, imageUrl, imageAlt, siteName }) {
+  let out = html;
+  const activeLang = lang || 'en';
+  const dir = activeLang === 'ar' ? 'rtl' : 'ltr';
+  out = out.replace(/<html\s+lang=["'][^"']*["']\s+dir=["'][^"']*["']/i, `<html lang="${escapeHtml(activeLang)}" dir="${dir}"`);
+
+  if (title) {
+    const safeTitle = escapeHtml(title);
+    out = out.replace(/<title>.*?<\/title>/i, `<title>${safeTitle}</title>`);
+    out = out.replace(/<meta name="title" content=".*?" \/>/i, `<meta name="title" content="${safeTitle}" />`);
+    out = out.replace(/<meta property="og:title" content=".*?" \/>/i, `<meta property="og:title" content="${safeTitle}" />`);
+    out = out.replace(/<meta property="twitter:title" content=".*?" \/>/i, `<meta property="twitter:title" content="${safeTitle}" />`);
+  }
+  if (description) {
+    const safeDesc = escapeHtml(description);
+    out = out.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${safeDesc}" />`);
+    out = out.replace(/<meta property="og:description" content=".*?" \/>/i, `<meta property="og:description" content="${safeDesc}" />`);
+    out = out.replace(/<meta property="twitter:description" content=".*?" \/>/i, `<meta property="twitter:description" content="${safeDesc}" />`);
+  }
+  if (keywords) {
+    const kwTag = `<meta name="keywords" content="${escapeHtml(keywords)}" />`;
+    if (/<meta name="keywords" content=".*?" \/>/i.test(out)) {
+      out = out.replace(/<meta name="keywords" content=".*?" \/>/i, kwTag);
+    } else if (out.includes('</head>')) {
+      out = out.replace('</head>', `    ${kwTag}\n  </head>`);
+    }
+  }
+  if (ogType) {
+    out = out.replace(/<meta property="og:type" content=".*?" \/>/i, `<meta property="og:type" content="${escapeHtml(ogType)}" />`);
+  }
+  const ogLocale = SSR_OG_LOCALES[activeLang] || 'en_US';
+  if (/<meta property="og:locale"[^>]*>/i.test(out)) {
+    out = out.replace(/<meta property="og:locale"[^>]*>/i, `<meta property="og:locale" content="${ogLocale}" />`);
+  } else if (out.includes('</head>')) {
+    out = out.replace('</head>', `    <meta property="og:locale" content="${ogLocale}" />\n  </head>`);
+  }
+  if (canonicalUrl) {
+    out = out.replace(/<meta property="og:url" content=".*?" \/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`);
+    out = injectCanonical(out, canonicalUrl);
+    if (baseRoute !== false) {
+      out = injectHreflang(out, baseRoute || canonicalUrl);
+    }
+  }
+  if (imageUrl) {
+    let ogImgReplacement = `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`;
+    if (imageAlt) ogImgReplacement += `\n    <meta property="og:image:alt" content="${escapeHtml(imageAlt)}" />`;
+    if (siteName) ogImgReplacement += `\n    <meta property="og:site_name" content="${escapeHtml(siteName)}" />`;
+    out = out.replace(/<meta property="og:image" content=".*?" \/>/i, ogImgReplacement);
+    out = out.replace(/<meta property="twitter:image" content=".*?" \/>/i, `<meta property="twitter:image" content="${escapeHtml(imageUrl)}" />`);
+  }
+  return out;
+}
+
+function generateGamePreRenderHtml(game, gamesCatalog, ssrLang = 'en', localeSeo = null, catSeoEntry = null) {
+  const isAr = ssrLang === 'ar';
+  const gameTitle = (isAr ? game.titleAr : game.title) || game.title || 'Play Online Game';
+  const rawDesc = isAr ? (game.seoDescriptionAr || game.descriptionAr || game.description) : (game.seoDescription || game.description);
+  const gameDesc = (rawDesc || `Play ${gameTitle} online for free on KYRAXO. Instant browser play, no download needed.`).replace(/\s+/g, ' ').trim();
+  const category = (game.category || 'arcade').toLowerCase();
+  const catLabel = getCatSeoField(catSeoEntry, 'name', ssrLang) || category;
+  const gameMetaCopy = (localeSeo && localeSeo.game) || {};
+  const controlsHeading = gameMetaCopy.controlsHeading || '🎮 How to Play & Controls';
+  const relatedHeading = (gameMetaCopy.relatedHeading || 'More Free Online Games in {category}').replace('{category}', escapeHtml(catLabel));
+  const homeUrl = buildLocalizedRelPath('/', ssrLang);
+  const catUrl = buildLocalizedRelPath(`/category/${encodeURIComponent(category)}`, ssrLang);
+  const rawBench = isAr ? (game.benchmarkGameAr || game.benchmarkGame) : game.benchmarkGame;
+
+  const benchmarkBox = rawBench ? `
     <div style="background:#1e1b4b;border:1px solid #4338ca;border-radius:14px;padding:16px 20px;margin-bottom:24px;">
       <span style="color:#a5b4fc;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">🔥 Browser Alternative</span>
-      <h3 style="color:#ffffff;font-size:15px;margin:0 0 6px 0;">Looking for free games like ${escapeHtml(game.benchmarkGame)}?</h3>
-      <p style="color:#c7d2fe;font-size:13px;line-height:1.6;margin:0;">${escapeHtml(gameTitle)} delivers fast, instant browser gameplay inspired by ${escapeHtml(game.benchmarkGame)}. No downloads, zero storage footprint, and 100% free on both mobile and PC.</p>
+      <h3 style="color:#ffffff;font-size:15px;margin:0 0 6px 0;">Looking for free games like ${escapeHtml(rawBench)}?</h3>
+      <p style="color:#c7d2fe;font-size:13px;line-height:1.6;margin:0;">${escapeHtml(gameTitle)} delivers fast, instant browser gameplay inspired by ${escapeHtml(rawBench)}. No downloads, zero storage footprint, and 100% free on both mobile and PC.</p>
     </div>` : '';
 
   const controlsBox = `
     <div style="background:#161b22;border:1px solid #30363d;border-radius:16px;padding:20px;margin-bottom:24px;">
-      <h2 style="font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:12px;">🎮 How to Play & Controls</h2>
-      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin-bottom:14px;">${escapeHtml(game.instructions || 'Master the gameplay with smooth, intuitive inputs on any device.')}</p>
+      <h2 style="font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:12px;">${escapeHtml(controlsHeading)}</h2>
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin-bottom:14px;">${escapeHtml((isAr ? game.instructionsAr : game.instructions) || game.instructions || 'Master the gameplay with smooth, intuitive inputs on any device.')}</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
         <div style="background:#0d1117;border:1px solid #21262d;padding:8px 14px;border-radius:10px;font-size:13px;color:#e2e8f0;">
           <strong style="color:#38bdf8;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;">Desktop PC</strong>
@@ -146,11 +319,11 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
     <div style="margin-bottom:32px;">
       <h3 style="font-size:13px;font-weight:bold;color:#64748b;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Tags & Categories</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="/category/${encodeURIComponent(category)}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#${escapeHtml(category)}</a>
-        <a href="/trending" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#TrendingGames</a>
-        <a href="/popular" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#FreeOnlineGames</a>
-        <a href="/category/two-player" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#UnblockedGames</a>
-        <a href="/category/arcade" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#BrowserGames</a>
+        <a href="${catUrl}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#${escapeHtml(category)}</a>
+        <a href="${buildLocalizedRelPath('/trending', ssrLang)}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#TrendingGames</a>
+        <a href="${buildLocalizedRelPath('/popular', ssrLang)}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#FreeOnlineGames</a>
+        <a href="${buildLocalizedRelPath('/category/two-player', ssrLang)}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#2PlayerGames</a>
+        <a href="${buildLocalizedRelPath('/category/arcade', ssrLang)}" style="background:#21262d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:bold;">#BrowserGames</a>
       </div>
     </div>`;
 
@@ -161,28 +334,28 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
 
   const relatedLinks = fallbackRelated.map(r => `
     <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:12px;">
-      <a href="/game/${encodeURIComponent(r.slug)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(r.title)}</a>
+      <a href="${buildLocalizedRelPath(`/game/${encodeURIComponent(r.slug)}`, ssrLang)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(isAr ? (r.titleAr || r.title) : r.title)}</a>
       <span style="color:#38bdf8;font-size:11px;text-transform:capitalize;">${escapeHtml(r.category || 'Arcade')}</span>
     </div>
   `).join('');
 
   return `
     <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
+      <a href="${homeUrl}" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
       <nav>
-        <a href="/category/arcade" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
-        <a href="/category/action" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
-        <a href="/category/puzzle" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
-        <a href="/category/racing" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Racing</a>
-        <a href="/category/sports" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
-        <a href="/category/kids" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
-        <a href="/category/strategy" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Strategy</a>
+        <a href="${buildLocalizedRelPath('/category/arcade', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
+        <a href="${buildLocalizedRelPath('/category/action', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
+        <a href="${buildLocalizedRelPath('/category/puzzle', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
+        <a href="${buildLocalizedRelPath('/category/racing', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Racing</a>
+        <a href="${buildLocalizedRelPath('/category/sports', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
+        <a href="${buildLocalizedRelPath('/category/kids', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
+        <a href="${buildLocalizedRelPath('/category/strategy', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Strategy</a>
       </nav>
     </header>
     <main style="max-width:960px;margin:24px auto;padding:0 16px;">
       <nav aria-label="Breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:16px;">
-        <a href="/" style="color:#00f2fe;text-decoration:none;">Home</a> &gt; 
-        <a href="/category/${encodeURIComponent(category)}" style="color:#00f2fe;text-decoration:none;text-transform:capitalize;">${escapeHtml(category)}</a> &gt; 
+        <a href="${homeUrl}" style="color:#00f2fe;text-decoration:none;">Home</a> &gt; 
+        <a href="${catUrl}" style="color:#00f2fe;text-decoration:none;text-transform:capitalize;">${escapeHtml(catLabel)}</a> &gt; 
         <span style="color:#e2e8f0;">${escapeHtml(gameTitle)}</span>
       </nav>
       <article>
@@ -196,11 +369,11 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
         <div style="background:#161b22;border:1px solid #30363d;border-radius:16px;padding:20px;margin-bottom:28px;">
           <h2 style="font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:12px;">Game Details & Player Notes</h2>
           <ul style="color:#94a3b8;font-size:14px;line-height:1.8;margin:0;padding-left:20px;">
-            <li><strong>Genre:</strong> <a href="/category/${encodeURIComponent(category)}" style="color:#38bdf8;text-decoration:none;text-transform:capitalize;">${escapeHtml(category)} Games</a></li>
-            <li><strong>Platform:</strong> HTML5 Web Browser (Desktop, iOS, Android, Tablet)</li>
+            <li><strong>Genre:</strong> <a href="${catUrl}" style="color:#38bdf8;text-decoration:none;text-transform:capitalize;">${escapeHtml(catLabel)}</a></li>
+            <li><strong>Platform:</strong> Browser Game (Desktop, iOS, Android, Tablet)</li>
             <li><strong>Safety & Play Mode:</strong> Sandboxed In-Browser Play, Zero Download Required</li>
           </ul>
-          <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin-top:12px;">${escapeHtml(gameTitle)} is curated in our ${escapeHtml(category)} catalog and tested for responsive controls across keyboard, mouse, and touchscreen devices. Focus on consistent rhythm in early levels and use Theatre or Fullscreen mode for an unobstructed view.</p>
+          <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin-top:12px;">${escapeHtml(gameTitle)} is curated in our ${escapeHtml(catLabel)} catalog and tested for responsive controls across keyboard, mouse, and touchscreen devices. Focus on consistent rhythm in early levels and use Theatre or Fullscreen mode for an unobstructed view.</p>
         </div>
 
         ${faqSection}
@@ -208,56 +381,48 @@ function generateGamePreRenderHtml(game, gamesCatalog) {
         ${tagsSection}
 
         <section style="margin-top:40px;">
-          <h2 style="font-size:22px;font-weight:bold;color:#ffffff;margin-bottom:16px;">More Free HTML5 Games in ${escapeHtml(category.toUpperCase())}</h2>
+          <h2 style="font-size:22px;font-weight:bold;color:#ffffff;margin-bottom:16px;">${relatedHeading}</h2>
           <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:14px;">
             ${relatedLinks}
           </div>
         </section>
       </article>
     </main>
-    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
-      <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
-      <p style="margin-top:8px;">
-        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
-        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
-        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
-        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
-        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
-      </p>
-    </footer>`;
+    ${buildSsrFooterHtml(`/game/${encodeURIComponent(game.slug)}`)}`;
 }
 
-function generateCategoryPreRenderHtml(catSlug, gamesInCat) {
-  const catName = catSlug.charAt(0).toUpperCase() + catSlug.slice(1);
+function generateCategoryPreRenderHtml(catSlug, gamesInCat, catSeoEntry, ssrLang = 'en') {
+  const catName = getCatSeoField(catSeoEntry, 'name', ssrLang) || (catSlug.charAt(0).toUpperCase() + catSlug.slice(1));
+  const heading = getCatSeoField(catSeoEntry, 'h1', ssrLang) || `Free Online ${catName} Games`;
+  const intro = getCatSeoField(catSeoEntry, 'intro', ssrLang) || `Explore and play the top free online ${catName} games on KYRAXO. All games are instant browser games with no downloads required.`;
+  const homeUrl = buildLocalizedRelPath('/', ssrLang);
   const gameGrid = gamesInCat.slice(0, 60).map(g => `
     <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:12px;">
-      <a href="/game/${encodeURIComponent(g.slug)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(g.title)}</a>
+      <a href="${buildLocalizedRelPath(`/game/${encodeURIComponent(g.slug)}`, ssrLang)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(ssrLang === 'ar' ? (g.titleAr || g.title) : g.title)}</a>
       <span style="color:#38bdf8;font-size:11px;text-transform:capitalize;">${escapeHtml(g.category || catName)}</span>
     </div>
   `).join('');
 
   return `
     <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
+      <a href="${homeUrl}" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
       <nav>
-        <a href="/category/arcade" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
-        <a href="/category/action" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
-        <a href="/category/puzzle" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
-        <a href="/category/racing" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Racing</a>
-        <a href="/category/sports" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
-        <a href="/category/kids" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
+        <a href="${buildLocalizedRelPath('/category/arcade', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
+        <a href="${buildLocalizedRelPath('/category/action', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
+        <a href="${buildLocalizedRelPath('/category/puzzle', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
+        <a href="${buildLocalizedRelPath('/category/racing', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Car &amp; Racing</a>
+        <a href="${buildLocalizedRelPath('/category/sports', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
+        <a href="${buildLocalizedRelPath('/category/kids', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
       </nav>
     </header>
     <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
       <nav aria-label="Breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:16px;">
-        <a href="/" style="color:#00f2fe;text-decoration:none;">Home</a> &gt; 
-        <span style="color:#e2e8f0;text-transform:capitalize;">${escapeHtml(catName)} Games</span>
+        <a href="${homeUrl}" style="color:#00f2fe;text-decoration:none;">Home</a> &gt; 
+        <span style="color:#e2e8f0;text-transform:capitalize;">${escapeHtml(catName)}</span>
       </nav>
       <section style="margin-bottom:32px;">
-        <h1 style="font-size:32px;font-weight:900;color:#ffffff;margin-bottom:12px;">Best Free Online ${escapeHtml(catName)} Games</h1>
-        <p style="font-size:15px;color:#cbd5e1;line-height:1.7;">
-          Explore and play the top free online ${escapeHtml(catName)} games on KYRAXO. All games are instant web games with no downloads or installs required. Compatible with modern mobile, tablet, and desktop browsers.
-        </p>
+        <h1 style="font-size:32px;font-weight:900;color:#ffffff;margin-bottom:12px;">${escapeHtml(heading)}</h1>
+        <p style="font-size:15px;color:#cbd5e1;line-height:1.7;">${escapeHtml(intro)}</p>
       </section>
       <section>
         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:14px;">
@@ -265,111 +430,93 @@ function generateCategoryPreRenderHtml(catSlug, gamesInCat) {
         </div>
       </section>
     </main>
-    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
-      <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
-      <p style="margin-top:8px;">
-        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
-        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
-        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
-        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
-        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
-      </p>
-    </footer>`;
+    ${buildSsrFooterHtml(`/category/${catSlug}`)}`;
 }
 
-function generateHomePreRenderHtml(gamesCatalog) {
+function generateHomePreRenderHtml(gamesCatalog, ssrLang = 'en', localeSeo = null, categorySeoMap = {}) {
   const categories = [
     'action', 'arcade', 'puzzle', 'racing', 'sports', 
     'adventure', 'casual', 'kids', 'two-player', 'multiplayer', 'strategy'
   ];
-  const catNav = categories.map(c => `
-    <a href="/category/${c}" style="display:inline-block;padding:8px 16px;margin:4px;background:#161b22;border:1px solid #30363d;border-radius:12px;color:#38bdf8;text-decoration:none;font-weight:bold;font-size:13px;text-transform:capitalize;">${c} Games</a>
-  `).join('');
+  const homeUrl = buildLocalizedRelPath('/', ssrLang);
+  const homeCopy = (localeSeo && localeSeo.home) || {};
+  const h1 = homeCopy.h1 || 'KYRAXO — Play Free Online Browser Games';
+  const subtitle = homeCopy.subtitle || 'Play over 3,200 free online games without downloading on mobile and desktop. Enjoy instant browser games including car racing, puzzle, shooting, 2-player, online multiplayer, and kids games.';
+  const popularTitle = homeCopy.popularTitle || 'Most Popular Free Online Browser Games';
+
+  const catNav = categories.map(c => {
+    const label = getCatSeoField(categorySeoMap[c], 'name', ssrLang) || `${c} Games`;
+    return `
+    <a href="${buildLocalizedRelPath(`/category/${c}`, ssrLang)}" style="display:inline-block;padding:8px 16px;margin:4px;background:#161b22;border:1px solid #30363d;border-radius:12px;color:#38bdf8;text-decoration:none;font-weight:bold;font-size:13px;">${escapeHtml(label)}</a>`;
+  }).join('');
 
   const featured = gamesCatalog.slice(0, 48);
   const gameGrid = featured.map(g => `
     <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:12px;">
-      <a href="/game/${encodeURIComponent(g.slug)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(g.title)}</a>
+      <a href="${buildLocalizedRelPath(`/game/${encodeURIComponent(g.slug)}`, ssrLang)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(ssrLang === 'ar' ? (g.titleAr || g.title) : g.title)}</a>
       <span style="color:#38bdf8;font-size:11px;text-transform:capitalize;">${escapeHtml(g.category || 'Arcade')}</span>
     </div>
   `).join('');
 
   return `
     <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
+      <a href="${homeUrl}" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;letter-spacing:1px;">KYRAXO ARCADE</a>
       <nav>
-        <a href="/category/arcade" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
-        <a href="/category/action" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
-        <a href="/category/puzzle" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
-        <a href="/category/racing" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Racing</a>
-        <a href="/category/sports" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
-        <a href="/category/kids" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
-        <a href="/category/strategy" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Strategy</a>
+        <a href="${buildLocalizedRelPath('/category/arcade', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Arcade</a>
+        <a href="${buildLocalizedRelPath('/category/action', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Action</a>
+        <a href="${buildLocalizedRelPath('/category/puzzle', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Puzzle</a>
+        <a href="${buildLocalizedRelPath('/category/racing', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Racing</a>
+        <a href="${buildLocalizedRelPath('/category/sports', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Sports</a>
+        <a href="${buildLocalizedRelPath('/category/kids', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Kids</a>
+        <a href="${buildLocalizedRelPath('/category/strategy', ssrLang)}" style="color:#94a3b8;margin:0 8px;text-decoration:none;font-weight:bold;font-size:13px;">Strategy</a>
       </nav>
     </header>
     <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
       <section style="text-align:center;padding:32px 16px;">
-        <h1 style="font-size:36px;font-weight:900;color:#ffffff;margin-bottom:12px;">KYRAXO — Free Online HTML5 Games</h1>
+        <h1 style="font-size:36px;font-weight:900;color:#ffffff;margin-bottom:12px;">${escapeHtml(h1)}</h1>
         <p style="font-size:16px;color:#cbd5e1;max-width:760px;margin:0 auto 24px;line-height:1.7;">
-          Play over 3,200 free online HTML5 games instantly on mobile and desktop without downloading. Enjoy high-quality action, arcade, puzzle, racing, two-player, and unblocked browser games with zero lag.
+          ${escapeHtml(subtitle)}
         </p>
         <div style="margin-top:16px;">${catNav}</div>
       </section>
 
       <section style="margin-top:40px;">
-        <h2 style="font-size:24px;font-weight:bold;color:#ffffff;margin-bottom:20px;">Top Featured HTML5 Games</h2>
+        <h2 style="font-size:24px;font-weight:bold;color:#ffffff;margin-bottom:20px;">${escapeHtml(popularTitle)}</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:14px;">
           ${gameGrid}
         </div>
       </section>
 
       <section style="margin-top:48px;background:#161b22;border:1px solid #30363d;border-radius:16px;padding:24px;color:#cbd5e1;line-height:1.7;">
-        <h2 style="font-size:22px;font-weight:bold;color:#ffffff;margin:0 0 12px;">KYRAXO Editorial Guide: Instant HTML5 Play & Safety</h2>
+        <h2 style="font-size:22px;font-weight:bold;color:#ffffff;margin:0 0 12px;">KYRAXO Editorial Guide: Instant Browser Play &amp; Safety</h2>
         <p style="font-size:14px;margin:0 0 10px;">Every title published on KYRAXO is curated for immediate browser compatibility using HTML5 Canvas and WebGL standards, removing downloads and plugin barriers on desktop and mobile phones.</p>
         <p style="font-size:14px;margin:0;">Locally hosted originals execute inside isolated browser sandboxes and undergo static security checks before listing, while dedicated Kids & Puzzle genres offer family-friendly learning and logic activities.</p>
       </section>
     </main>
-    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
-      <p>© ${new Date().getFullYear()} KYRAXO Gaming. All games are free to play in modern web browsers.</p>
-      <p style="margin-top:8px;">
-        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
-        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
-        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
-        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
-        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
-      </p>
-    </footer>`;
+    ${buildSsrFooterHtml('/')}`;
 }
 
-function generateCollectionPreRenderHtml(heading, intro, gamesSubset) {
+function generateCollectionPreRenderHtml(heading, intro, gamesSubset, ssrLang = 'en', baseRoute = '/trending') {
+  const homeUrl = buildLocalizedRelPath('/', ssrLang);
   const cards = gamesSubset.slice(0, 48).map(g => `
     <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:12px;">
-      <a href="/game/${encodeURIComponent(g.slug)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(g.title)}</a>
+      <a href="${buildLocalizedRelPath(`/game/${encodeURIComponent(g.slug)}`, ssrLang)}" style="color:#ffffff;text-decoration:none;font-weight:bold;display:block;font-size:14px;margin-bottom:4px;">${escapeHtml(ssrLang === 'ar' ? (g.titleAr || g.title) : g.title)}</a>
       <p style="color:#94a3b8;font-size:12px;margin:4px 0 0;line-height:1.5;">${escapeHtml((g.description || '').slice(0, 110))}</p>
     </div>
   `).join('');
   return `
     <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;">
-      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
+      <a href="${homeUrl}" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
     </header>
     <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
       <h1 style="font-size:30px;font-weight:900;color:#ffffff;margin-bottom:10px;">${escapeHtml(heading)}</h1>
       <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:24px;">${escapeHtml(intro)}</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">${cards}</div>
     </main>
-    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
-      <p>© ${new Date().getFullYear()} KYRAXO Gaming.</p>
-      <p style="margin-top:8px;">
-        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
-        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
-        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
-        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
-        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
-      </p>
-    </footer>`;
+    ${buildSsrFooterHtml(baseRoute)}`;
 }
 
-function generateCategoriesPreRenderHtml(gamesCatalog) {
+function generateCategoriesPreRenderHtml(gamesCatalog, ssrLang = 'en', localeSeo = null, categorySeoMap = {}) {
   const cats = [
     ['action', 'Action Games', 'Fast-paced reflexes, combat challenges, and precision arcade missions.'],
     ['arcade', 'Arcade Games', 'Timeless score-chasing browser classics and modern retro hits.'],
@@ -385,31 +532,31 @@ function generateCategoriesPreRenderHtml(gamesCatalog) {
   ];
   const counts = new Map();
   gamesCatalog.forEach(g => { const c = (g.category || '').toLowerCase(); counts.set(c, (counts.get(c) || 0) + 1); });
-  const cards = cats.map(([slug, label, summary]) => `
+  const hubCopy = (localeSeo && localeSeo.categoriesHub) || {};
+  const heading = hubCopy.h1 || 'All Free Online Game Categories on KYRAXO';
+  const subtitle = hubCopy.subtitle || 'Browse our curated library of over 3,200 free online browser games organized by genre — car games, puzzle, action, 2 player, multiplayer, and kids games with no downloads.';
+  const homeUrl = buildLocalizedRelPath('/', ssrLang);
+
+  const cards = cats.map(([slug, label, summary]) => {
+    const seoEntry = categorySeoMap[slug];
+    const locName = getCatSeoField(seoEntry, 'name', ssrLang) || label;
+    const locDesc = getCatSeoField(seoEntry, 'intro', ssrLang) || summary;
+    return `
     <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px;">
-      <a href="/category/${slug}" style="color:#38bdf8;font-weight:bold;font-size:16px;text-decoration:none;">${escapeHtml(label)} (${counts.get(slug) || 0})</a>
-      <p style="color:#94a3b8;font-size:13px;margin:8px 0 0;line-height:1.5;">${escapeHtml(summary)}</p>
-    </div>
-  `).join('');
+      <a href="${buildLocalizedRelPath(`/category/${slug}`, ssrLang)}" style="color:#38bdf8;font-weight:bold;font-size:16px;text-decoration:none;">${escapeHtml(locName)} (${counts.get(slug) || 0})</a>
+      <p style="color:#94a3b8;font-size:13px;margin:8px 0 0;line-height:1.5;">${escapeHtml(locDesc)}</p>
+    </div>`;
+  }).join('');
   return `
     <header style="padding:16px 20px;background:#0d1117;border-bottom:1px solid #21262d;">
-      <a href="/" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
+      <a href="${homeUrl}" style="color:#00f2fe;font-weight:900;font-size:20px;text-decoration:none;">KYRAXO ARCADE</a>
     </header>
     <main style="max-width:1100px;margin:24px auto;padding:0 16px;">
-      <h1 style="font-size:32px;font-weight:900;color:#ffffff;margin-bottom:10px;">All Game Categories on KYRAXO</h1>
-      <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:24px;">Browse our curated library of over 3,200 free HTML5 browser games organized by genre for instant play without installation.</p>
+      <h1 style="font-size:32px;font-weight:900;color:#ffffff;margin-bottom:10px;">${escapeHtml(heading)}</h1>
+      <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:24px;">${escapeHtml(subtitle)}</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">${cards}</div>
     </main>
-    <footer style="margin-top:60px;padding:32px 16px;border-top:1px solid #21262d;text-align:center;color:#64748b;font-size:13px;">
-      <p>© ${new Date().getFullYear()} KYRAXO Gaming.</p>
-      <p style="margin-top:8px;">
-        <a href="/about" style="color:#94a3b8;margin:0 8px;">About</a> • 
-        <a href="/privacy" style="color:#94a3b8;margin:0 8px;">Privacy Policy</a> • 
-        <a href="/terms" style="color:#94a3b8;margin:0 8px;">Terms of Service</a> • 
-        <a href="/cookies" style="color:#94a3b8;margin:0 8px;">Cookie Policy</a> • 
-        <a href="/contact" style="color:#94a3b8;margin:0 8px;">Contact</a>
-      </p>
-    </footer>`;
+    ${buildSsrFooterHtml('/categories')}`;
 }
 
 function generatePrivacyPreRenderHtml() {
@@ -610,6 +757,43 @@ export function createProductionServer(options = {}) {
   let gamesBySlug = new Map();
   let lastGamesMtime = 0;
 
+  let categorySeoMap = {};
+  const catSeoCandidates = [
+    path.join(rootDir, 'src/data/categorySeo.json'),
+    path.join(ROOT_DIR, 'src/data/categorySeo.json'),
+  ];
+  for (const seoPath of catSeoCandidates) {
+    if (fs.existsSync(seoPath)) {
+      try {
+        categorySeoMap = JSON.parse(fs.readFileSync(seoPath, 'utf-8'));
+        break;
+      } catch (err) {
+        console.warn(`[SEO WARNING] Failed to load categorySeo.json: ${err.message}`);
+      }
+    }
+  }
+
+  let seoTranslationsData = { locales: {} };
+  const seoTransCandidates = [
+    path.join(rootDir, 'src/data/seoTranslations.json'),
+    path.join(ROOT_DIR, 'src/data/seoTranslations.json'),
+  ];
+  for (const transPath of seoTransCandidates) {
+    if (fs.existsSync(transPath)) {
+      try {
+        seoTranslationsData = JSON.parse(fs.readFileSync(transPath, 'utf-8'));
+        break;
+      } catch (err) {
+        console.warn(`[SEO WARNING] Failed to load seoTranslations.json: ${err.message}`);
+      }
+    }
+  }
+
+  function getSsrLocale(lang) {
+    const locales = (seoTranslationsData && seoTranslationsData.locales) || {};
+    return locales[lang] || locales.en || null;
+  }
+
   function refreshGamesCatalog() {
     const gamesPath = path.join(rootDir, 'src/data/games.json');
     try {
@@ -771,9 +955,9 @@ export function createProductionServer(options = {}) {
         const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>KYRAXO — Free Online HTML5 Games</title>
+    <title>KYRAXO — Play Free Online Browser Games (No Downloads)</title>
     <link>https://kyraxo.com</link>
-    <description>Play over 3,200 free online HTML5 games instantly on mobile and desktop without downloading.</description>
+    <description>Play over 3,200 free online games without downloading on mobile and desktop.</description>
     <language>en-us</language>
     <atom:link href="https://kyraxo.com/rss.xml" rel="self" type="application/rss+xml" />
     <lastBuildDate>${buildDate}</lastBuildDate>${itemsXml}
@@ -787,9 +971,12 @@ export function createProductionServer(options = {}) {
         return;
       }
 
-      // 4. Server-Side Social OpenGraph / WhatsApp Rich Preview Injection (/game/:slug)
-      if (pathname.startsWith('/game/')) {
-        const rawSlug = pathname.replace(/^\/game\/?/, '').split('/')[0].split('?')[0];
+      const { ssrLang, baseRoute } = parseSsrLangPath(pathname);
+      const activeLocaleSeo = getSsrLocale(ssrLang);
+
+      // 4. Server-Side Social OpenGraph / WhatsApp Rich Preview Injection (/game/:slug & /:lang/game/:slug)
+      if (baseRoute.startsWith('/game/')) {
+        const rawSlug = baseRoute.replace(/^\/game\/?/, '').split('/')[0].split('?')[0];
         let slug = rawSlug;
         try { slug = decodeURIComponent(rawSlug); } catch (_) {}
         refreshGamesCatalog();
@@ -827,51 +1014,72 @@ export function createProductionServer(options = {}) {
           if (fs.existsSync(spaIndex)) {
             let html = fs.readFileSync(spaIndex, 'utf-8');
 
-            const gameTitle = game.title || 'Play Online Game';
-            const cleanDesc = (game.description || `Play ${gameTitle} online for free on KYRAXO. No download needed. Instant browser play.`).replace(/\s+/g, ' ').trim();
-            const canonicalUrl = `https://kyraxo.com/game/${encodeURIComponent(game.slug)}`;
+            const isAr = ssrLang === 'ar';
+            const gameTitle = (isAr ? game.titleAr : game.title) || game.title || 'Play Online Game';
+            const rawEnDesc = (game.seoDescription || game.description || `Play ${game.title || gameTitle} free online on KYRAXO without downloading. Instant browser game on PC and mobile.`).replace(/\s+/g, ' ').trim();
+            const rawArDesc = (game.seoDescriptionAr || game.descriptionAr || rawEnDesc).replace(/\s+/g, ' ').trim();
 
-            let imageUrl = game.thumbnail || 'https://kyraxo.com/og-banner.svg';
+            let pageTitle;
+            let pageDesc;
+            if (isAr) {
+              pageTitle = game.seoTitleAr || `${gameTitle} — العب مجاناً اون لاين بدون تحميل | كايراكسو`;
+              pageDesc = rawArDesc;
+            } else if (ssrLang === 'en') {
+              pageTitle = game.seoTitle || `${gameTitle} — Play Free Online Browser Game | KYRAXO`;
+              pageDesc = rawEnDesc;
+            } else {
+              const titleSuffix = (activeLocaleSeo && activeLocaleSeo.game && activeLocaleSeo.game.titleSuffix) || 'Play Free Online Browser Game';
+              const descTpl = (activeLocaleSeo && activeLocaleSeo.game && activeLocaleSeo.game.descFallback) || 'Play {title} free online on KYRAXO.';
+              pageTitle = `${gameTitle} — ${titleSuffix} | KYRAXO`;
+              pageDesc = `${descTpl.replace('{title}', gameTitle)} ${rawEnDesc}`.slice(0, 160).trim();
+            }
+
+            const gameBaseRoute = `/game/${encodeURIComponent(game.slug)}`;
+            const canonicalUrl = buildLocalizedUrl(gameBaseRoute, ssrLang);
+
+            let imageUrl = game.thumbnail || 'https://kyraxo.com/og-banner.png';
             if (!imageUrl.startsWith('http')) {
               imageUrl = `https://kyraxo.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
             }
 
-            // Clean replacement of generic page metadata with game-specific OpenGraph & Twitter tags
-            html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(gameTitle)} — Play Free Online on KYRAXO</title>`);
-            html = html.replace(/<meta name="title" content=".*?" \/>/i, `<meta name="title" content="${escapeHtml(gameTitle)} — Play Free Online on KYRAXO" />`);
-            html = html.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(cleanDesc)}" />`);
+            const seoKeywords = Array.isArray(game.searchKeywords) && game.searchKeywords.length > 0
+              ? game.searchKeywords.join(', ')
+              : undefined;
 
-            html = html.replace(/<meta property="og:type" content=".*?" \/>/i, `<meta property="og:type" content="game" />`);
-            html = html.replace(/<meta property="og:url" content=".*?" \/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`);
-            html = html.replace(/<meta property="og:title" content=".*?" \/>/i, `<meta property="og:title" content="${escapeHtml(gameTitle)} — Play Free on KYRAXO" />`);
-            html = html.replace(/<meta property="og:description" content=".*?" \/>/i, `<meta property="og:description" content="${escapeHtml(cleanDesc)}" />`);
-            html = html.replace(/<meta property="og:image" content=".*?" \/>/i, `<meta property="og:image" content="${escapeHtml(imageUrl)}" />\n    <meta property="og:image:alt" content="${escapeHtml(gameTitle)}" />\n    <meta property="og:site_name" content="KYRAXO Games" />`);
-
-            html = html.replace(/<meta property="twitter:title" content=".*?" \/>/i, `<meta property="twitter:title" content="${escapeHtml(gameTitle)} — Play Free on KYRAXO" />`);
-            html = html.replace(/<meta property="twitter:description" content=".*?" \/>/i, `<meta property="twitter:description" content="${escapeHtml(cleanDesc)}" />`);
-            html = html.replace(/<meta property="twitter:image" content=".*?" \/>/i, `<meta property="twitter:image" content="${escapeHtml(imageUrl)}" />`);
+            html = applyHeadMeta(html, {
+              title: pageTitle,
+              description: pageDesc,
+              keywords: seoKeywords,
+              canonicalUrl,
+              baseRoute: gameBaseRoute,
+              lang: ssrLang,
+              ogType: 'game',
+              imageUrl,
+              imageAlt: gameTitle,
+              siteName: isAr ? 'كايراكسو' : 'KYRAXO Games',
+            });
 
             // Inject Google VideoGame, BreadcrumbList, and FAQPage Structured Data Schema Graph
             const faqEntities = [
               {
                 "@type": "Question",
-                "name": `How do I play ${gameTitle} online for free?`,
+                "name": `How do I play ${game.title || gameTitle} online for free?`,
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": `You can play ${gameTitle} instantly on KYRAXO in any web browser without downloading or registering.`
+                  "text": `You can play ${game.title || gameTitle} instantly on KYRAXO in any web browser without downloading or registering.`
                 }
               },
               {
                 "@type": "Question",
-                "name": `Can I play ${gameTitle} on mobile (iOS and Android)?`,
+                "name": `Can I play ${game.title || gameTitle} on mobile (iOS and Android)?`,
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": `Yes, ${gameTitle} is built with HTML5 technology and works on iPhones, iPads, Android smartphones, and desktop computers.`
+                  "text": `Yes, ${game.title || gameTitle} runs smoothly on iPhones, iPads, Android smartphones, and desktop web browsers.`
                 }
               },
               {
                 "@type": "Question",
-                "name": `Is ${gameTitle} unblocked at school or work?`,
+                "name": `Is ${game.title || gameTitle} unblocked at school or work?`,
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": `Yes, KYRAXO uses clean HTTPS and requires no executable files or flash plugins, making it accessible on Chromebooks and school networks.`
@@ -882,33 +1090,56 @@ export function createProductionServer(options = {}) {
             if (game.benchmarkGame) {
               faqEntities.push({
                 "@type": "Question",
-                "name": `Is ${gameTitle} similar to ${game.benchmarkGame}?`,
+                "name": `Is ${game.title || gameTitle} similar to ${game.benchmarkGame}?`,
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": `Yes, ${gameTitle} delivers fast, free browser gameplay mechanics inspired by ${game.benchmarkGame} with no downloads required.`
+                  "text": `Yes, ${game.title || gameTitle} delivers fast, free browser gameplay mechanics inspired by ${game.benchmarkGame} with no downloads required.`
                 }
               });
             }
 
+            const videoGameSchema = {
+              "@type": "VideoGame",
+              "name": game.title || gameTitle,
+              "headline": gameTitle,
+              "description": pageDesc,
+              "image": imageUrl,
+              "url": canonicalUrl,
+              "genre": [game.category || 'Arcade'],
+              "inLanguage": ssrLang,
+              "playMode": game.category === 'two-player' ? 'MultiPlayer' : 'SinglePlayer',
+              "applicationCategory": "Game",
+              "operatingSystem": "Any, Web Browser, iOS, Android, Windows, macOS",
+              "author": {
+                "@type": "Organization",
+                "name": game.author || 'KYRAXO Studios',
+                "url": "https://kyraxo.com"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
+              }
+            };
+
+            if (typeof game.rating === 'number' && game.rating > 0 && typeof game.ratingCount === 'number' && game.ratingCount > 0) {
+              videoGameSchema.aggregateRating = {
+                "@type": "AggregateRating",
+                "ratingValue": game.rating,
+                "ratingCount": game.ratingCount,
+                "bestRating": "5",
+                "worstRating": "1"
+              };
+            }
+
+            const catSeoEntry = categorySeoMap[(game.category || 'arcade').toLowerCase()];
+            const catLabel = getCatSeoField(catSeoEntry, 'name', ssrLang) || (game.category || 'Arcade');
+
             const schemaGraph = {
               "@context": "https://schema.org",
               "@graph": [
-                {
-                  "@type": "VideoGame",
-                  "name": gameTitle,
-                  "description": cleanDesc,
-                  "image": imageUrl,
-                  "url": canonicalUrl,
-                  "genre": [game.category || 'Arcade'],
-                  "playMode": "SinglePlayer",
-                  "applicationCategory": "Game",
-                  "operatingSystem": "Any, Web Browser, iOS, Android, Windows, macOS",
-                  "offers": {
-                    "@type": "Offer",
-                    "price": "0",
-                    "priceCurrency": "USD"
-                  }
-                },
+                videoGameSchema,
                 {
                   "@type": "BreadcrumbList",
                   "itemListElement": [
@@ -916,13 +1147,13 @@ export function createProductionServer(options = {}) {
                       "@type": "ListItem",
                       "position": 1,
                       "name": "Home",
-                      "item": "https://kyraxo.com/"
+                      "item": buildLocalizedUrl('/', ssrLang)
                     },
                     {
                       "@type": "ListItem",
                       "position": 2,
-                      "name": (game.category || 'Arcade'),
-                      "item": `https://kyraxo.com/category/${encodeURIComponent((game.category || 'arcade').toLowerCase())}`
+                      "name": catLabel,
+                      "item": buildLocalizedUrl(`/category/${encodeURIComponent((game.category || 'arcade').toLowerCase())}`, ssrLang)
                     },
                     {
                       "@type": "ListItem",
@@ -945,11 +1176,8 @@ export function createProductionServer(options = {}) {
               html = html.replace('</head>', `${gameJsonLd}\n  </head>`);
             }
 
-            // Inject SEO Canonical Tag
-            html = injectCanonical(html, canonicalUrl);
-
             // Inject Crawlable Pre-Rendered HTML into #root
-            const preRendered = generateGamePreRenderHtml(game, gamesCatalog);
+            const preRendered = generateGamePreRenderHtml(game, gamesCatalog, ssrLang, activeLocaleSeo, catSeoEntry);
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
 
             res.statusCode = 200;
@@ -962,31 +1190,32 @@ export function createProductionServer(options = {}) {
         }
       }
 
-      // 4b. Category Social Previews & Crawlable Pre-Rendering (/category/:slug)
-      if (pathname.startsWith('/category/')) {
-        const catSlug = pathname.replace(/^\/category\/?/, '').split('/')[0].split('?')[0];
+      // 4b. Category Social Previews & Crawlable Pre-Rendering (/category/:slug & /:lang/category/:slug)
+      if (baseRoute.startsWith('/category/')) {
+        const catSlug = baseRoute.replace(/^\/category\/?/, '').split('/')[0].split('?')[0];
         const spaIndex = fs.existsSync(path.join(distDir, 'index.html'))
           ? path.join(distDir, 'index.html')
           : path.join(rootDir, 'index.html');
 
         if (fs.existsSync(spaIndex)) {
           let html = fs.readFileSync(spaIndex, 'utf-8');
-          const catName = catSlug.charAt(0).toUpperCase() + catSlug.slice(1);
-          const catTitle = `${catName} Games — Play Free Online | KYRAXO`;
-          const catDesc = `Play the best free online ${catName} games on KYRAXO. Instant browser play, no downloads needed. 100% free HTML5 games.`;
-          const catUrl = `https://kyraxo.com/category/${encodeURIComponent(catSlug)}`;
+          const catSeoEntry = categorySeoMap[catSlug.toLowerCase()];
+          const fallbackName = catSlug.charAt(0).toUpperCase() + catSlug.slice(1);
+          const catName = getCatSeoField(catSeoEntry, 'name', ssrLang) || fallbackName;
+          const catTitle = getCatSeoField(catSeoEntry, 'title', ssrLang) || `Free Online ${fallbackName} Games — Play Without Downloading | KYRAXO`;
+          const catDesc = getCatSeoField(catSeoEntry, 'desc', ssrLang) || `Play the best free online ${fallbackName} browser games on KYRAXO with no downloads required on PC and mobile.`;
+          const catKeywords = getCatSeoField(catSeoEntry, 'keywords', ssrLang) || undefined;
+          const catBaseRoute = `/category/${encodeURIComponent(catSlug)}`;
+          const catUrl = buildLocalizedUrl(catBaseRoute, ssrLang);
 
-          html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(catTitle)}</title>`);
-          html = html.replace(/<meta name="title" content=".*?" \/>/i, `<meta name="title" content="${escapeHtml(catTitle)}" />`);
-          html = html.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(catDesc)}" />`);
-          html = html.replace(/<meta property="og:url" content=".*?" \/>/i, `<meta property="og:url" content="${escapeHtml(catUrl)}" />`);
-          html = html.replace(/<meta property="og:title" content=".*?" \/>/i, `<meta property="og:title" content="${escapeHtml(catTitle)}" />`);
-          html = html.replace(/<meta property="og:description" content=".*?" \/>/i, `<meta property="og:description" content="${escapeHtml(catDesc)}" />`);
-          html = html.replace(/<meta property="twitter:title" content=".*?" \/>/i, `<meta property="twitter:title" content="${escapeHtml(catTitle)}" />`);
-          html = html.replace(/<meta property="twitter:description" content=".*?" \/>/i, `<meta property="twitter:description" content="${escapeHtml(catDesc)}" />`);
-
-          // Inject SEO Canonical Tag
-          html = injectCanonical(html, catUrl);
+          html = applyHeadMeta(html, {
+            title: catTitle,
+            description: catDesc,
+            keywords: catKeywords,
+            canonicalUrl: catUrl,
+            baseRoute: catBaseRoute,
+            lang: ssrLang,
+          });
 
           // Refresh and filter catalog
           refreshGamesCatalog();
@@ -997,8 +1226,8 @@ export function createProductionServer(options = {}) {
           const itemListElements = topInCat.map((g, idx) => ({
             "@type": "ListItem",
             "position": idx + 1,
-            "name": g.title,
-            "url": `https://kyraxo.com/game/${encodeURIComponent(g.slug)}`
+            "name": ssrLang === 'ar' ? (g.titleAr || g.title) : g.title,
+            "url": buildLocalizedUrl(`/game/${encodeURIComponent(g.slug)}`, ssrLang)
           }));
 
           const catSchema = {
@@ -1008,11 +1237,12 @@ export function createProductionServer(options = {}) {
                 "@type": "CollectionPage",
                 "name": catTitle,
                 "description": catDesc,
-                "url": catUrl
+                "url": catUrl,
+                "inLanguage": ssrLang
               },
               {
                 "@type": "ItemList",
-                "name": `${catName} Games Catalog`,
+                "name": `${catName}`,
                 "numberOfItems": gamesInCat.length,
                 "itemListElement": itemListElements
               }
@@ -1025,7 +1255,7 @@ export function createProductionServer(options = {}) {
           }
 
           // Inject Crawlable Pre-Rendered HTML into #root
-          const preRendered = generateCategoryPreRenderHtml(catSlug, gamesInCat);
+          const preRendered = generateCategoryPreRenderHtml(catSlug, gamesInCat, catSeoEntry, ssrLang);
           html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
 
           res.statusCode = 200;
@@ -1037,7 +1267,7 @@ export function createProductionServer(options = {}) {
         }
       }
 
-      // 4c. Default SPA Fallback (Serve dist/index.html or public/index.html with SEO Canonical & Homepage Pre-Render)
+      // 4c. Default SPA Fallback (Serve dist/index.html or public/index.html with localized SEO Meta & Pre-Render)
       const ext = path.extname(pathname);
       const isFileRequest = ext && ext !== '.html';
 
@@ -1049,67 +1279,116 @@ export function createProductionServer(options = {}) {
         if (fs.existsSync(spaIndex)) {
           let html = fs.readFileSync(spaIndex, 'utf-8');
 
-          if (pathname === '/' || pathname === '') {
-            html = injectCanonical(html, 'https://kyraxo.com/');
+          if (baseRoute === '/' || baseRoute === '') {
+            const homeMeta = (activeLocaleSeo && activeLocaleSeo.home) || {};
+            html = applyHeadMeta(html, {
+              title: homeMeta.seoTitle || 'KYRAXO — Play Free Online Browser Games (No Downloads) | ألعاب مجانية اون لاين',
+              description: homeMeta.seoDesc,
+              keywords: homeMeta.keywords,
+              canonicalUrl: buildLocalizedUrl('/', ssrLang),
+              baseRoute: '/',
+              lang: ssrLang,
+            });
             refreshGamesCatalog();
-            const preRendered = generateHomePreRenderHtml(gamesCatalog);
+            const preRendered = generateHomePreRenderHtml(gamesCatalog, ssrLang, activeLocaleSeo, categorySeoMap);
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/privacy') {
-            html = injectCanonical(html, 'https://kyraxo.com/privacy');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Privacy Policy — KYRAXO | User Data Protection & Google AdSense Disclosures</title>');
-            html = html.replace(/<meta name="title" content=".*?" \/>/i, '<meta name="title" content="Privacy Policy — KYRAXO | User Data Protection & Google AdSense Disclosures" />');
-            html = html.replace(/<meta name="description" content=".*?" \/>/i, '<meta name="description" content="Comprehensive Privacy Policy for KYRAXO. Learn how we handle cookies, Google AdSense programmatic advertising, analytics, and your rights under GDPR and CCPA." />');
+          } else if (baseRoute === '/privacy') {
+            html = applyHeadMeta(html, {
+              title: 'Privacy Policy — KYRAXO | User Data Protection & Google AdSense Disclosures',
+              description: 'Comprehensive Privacy Policy for KYRAXO. Learn how we handle cookies, Google AdSense programmatic advertising, analytics, and your rights under GDPR and CCPA.',
+              canonicalUrl: 'https://kyraxo.com/privacy',
+              baseRoute: false,
+            });
             const preRendered = generatePrivacyPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/terms') {
-            html = injectCanonical(html, 'https://kyraxo.com/terms');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Terms of Service — KYRAXO Gaming</title>');
+          } else if (baseRoute === '/terms') {
+            html = applyHeadMeta(html, {
+              title: 'Terms of Service — KYRAXO Gaming',
+              canonicalUrl: 'https://kyraxo.com/terms',
+              baseRoute: false,
+            });
             const preRendered = generateTermsPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/about') {
-            html = injectCanonical(html, 'https://kyraxo.com/about');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>About Us — KYRAXO Mission & Team</title>');
+          } else if (baseRoute === '/about') {
+            const aboutMeta = (activeLocaleSeo && activeLocaleSeo.about) || {};
+            html = applyHeadMeta(html, {
+              title: aboutMeta.seoTitle || 'About Us — KYRAXO Mission & Team',
+              description: aboutMeta.seoDesc,
+              canonicalUrl: buildLocalizedUrl('/about', ssrLang),
+              baseRoute: '/about',
+              lang: ssrLang,
+            });
             const preRendered = generateAboutPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/contact') {
-            html = injectCanonical(html, 'https://kyraxo.com/contact');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Contact Us — KYRAXO Platform Support</title>');
+          } else if (baseRoute === '/contact') {
+            html = applyHeadMeta(html, {
+              title: 'Contact Us — KYRAXO Platform Support',
+              canonicalUrl: 'https://kyraxo.com/contact',
+              baseRoute: false,
+            });
             const preRendered = generateContactPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/categories') {
-            html = injectCanonical(html, 'https://kyraxo.com/categories');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>All Game Categories — Browse Free Browser Games by Genre | KYRAXO</title>');
+          } else if (baseRoute === '/categories') {
+            const hubMeta = (activeLocaleSeo && activeLocaleSeo.categoriesHub) || {};
+            html = applyHeadMeta(html, {
+              title: hubMeta.seoTitle || 'All Free Online Game Categories — Car, Puzzle, 2 Player & Kids Games | KYRAXO',
+              description: hubMeta.seoDesc || 'Browse all free online game categories on KYRAXO with no downloads: car games, puzzle, action shooting, 2 player, multiplayer, sports, and games for kids.',
+              canonicalUrl: buildLocalizedUrl('/categories', ssrLang),
+              baseRoute: '/categories',
+              lang: ssrLang,
+            });
             refreshGamesCatalog();
-            const preRendered = generateCategoriesPreRenderHtml(gamesCatalog);
+            const preRendered = generateCategoriesPreRenderHtml(gamesCatalog, ssrLang, activeLocaleSeo, categorySeoMap);
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/trending') {
-            html = injectCanonical(html, 'https://kyraxo.com/trending');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Trending Browser Games — What Gamers Are Playing Now | KYRAXO</title>');
+          } else if (baseRoute === '/trending') {
+            const trendMeta = (activeLocaleSeo && activeLocaleSeo.trending) || {};
+            const trendingDesc = trendMeta.seoDesc || 'Discover trending games and the most played free online browser games on KYRAXO with no downloads required on desktop and mobile.';
+            html = applyHeadMeta(html, {
+              title: trendMeta.seoTitle || 'Trending Games — Most Played Free Online Browser Games | KYRAXO',
+              description: trendingDesc,
+              canonicalUrl: buildLocalizedUrl('/trending', ssrLang),
+              baseRoute: '/trending',
+              lang: ssrLang,
+            });
             refreshGamesCatalog();
             const trendingList = gamesCatalog.filter(g => g && g.trending);
             const preRendered = generateCollectionPreRenderHtml(
-              'Trending Free HTML5 Games',
-              'Discover the most played and rising browser games on KYRAXO right now, ready to launch immediately on desktop and mobile.',
-              trendingList
+              trendMeta.h1 || 'Trending Free Online Browser Games',
+              trendingDesc,
+              trendingList,
+              ssrLang,
+              '/trending'
             );
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/popular') {
-            html = injectCanonical(html, 'https://kyraxo.com/popular');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Most Popular Online Games — Highest Rated Games | KYRAXO</title>');
+          } else if (baseRoute === '/popular') {
+            const popMeta = (activeLocaleSeo && activeLocaleSeo.popular) || {};
+            const popularDesc = popMeta.seoDesc || 'Play the most popular games and best free online games on KYRAXO with no downloads. Top-rated car, puzzle, sports, and strategy browser games.';
+            html = applyHeadMeta(html, {
+              title: popMeta.seoTitle || 'Most Popular Games — Best Free Online Games to Play (No Downloads) | KYRAXO',
+              description: popularDesc,
+              canonicalUrl: buildLocalizedUrl('/popular', ssrLang),
+              baseRoute: '/popular',
+              lang: ssrLang,
+            });
             refreshGamesCatalog();
             const popularList = [...gamesCatalog].sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0)).slice(0, 48);
             const preRendered = generateCollectionPreRenderHtml(
-              'Most Popular Online Games',
-              'Explore KYRAXO players all-time highest-rated arcade, puzzle, racing, sports, and strategy HTML5 games.',
-              popularList
+              popMeta.h1 || 'Most Popular Free Online Games',
+              popularDesc,
+              popularList,
+              ssrLang,
+              '/popular'
             );
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
-          } else if (pathname === '/search' || pathname === '/favorites' || pathname.startsWith('/admin') || pathname.startsWith('/owner') || pathname.startsWith('/inbox')) {
-            html = injectCanonical(html, `https://kyraxo.com${pathname}`);
+          } else if (baseRoute === '/search' || baseRoute === '/favorites' || baseRoute.startsWith('/admin') || baseRoute.startsWith('/owner') || baseRoute.startsWith('/inbox')) {
+            html = injectCanonical(html, `https://kyraxo.com${baseRoute}`);
             html = html.replace(/<meta\s+name=["']robots["'][^>]*>/i, '<meta name="robots" content="noindex, follow" />');
-          } else if (pathname === '/cookies') {
-            html = injectCanonical(html, 'https://kyraxo.com/cookies');
-            html = html.replace(/<title>.*?<\/title>/i, '<title>Cookie Policy & Ad Preferences — KYRAXO</title>');
+          } else if (baseRoute === '/cookies') {
+            html = applyHeadMeta(html, {
+              title: 'Cookie Policy & Ad Preferences — KYRAXO',
+              canonicalUrl: 'https://kyraxo.com/cookies',
+              baseRoute: false,
+            });
             const preRendered = generateCookiesPreRenderHtml();
             html = html.replace('<div id="root"></div>', `<div id="root">${preRendered}</div>`);
           } else {

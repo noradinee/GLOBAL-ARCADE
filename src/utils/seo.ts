@@ -1,4 +1,17 @@
-export type SupportedLanguage = 'en' | 'ar' | 'fr' | 'es' | 'de' | 'pt';
+import { getHreflangLinks, getLanguageMeta } from '../i18n/localeRouting';
+
+export type SupportedLanguage =
+  | 'en'
+  | 'ar'
+  | 'es'
+  | 'pt'
+  | 'fr'
+  | 'de'
+  | 'tr'
+  | 'id'
+  | 'ru'
+  | 'it'
+  | 'pl';
 
 export interface SEOProps {
   title: string;
@@ -10,6 +23,7 @@ export interface SEOProps {
   schemaData?: Record<string, any> | Record<string, any>[];
   lang?: SupportedLanguage | string;
   robots?: string;
+  includeHreflang?: boolean;
 }
 
 export function updatePageSEO({
@@ -17,11 +31,12 @@ export function updatePageSEO({
   description,
   keywords,
   canonicalUrl = window.location.href,
-  ogImage = '/og-banner.png',
+  ogImage = 'https://kyraxo.com/og-banner.png',
   ogType = 'website',
   schemaData,
   lang = 'en',
   robots = 'index, follow',
+  includeHreflang = true,
 }: SEOProps) {
   if (typeof document === 'undefined') return;
 
@@ -39,6 +54,8 @@ export function updatePageSEO({
     tag.setAttribute('content', content);
   };
 
+  const langMeta = getLanguageMeta(lang);
+
   // Standard Meta
   setMetaTag('name', 'description', description);
   setMetaTag('name', 'title', title);
@@ -53,7 +70,8 @@ export function updatePageSEO({
   setMetaTag('property', 'og:url', canonicalUrl);
   setMetaTag('property', 'og:type', ogType);
   setMetaTag('property', 'og:image', ogImage);
-  setMetaTag('property', 'og:site_name', lang === 'ar' ? 'كايراكسو' : 'KYRAXO');
+  setMetaTag('property', 'og:locale', langMeta.ogLocale || 'en_US');
+  setMetaTag('property', 'og:site_name', langMeta.brandName || 'KYRAXO');
 
   // Twitter Card
   setMetaTag('property', 'twitter:card', 'summary_large_image');
@@ -69,6 +87,24 @@ export function updatePageSEO({
     document.head.appendChild(linkCanonical);
   }
   linkCanonical.setAttribute('href', canonicalUrl);
+
+  // Bidirectional Hreflang alternate tags for indexable SEO pages
+  document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+  if (includeHreflang && !robots.includes('noindex')) {
+    try {
+      const parsed = new URL(canonicalUrl, window.location.origin);
+      const hreflangs = getHreflangLinks(parsed.pathname, window.location.origin);
+      for (const entry of hreflangs) {
+        const linkAlt = document.createElement('link');
+        linkAlt.setAttribute('rel', 'alternate');
+        linkAlt.setAttribute('hreflang', entry.hrefLang);
+        linkAlt.setAttribute('href', entry.href);
+        document.head.appendChild(linkAlt);
+      }
+    } catch {
+      // ignore invalid URL parse in constrained environments
+    }
+  }
 
   // JSON-LD Structured Data
   const existingScript = document.getElementById('seo-jsonld-schema');

@@ -1,9 +1,11 @@
 import React, { useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { LanguageProvider } from './context/LanguageContext';
+import { BrowserRouter, Routes, Route, useLocation, useParams } from 'react-router-dom';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { analytics } from './services/analytics';
+import { extractLangFromPathname, LOCALIZED_URL_PREFIXES } from './i18n/localeRouting';
+import type { Language } from './i18n/translations';
 import { Header } from './components/common/Header';
 import { Footer } from './components/common/Footer';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
@@ -33,10 +35,37 @@ const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(
 
 const RouteTracker: React.FC = () => {
   const location = useLocation();
+  const { lang, setLang } = useLanguage();
+
   useEffect(() => {
     analytics.trackPageView(location.pathname + location.search);
-  }, [location]);
+    const { langFromUrl } = extractLangFromPathname(location.pathname);
+    if (langFromUrl && langFromUrl !== lang) {
+      setLang(langFromUrl as Language);
+    }
+  }, [location, lang, setLang]);
+
   return null;
+};
+
+const PrefixedLocaleRoutes: React.FC = () => {
+  const { langPrefix } = useParams<{ langPrefix: string }>();
+  if (!langPrefix || !LOCALIZED_URL_PREFIXES.includes(langPrefix as Exclude<Language, 'en'>)) {
+    return <HomePage />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="game/:slug" element={<GameDetailPage />} />
+      <Route path="category/:slug" element={<CategoryPage />} />
+      <Route path="categories" element={<CategoriesListPage />} />
+      <Route path="trending" element={<TrendingPage />} />
+      <Route path="popular" element={<PopularPage />} />
+      <Route path="about" element={<AboutPage />} />
+      <Route path="*" element={<HomePage />} />
+    </Routes>
+  );
 };
 
 const PageLoaderFallback: React.FC = () => (
@@ -81,6 +110,7 @@ export const App: React.FC = () => {
                       <Route path="/privacy" element={<PrivacyPolicyPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/cookies" element={<CookiePolicyPage />} />
+                      <Route path="/:langPrefix/*" element={<PrefixedLocaleRoutes />} />
                       {/* Fallback */}
                       <Route path="*" element={<HomePage />} />
                     </Routes>

@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import { gameService } from '../../services/gameService';
+import { extractLangFromPathname, localizePath } from '../../i18n/localeRouting';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { PlayerStatusWidget } from '../profile/PlayerStatusWidget';
+import { SearchAutocomplete } from './SearchAutocomplete';
 import {
   Search,
   Flame,
@@ -13,10 +16,11 @@ import {
   Menu,
   X,
   Gamepad2,
+  Dices,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { t, lang, isRtl } = useLanguage();
+  const { t, lang } = useLanguage();
   const { favorites } = useFavorites();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,30 +28,34 @@ export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileMenuOpen(false);
-    }
-  };
-
   const navLinks = [
-    { label: t.nav.home, path: '/', icon: Gamepad2 },
-    { label: t.nav.categories, path: '/categories', icon: Grid },
-    { label: t.nav.trending, path: '/trending', icon: Flame },
-    { label: t.nav.popular, path: '/popular', icon: Star },
+    { label: t.nav.home, path: localizePath('/', lang), basePath: '/', icon: Gamepad2 },
+    { label: t.nav.categories, path: localizePath('/categories', lang), basePath: '/categories', icon: Grid },
+    { label: t.nav.trending, path: localizePath('/trending', lang), basePath: '/trending', icon: Flame },
+    { label: t.nav.popular, path: localizePath('/popular', lang), basePath: '/popular', icon: Star },
     {
       label: t.nav.favorites,
       path: '/favorites',
+      basePath: '/favorites',
       icon: Bookmark,
       badge: favorites.length > 0 ? favorites.length : undefined,
     },
   ];
 
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+  const { basePath: currentBasePath } = extractLangFromPathname(location.pathname);
+
+  const isActive = (basePath: string) => {
+    if (basePath === '/') return currentBasePath === '/';
+    return currentBasePath.startsWith(basePath);
+  };
+
+  const handleSurpriseMe = () => {
+    const currentSlug = currentBasePath.startsWith('/game/') ? currentBasePath.replace(/^\/game\/?/, '') : undefined;
+    const randomGame = gameService.getRandomGame(currentSlug);
+    if (randomGame) {
+      navigate(localizePath(`/game/${randomGame.slug}`, lang));
+      setMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -57,7 +65,7 @@ export const Header: React.FC = () => {
           
           {/* Brand Logo */}
           <Link
-            to="/"
+            to={localizePath('/', lang)}
             className="flex items-center gap-3 group focus:outline-none"
             aria-label="KYRAXO Home"
           >
@@ -80,7 +88,7 @@ export const Header: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const active = isActive(link.path);
+              const active = isActive(link.basePath);
               return (
                 <Link
                   key={link.path}
@@ -103,33 +111,33 @@ export const Header: React.FC = () => {
             })}
           </nav>
 
-          {/* Search Bar (Desktop & Tablet) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-xs lg:max-w-sm relative"
-          >
-            <input
-              type="text"
+          {/* Search Bar with Live Autocomplete & Quick Suggestions (Desktop & Tablet) */}
+          <div className="hidden md:flex flex-1 max-w-xs lg:max-w-sm relative">
+            <SearchAutocomplete
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.search.placeholder}
-              className={`w-full bg-dark-900/90 text-sm text-slate-100 placeholder-slate-500 rounded-xl py-2 border border-dark-700/80 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all ${
-                isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'
-              }`}
+              onChange={setSearchQuery}
+              onSubmit={(q) => {
+                navigate(`/search?q=${encodeURIComponent(q)}`);
+                setMobileMenuOpen(false);
+              }}
+              onSelectGame={() => {
+                setMobileMenuOpen(false);
+              }}
             />
-            <button
-              type="submit"
-              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-cyan transition-colors ${
-                isRtl ? 'right-3' : 'left-3'
-              }`}
-              aria-label="Search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </form>
+          </div>
 
-          {/* Right Action: Player Status, Language Switcher & Mobile Menu Trigger */}
+          {/* Right Action: Surprise Me, Player Status, Language Switcher & Mobile Menu Trigger */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Surprise Me / Random Game Button */}
+            <button
+              onClick={handleSurpriseMe}
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-purple-500/15 hover:from-amber-500/25 hover:via-rose-500/25 hover:to-purple-500/25 border border-amber-500/40 text-amber-300 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-sm active:scale-95 group"
+              title={lang === 'ar' ? 'فاجئني بلعبة عشوائية!' : 'Surprise me with a random game!'}
+            >
+              <Dices className="w-4 h-4 text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="hidden sm:inline">{lang === 'ar' ? 'فاجئني' : 'Random'}</span>
+            </button>
+
             <PlayerStatusWidget />
             <LanguageSwitcher />
 
@@ -157,32 +165,40 @@ export const Header: React.FC = () => {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-dark-900 border-b border-dark-700 px-4 pt-3 pb-6 space-y-3 animate-fadeIn">
-          {/* Mobile Search */}
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <input
-              type="text"
+          {/* Mobile Search with Autocomplete */}
+          <div className="relative">
+            <SearchAutocomplete
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.search.placeholder}
-              className={`w-full bg-dark-850 text-sm text-slate-100 placeholder-slate-500 rounded-xl py-2.5 border border-dark-700 focus:border-brand-purple focus:outline-none ${
-                isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'
-              }`}
+              onChange={setSearchQuery}
+              onSubmit={(q) => {
+                navigate(`/search?q=${encodeURIComponent(q)}`);
+                setMobileMenuOpen(false);
+              }}
+              onSelectGame={() => {
+                setMobileMenuOpen(false);
+              }}
             />
-            <button
-              type="submit"
-              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${
-                isRtl ? 'right-3' : 'left-3'
-              }`}
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </form>
+          </div>
 
           {/* Nav List */}
           <div className="grid grid-cols-1 gap-1">
+            {/* Surprise Me Mobile Button */}
+            <button
+              onClick={handleSurpriseMe}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-500/20 to-brand-rose/20 border border-amber-500/30 text-amber-300 hover:text-white transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Dices className="w-5 h-5 text-amber-400" />
+                <span>{lang === 'ar' ? '🎲 فاجئني بلعبة عشوائية' : '🎲 Surprise Me (Random Game)'}</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-200">
+                {lang === 'ar' ? 'العب فوراً' : 'Play'}
+              </span>
+            </button>
+
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const active = isActive(link.path);
+              const active = isActive(link.basePath);
               return (
                 <Link
                   key={link.path}

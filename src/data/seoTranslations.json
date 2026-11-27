@@ -1,0 +1,457 @@
+{
+  "languages": [
+    { "code": "en", "nativeName": "English", "flag": "🇬🇧", "dir": "ltr", "ogLocale": "en_US", "brandName": "KYRAXO" },
+    { "code": "ar", "nativeName": "العربية", "flag": "🇸🇦", "dir": "rtl", "ogLocale": "ar_AR", "brandName": "كايراكسو" },
+    { "code": "es", "nativeName": "Español", "flag": "🇪🇸", "dir": "ltr", "ogLocale": "es_ES", "brandName": "KYRAXO" },
+    { "code": "pt", "nativeName": "Português", "flag": "🇧🇷", "dir": "ltr", "ogLocale": "pt_BR", "brandName": "KYRAXO" },
+    { "code": "fr", "nativeName": "Français", "flag": "🇫🇷", "dir": "ltr", "ogLocale": "fr_FR", "brandName": "KYRAXO" },
+    { "code": "de", "nativeName": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "ogLocale": "de_DE", "brandName": "KYRAXO" },
+    { "code": "tr", "nativeName": "Türkçe", "flag": "🇹🇷", "dir": "ltr", "ogLocale": "tr_TR", "brandName": "KYRAXO" },
+    { "code": "id", "nativeName": "Bahasa Indonesia", "flag": "🇮🇩", "dir": "ltr", "ogLocale": "id_ID", "brandName": "KYRAXO" },
+    { "code": "ru", "nativeName": "Русский", "flag": "🇷🇺", "dir": "ltr", "ogLocale": "ru_RU", "brandName": "KYRAXO" },
+    { "code": "it", "nativeName": "Italiano", "flag": "🇮🇹", "dir": "ltr", "ogLocale": "it_IT", "brandName": "KYRAXO" },
+    { "code": "pl", "nativeName": "Polski", "flag": "🇵🇱", "dir": "ltr", "ogLocale": "pl_PL", "brandName": "KYRAXO" }
+  ],
+  "locales": {
+    "en": {
+      "home": {
+        "seoTitle": "KYRAXO — Play Free Online Browser Games (No Downloads) | 3,200+ Games",
+        "seoDesc": "Play 3,200+ free online games on KYRAXO with no downloads required. Instant browser games for PC and mobile: car games, puzzles, action shooting, 2 player, multiplayer, and kids games.",
+        "h1": "Free Online Browser Games — Play Instant Games Without Downloading",
+        "subtitle": "Play over 3,200 free online games right in your browser on mobile and PC: car racing, puzzles, shooting, 2-player, and kids games with zero downloads.",
+        "keywords": "free online games, browser games, play free games online without downloading, unblocked games, car games, 2 player games, multiplayer games, puzzle games",
+        "popularTitle": "Most Popular Free Online Browser Games",
+        "exploreCategories": "Explore All Categories",
+        "gamesLabel": "Games"
+      },
+      "categoriesHub": {
+        "seoTitle": "All Free Online Game Categories — Car, Puzzle, 2 Player & Kids Games | KYRAXO",
+        "seoDesc": "Browse all free online game categories on KYRAXO with no downloads: car games, puzzle, action shooting, 2 player, multiplayer, sports, and games for kids.",
+        "h1": "All Free Online Game Categories",
+        "subtitle": "Pick a genre to play free online browser games immediately with zero downloads.",
+        "exploreCta": "Explore Games"
+      },
+      "trending": {
+        "seoTitle": "Trending Games — Most Played Free Online Browser Games | KYRAXO",
+        "seoDesc": "Discover trending games and the most played free online browser games on KYRAXO with no downloads required on desktop and mobile.",
+        "h1": "Trending Free Online Browser Games"
+      },
+      "popular": {
+        "seoTitle": "Most Popular Games — Best Free Online Games to Play (No Downloads) | KYRAXO",
+        "seoDesc": "Play the most popular games and best free online games on KYRAXO with no downloads. Top-rated car, puzzle, sports, and strategy browser games.",
+        "h1": "Most Popular Free Online Games"
+      },
+      "about": {
+        "seoTitle": "About KYRAXO — Free Online Browser Games Platform",
+        "seoDesc": "Learn more about KYRAXO, our mission to provide fast instant free online browser games worldwide with zero downloads."
+      },
+      "game": {
+        "titleSuffix": "Play Free Online (No Download)",
+        "descFallback": "Play {title} free online on KYRAXO with no downloads required. Instant browser gameplay on mobile and PC.",
+        "controlsHeading": "🎮 How to Play & Controls",
+        "faqHeading": "❓ Frequently Asked Questions",
+        "relatedHeading": "More Free Online Games in {category}"
+      }
+    },
+    "ar": {
+      "home": {
+        "seoTitle": "كايراكسو — ألعاب مجانية اون لاين بدون تحميل (+3,200 لعبة متصفح) | سيارات، بنات وذكاء",
+        "seoDesc": "العب أكثر من 3,200 لعبة ضمن ألعاب مجانية اون لاين وبدون تحميل على كايراكسو: ألعاب سيارات، ألعاب حرب وقتال، ألعاب بنات وأطفال، ألعاب ذكاء وألغاز، وألعاب شخصين مباشرة في المتصفح.",
+        "h1": "ألعاب مجانية اون لاين بدون تحميل — العب مباشرة في المتصفح",
+        "subtitle": "استمتع بأكثر من 3,200 لعبة مجانية للجوال والكمبيوتر بدون تنزيل: ألعاب سيارات وسباق، ألعاب حرب، ألعاب ذكاء، ألعاب بنات وأطفال، وألعاب شخصين.",
+        "keywords": "ألعاب مجانية, العاب مجانية, العاب اون لاين, العاب بدون تحميل, العاب سيارات, العاب حرب, العاب بنات, العاب ذكاء, العاب اطفال, العاب شخصين",
+        "popularTitle": "أشهر ألعاب المتصفح المجانية اون لاين",
+        "exploreCategories": "تصفح جميع التصنيفات",
+        "gamesLabel": "لعبة"
+      },
+      "categoriesHub": {
+        "seoTitle": "تصنيفات الألعاب — ألعاب سيارات وذكاء وحرب وبنات وشخصين اون لاين | كايراكسو",
+        "seoDesc": "تصفح جميع تصنيفات ألعاب مجانية اون لاين على كايراكسو: ألعاب سيارات، ألعاب حرب وقتال، ألعاب ذكاء وألغاز، ألعاب كرة قدم، ألعاب شخصين، وألعاب أطفال وبنات بدون تحميل.",
+        "h1": "جميع تصنيفات الألعاب المجانية اون لاين",
+        "subtitle": "اختر التصنيف المفضل لديك وابدأ اللعب فوراً في المتصفح مجاناً وبدون تحميل.",
+        "exploreCta": "استكشف الألعاب"
+      },
+      "trending": {
+        "seoTitle": "ألعاب مجانية اون لاين الرائجة — الأكثر لعباً بدون تحميل | كايراكسو",
+        "seoDesc": "اكتشف أشهر الألعاب الرائجة والأكثر لعباً الآن ضمن ألعاب مجانية اون لاين بدون تحميل على كايراكسو للجوال والكمبيوتر.",
+        "h1": "الألعاب الرائجة والأكثر لعباً اون لاين"
+      },
+      "popular": {
+        "seoTitle": "أفضل ألعاب مجانية اون لاين — الألعاب الأكثر شهرة وتقييماً | كايراكسو",
+        "seoDesc": "العب أفضل ألعاب مجانية اون لاين والأعلى تقييماً على كايراكسو بدون تحميل: ألعاب سيارات وذكاء وشخصين مباشرة في المتصفح.",
+        "h1": "أفضل الألعاب المجانية الأكثر شعبية"
+      },
+      "about": {
+        "seoTitle": "من نحن — منصة كايراكسو للألعاب المجانية بدون تحميل",
+        "seoDesc": "تعرف على كايراكسو، منصتك الرائدة للألعاب المجانية اون لاين عبر المتصفح بدون تحميل لجميع الأعمار."
+      },
+      "game": {
+        "titleSuffix": "العب مجاناً اون لاين بدون تحميل",
+        "descFallback": "العب {title} مجاناً اون لاين وبدون تحميل على كايراكسو. تشغيل فوري في المتصفح على الجوال والكمبيوتر.",
+        "controlsHeading": "🎮 طريقة اللعب والتحكم",
+        "faqHeading": "❓ الأسئلة الشائعة",
+        "relatedHeading": "المزيد من ألعاب {category} المجانية اون لاين"
+      }
+    },
+    "es": {
+      "home": {
+        "seoTitle": "KYRAXO — Juegos Gratis Online Sin Descargar (+3.200 Juegos) | Carros & Solitario",
+        "seoDesc": "Juega a más de 3.200 juegos gratis online en KYRAXO sin descargar: juegos de carros, juegos de fútbol, solitario online, minijuegos, rompecabezas y 2 jugadores en PC y móvil.",
+        "h1": "Juegos Gratis Online — Jugar en Línea Sin Descargar",
+        "subtitle": "Disfruta de más de 3.200 juegos gratis online al instante en PC y celular: carros, fútbol, solitario online, rompecabezas y 2 jugadores sin descargas.",
+        "keywords": "juegos gratis, juegos gratis online, juegos online gratis, juegos sin descargar, juegos de carros, juegos de futbol, solitario online, minijuegos, rompecabezas",
+        "popularTitle": "Juegos Online Gratis Más Populares",
+        "exploreCategories": "Explorar Todas las Categorías",
+        "gamesLabel": "Juegos"
+      },
+      "categoriesHub": {
+        "seoTitle": "Todas las Categorías de Juegos Gratis Online — Coches, Puzzles y 2 Jugadores | KYRAXO",
+        "seoDesc": "Explora todas las categorías de juegos gratis online sin descargar en KYRAXO: carreras de coches, acción, estrategia, fútbol, multijugador y niños.",
+        "h1": "Categorías de Juegos Gratis Online",
+        "subtitle": "Elige tu género favorito y empieza a jugar gratis al instante sin descargar nada.",
+        "exploreCta": "Explorar Juegos"
+      },
+      "trending": {
+        "seoTitle": "Juegos en Tendencia — Los Juegos Gratis Online Más Jugados | KYRAXO",
+        "seoDesc": "Descubre los juegos gratis online más virales y jugados hoy en KYRAXO sin descargar en PC y teléfono móvil.",
+        "h1": "Juegos Gratis Online en Tendencia"
+      },
+      "popular": {
+        "seoTitle": "Juegos Más Populares — Mejores Juegos Gratis Online Sin Descargar | KYRAXO",
+        "seoDesc": "Juega a los mejores juegos gratis online mejor valorados en KYRAXO sin descargas. Carreras, fútbol, puzzle y multijugador al instante.",
+        "h1": "Los Mejores Juegos Gratis Más Populares"
+      },
+      "about": {
+        "seoTitle": "Sobre Nosotros — Juegos Gratis Online en KYRAXO",
+        "seoDesc": "Conoce KYRAXO, tu portal de juegos gratis online en navegador sin descargas para PC y móviles."
+      },
+      "game": {
+        "titleSuffix": "Juega Gratis Online Sin Descargar",
+        "descFallback": "Juega gratis a {title} online en KYRAXO sin descargar nada. Partidas instantáneas en navegador para PC y móvil.",
+        "controlsHeading": "🎮 Cómo Jugar y Controles",
+        "faqHeading": "❓ Preguntas Frecuentes",
+        "relatedHeading": "Más Juegos Gratis Online de {category}"
+      }
+    },
+    "pt": {
+      "home": {
+        "seoTitle": "KYRAXO — Jogos Online Grátis Sem Baixar (+3.200 Jogos) | Carro & Paciência",
+        "seoDesc": "Jogue mais de 3.200 jogos online grátis no KYRAXO sem baixar nada: jogos de carro, paciência online, jogos de tiro, futebol e 2 jogadores no PC e celular.",
+        "h1": "Jogos Online Grátis — Jogue no Navegador Sem Baixar",
+        "subtitle": "Mais de 3.200 jogos online e jogos grátis no celular e PC: jogos de carro, paciência online, tiro e 2 jogadores sem precisar baixar.",
+        "keywords": "jogos online, jogos gratis, jogos grátis online, jogos sem baixar, jogos de carro, paciencia online, jogos de tiro, futebol online",
+        "popularTitle": "Jogos Online Grátis Mais Populares",
+        "exploreCategories": "Explorar Todas as Categorias",
+        "gamesLabel": "Jogos"
+      },
+      "categoriesHub": {
+        "seoTitle": "Categorias de Jogos Grátis Online — Carro, Futebol, Puzzle & 2 Jogadores | KYRAXO",
+        "seoDesc": "Navegue por todas as categorias de jogos online grátis no KYRAXO sem downloads: carros, ação, estratégia, esportes, multiplayer e infantil.",
+        "h1": "Categorias de Jogos Online Grátis",
+        "subtitle": "Escolha um gênero e jogue instantaneamente no navegador sem baixar.",
+        "exploreCta": "Explorar Jogos"
+      },
+      "trending": {
+        "seoTitle": "Jogos em Alta — Jogos Online Grátis Mais Jogados Agora | KYRAXO",
+        "seoDesc": "Descubra os jogos online grátis que estão em alta no KYRAXO para jogar direto no navegador sem download.",
+        "h1": "Jogos Online Grátis em Alta"
+      },
+      "popular": {
+        "seoTitle": "Jogos Mais Populares — Melhores Jogos Grátis Online | KYRAXO",
+        "seoDesc": "Jogue os melhores jogos online grátis e mais bem avaliados no KYRAXO sem downloads no celular e PC.",
+        "h1": "Melhores Jogos Online Grátis"
+      },
+      "about": {
+        "seoTitle": "Sobre o KYRAXO — Jogos Online Grátis no Navegador",
+        "seoDesc": "Conheça o KYRAXO, o portal de jogos grátis online instantâneos para PC e celular sem download."
+      },
+      "game": {
+        "titleSuffix": "Jogue Grátis Online Sem Baixar",
+        "descFallback": "Jogue {title} grátis online no KYRAXO sem download. Diversão instantânea no navegador para celular e PC.",
+        "controlsHeading": "🎮 Como Jogar e Controles",
+        "faqHeading": "❓ Perguntas Frequentes",
+        "relatedHeading": "Mais Jogos Grátis de {category}"
+      }
+    },
+    "fr": {
+      "home": {
+        "seoTitle": "KYRAXO — Jeux Gratuits en Ligne Sans Téléchargement (+3 200 Jeux) | Solitaire & Voiture",
+        "seoDesc": "Jouez à plus de 3 200 jeux gratuits en ligne sur KYRAXO sans téléchargement ni inscription : solitaire gratuit, jeux de voiture, jeux de foot, tir, puzzle et jeux à 2 joueurs.",
+        "h1": "Jeux Gratuits en Ligne Sans Téléchargement",
+        "subtitle": "Profitez de plus de 3 200 jeux gratuits sur navigateur PC et mobile : solitaire gratuit, jeux de voiture, jeux de foot, réflexion et jeux à 2 joueurs.",
+        "keywords": "jeux gratuits, jeux gratuit, jeux gratuits en ligne, jeux en ligne gratuit, solitaire gratuit, jeux de voiture, jeux de foot, jeux gratuits sans téléchargement",
+        "popularTitle": "Jeux Gratuits en Ligne les Plus Populaires",
+        "exploreCategories": "Toutes les Catégories",
+        "gamesLabel": "Jeux"
+      },
+      "categoriesHub": {
+        "seoTitle": "Catégories de Jeux Gratuits en Ligne — Voiture, Puzzle, 2 Joueurs & Enfants | KYRAXO",
+        "seoDesc": "Parcourez toutes les catégories de jeux gratuits en ligne sans téléchargement sur KYRAXO : voitures, tir, puzzle, sport, multijoueur et enfants.",
+        "h1": "Catégories de Jeux Gratuits en Ligne",
+        "subtitle": "Choisissez votre catégorie et lancez une partie gratuite sans téléchargement.",
+        "exploreCta": "Explorer les Jeux"
+      },
+      "trending": {
+        "seoTitle": "Jeux Tendances — Jeux Gratuits en Ligne les Plus Joués | KYRAXO",
+        "seoDesc": "Découvrez les jeux gratuits en ligne les plus populaires et tendances du moment sur KYRAXO sans téléchargement.",
+        "h1": "Jeux Gratuits en Ligne Tendances"
+      },
+      "popular": {
+        "seoTitle": "Jeux les Plus Populaires — Meilleurs Jeux Gratuits en Ligne | KYRAXO",
+        "seoDesc": "Jouez aux meilleurs jeux gratuits en ligne les mieux notés sur KYRAXO sans téléchargement sur PC et mobile.",
+        "h1": "Meilleurs Jeux Gratuits en Ligne"
+      },
+      "about": {
+        "seoTitle": "À Propos de KYRAXO — Jeux Gratuits sur Navigateur",
+        "seoDesc": "Découvrez KYRAXO, la plateforme dédiée aux jeux gratuits en ligne instantanés sans téléchargement."
+      },
+      "game": {
+        "titleSuffix": "Jouer Gratuitement en Ligne Sans Téléchargement",
+        "descFallback": "Jouez gratuitement à {title} en ligne sur KYRAXO sans téléchargement. Jeu instantané sur navigateur PC et mobile.",
+        "controlsHeading": "🎮 Commandes et Contrôles",
+        "faqHeading": "❓ Questions Fréquentes",
+        "relatedHeading": "Plus de Jeux Gratuits : {category}"
+      }
+    },
+    "de": {
+      "home": {
+        "seoTitle": "KYRAXO — Kostenlose Spiele Ohne Anmeldung & Solitär (+3.200 Online Spiele)",
+        "seoDesc": "Spiele über 3.200 kostenlose Spiele online auf KYRAXO ohne Anmeldung und ohne Download: Solitär kostenlos, Schach spielen, Sudoku, Action- und 2-Spieler-Spiele.",
+        "h1": "Kostenlose Spiele Online Ohne Anmeldung & Ohne Download",
+        "subtitle": "Über 3.200 spiele kostenlos und gratis online spielen auf PC und Handy — Solitär, Schach, Sudoku und mehr ohne Anmeldung.",
+        "keywords": "kostenlose spiele, spiele kostenlos, kostenlos online spiele, kostenlose spiele ohne anmeldung, solitär kostenlos, schach spielen, gratis spiele",
+        "popularTitle": "Beliebteste Kostenlose Onlinespiele",
+        "exploreCategories": "Alle Kategorien ansehen",
+        "gamesLabel": "Spiele"
+      },
+      "categoriesHub": {
+        "seoTitle": "Alle Spielkategorien — Kostenlose Onlinespiele Ohne Anmeldung | KYRAXO",
+        "seoDesc": "Entdecke alle Kategorien kostenloser Browserspiele ohne Download und Anmeldung auf KYRAXO: Autos, Puzzle, Action, Sport, 2-Spieler und Kinder.",
+        "h1": "Kategorien Kostenloser Onlinespiele",
+        "subtitle": "Wähle ein Genre und starte kostenlose Browserspiele sofort ohne Anmeldung.",
+        "exploreCta": "Spiele entdecken"
+      },
+      "trending": {
+        "seoTitle": "Spiele im Trend — Meistgespielte Kostenlose Onlinespiele | KYRAXO",
+        "seoDesc": "Entdecke die angesagtesten kostenlosen Onlinespiele ohne Anmeldung und Download auf KYRAXO für PC und Handy.",
+        "h1": "Angesagte Kostenlose Onlinespiele"
+      },
+      "popular": {
+        "seoTitle": "Beliebteste Spiele — Beste Kostenlose Spiele Ohne Anmeldung | KYRAXO",
+        "seoDesc": "Spiele die beliebtesten und bestbewerteten kostenlosen Spiele online auf KYRAXO ohne Download und Anmeldung.",
+        "h1": "Die Beliebtesten Kostenlosen Onlinespiele"
+      },
+      "about": {
+        "seoTitle": "Über KYRAXO — Kostenlose Browserspiele Ohne Download",
+        "seoDesc": "Erfahre mehr über KYRAXO, deine Plattform für kostenlose Online-Spiele ohne Anmeldung im Browser."
+      },
+      "game": {
+        "titleSuffix": "Kostenlos Online Spielen Ohne Anmeldung",
+        "descFallback": "Spiele {title} kostenlos online auf KYRAXO ohne Download und ohne Anmeldung — direkt im Browser auf PC & Handy.",
+        "controlsHeading": "🎮 Steuerung & Spielanleitung",
+        "faqHeading": "❓ Häufige Fragen",
+        "relatedHeading": "Mehr kostenlose {category} Spiele"
+      }
+    },
+    "tr": {
+      "home": {
+        "seoTitle": "KYRAXO — Oyun Oyna & Ücretsiz Oyunlar (İndirmeden +3.200 Online Oyun)",
+        "seoDesc": "KYRAXO'da 3.200+ ücretsiz oyunlar ve oyun oyna! Araba oyunları, iki kişilik oyunlar, silah oyunları, zeka oyunları ve kız oyunları indirmeden hemen oyna.",
+        "h1": "Oyun Oyna — Ücretsiz Online Oyunlar (İndirmeden)",
+        "subtitle": "Bilgisayar ve telefonda indirmeden 3.200+ ücretsiz oyunlar: araba oyunları, iki kişilik oyunlar, silah oyunları ve zeka oyunları.",
+        "keywords": "oyunlar, oyun oyna, ücretsiz oyunlar, araba oyunları, iki kişilik oyunlar, kız oyunları, silah oyunu, zeka oyunları",
+        "popularTitle": "En Popüler Ücretsiz Online Oyunlar",
+        "exploreCategories": "Tüm Kategorileri Gör",
+        "gamesLabel": "Oyun"
+      },
+      "categoriesHub": {
+        "seoTitle": "Tüm Oyun Kategorileri — Araba, Zeka, 2 Kişilik & Savaş Oyunları | KYRAXO",
+        "seoDesc": "KYRAXO'daki tüm ücretsiz tarayıcı oyunu kategorilerini keşfet: araba oyunları, bulmaca, aksiyon, spor, çok oyunculu ve çocuk oyunları.",
+        "h1": "Ücretsiz Online Oyun Kategorileri",
+        "subtitle": "Favori kategorini seç ve indirmeden anında ücretsiz oyun oyna.",
+        "exploreCta": "Oyunları Keşfet"
+      },
+      "trending": {
+        "seoTitle": "Trend Oyunlar — En Çok Oynanan Ücretsiz Online Oyunlar | KYRAXO",
+        "seoDesc": "Şu an en çok oynanan trend ücretsiz online tarayıcı oyunlarını KYRAXO'da indirmeden keşfet ve oyna.",
+        "h1": "Trend Ücretsiz Tarayıcı Oyunları"
+      },
+      "popular": {
+        "seoTitle": "En Popüler Oyunlar — En İyi Ücretsiz Online Oyun Oyna | KYRAXO",
+        "seoDesc": "KYRAXO'da en yüksek puanlı ve en popüler ücretsiz online oyunları indirmeden PC ve mobilde hemen oyna.",
+        "h1": "En Popüler Ücretsiz Oyunlar"
+      },
+      "about": {
+        "seoTitle": "Hakkımızda — KYRAXO Ücretsiz Tarayıcı Oyunları",
+        "seoDesc": "İndirmeden ücretsiz online tarayıcı oyunları sunan KYRAXO hakkında bilgi edinin."
+      },
+      "game": {
+        "titleSuffix": "Ücretsiz Online Oyna (İndirmeden)",
+        "descFallback": "{title} oyununu KYRAXO'da indirmeden ücretsiz online oyna. PC ve mobilde anında tarayıcı oyunu.",
+        "controlsHeading": "🎮 Nasıl Oynanır ve Kontroller",
+        "faqHeading": "❓ Sıkça Sorulan Sorular",
+        "relatedHeading": "Daha Fazla Ücretsiz {category} Oyunu"
+      }
+    },
+    "id": {
+      "home": {
+        "seoTitle": "KYRAXO — Game Online Gratis & Permainan Gratis (+3.200 Game Tanpa Download)",
+        "seoDesc": "Main 3.200+ game online gratis dan permainan online gratis di KYRAXO tanpa download: tetris gratis, mahjong, game balap mobil, sepak bola, dan game PC gratis di HP & PC.",
+        "h1": "Game Online Gratis & Permainan Gratis Tanpa Download",
+        "subtitle": "Mainkan lebih dari 3.200 game gratis dan permainan online gratis langsung di browser HP dan PC tanpa download.",
+        "keywords": "game online gratis, game gratis, permainan gratis, permainan online gratis, game pc gratis, tetris gratis, mahjong classic gratis, game balap mobil",
+        "popularTitle": "Game Online Gratis Paling Populer",
+        "exploreCategories": "Lihat Semua Kategori",
+        "gamesLabel": "Game"
+      },
+      "categoriesHub": {
+        "seoTitle": "Semua Kategori Game Gratis Online — Balap, Puzzle, 2 Pemain & Anak | KYRAXO",
+        "seoDesc": "Jelajahi semua kategori game online gratis tanpa download di KYRAXO: game mobil, puzzle, aksi perang, olahraga, multiplayer, dan game anak.",
+        "h1": "Kategori Game Online Gratis",
+        "subtitle": "Pilih kategori favoritmu dan langsung main game gratis tanpa download.",
+        "exploreCta": "Jelajahi Game"
+      },
+      "trending": {
+        "seoTitle": "Game Trending — Game Online Gratis Paling Banyak Dimainkan | KYRAXO",
+        "seoDesc": "Temukan game trending dan game online gratis paling populer minggu ini di KYRAXO tanpa download di HP dan PC.",
+        "h1": "Game Online Gratis Trending"
+      },
+      "popular": {
+        "seoTitle": "Game Terpopuler — Game Gratis Online Terbaik Tanpa Download | KYRAXO",
+        "seoDesc": "Mainkan game terpopuler dan game online gratis terbaik di KYRAXO tanpa perlu download aplikasi.",
+        "h1": "Game Online Gratis Terpopuler"
+      },
+      "about": {
+        "seoTitle": "Tentang KYRAXO — Platform Game Browser Gratis",
+        "seoDesc": "Kenali KYRAXO, platform game online gratis instan di browser HP dan PC tanpa download."
+      },
+      "game": {
+        "titleSuffix": "Main Gratis Online Tanpa Download",
+        "descFallback": "Mainkan {title} gratis online di KYRAXO tanpa download. Game browser cepat di HP dan komputer.",
+        "controlsHeading": "🎮 Cara Bermain & Kontrol",
+        "faqHeading": "❓ Pertanyaan Umum",
+        "relatedHeading": "Game {category} Gratis Lainnya"
+      }
+    },
+    "ru": {
+      "home": {
+        "seoTitle": "KYRAXO — Игры Онлайн Бесплатно (+3 200 Браузерных Игр Без Регистрации)",
+        "seoDesc": "Играйте в 3 200+ игр онлайн бесплатно на KYRAXO без регистрации и скачивания: пасьянс косынка, гонки онлайн, игры на двоих, для девочек, детские игры и стрелялки.",
+        "h1": "Игры Онлайн Бесплатно — Играть в Браузере Без Скачивания",
+        "subtitle": "Более 3 200 бесплатных браузерных игр онлайн без регистрации: пасьянс косынка, маджонг, гонки, игры на двоих и для детей.",
+        "keywords": "игры онлайн, игры бесплатно, онлайн игры бесплатно, игры онлайн бесплатно без регистрации, пасьянс косынка, гонки онлайн, игры на двоих, детские игры",
+        "popularTitle": "Самые Популярные Онлайн Игры Бесплатно",
+        "exploreCategories": "Все Категории Игр",
+        "gamesLabel": "Игр"
+      },
+      "categoriesHub": {
+        "seoTitle": "Все Категории Онлайн Игр Бесплатно — Гонки, Головоломки и На Двоих | KYRAXO",
+        "seoDesc": "Выберите жанр и играйте бесплатно онлайн без скачивания и регистрации на KYRAXO: гонки, экшен, стратегии, спорт и детские игры.",
+        "h1": "Категории Бесплатных Онлайн Игр",
+        "subtitle": "Выберите любимый жанр и начните играть в браузере мгновенно и бесплатно.",
+        "exploreCta": "Открыть Игры"
+      },
+      "trending": {
+        "seoTitle": "Популярные Тренды — Новые Онлайн Игры Бесплатно | KYRAXO",
+        "seoDesc": "Откройте для себя самые популярные онлайн игры бесплатно в тренде на KYRAXO без скачивания и регистрации.",
+        "h1": "Трендовые Бесплатные Онлайн Игры"
+      },
+      "popular": {
+        "seoTitle": "Лучшие Игры — Топ Бесплатных Онлайн Игр Без Скачивания | KYRAXO",
+        "seoDesc": "Играйте в лучшие бесплатные браузерные игры с высоким рейтингом на KYRAXO без установки на ПК и смартфон.",
+        "h1": "Лучшие Популярные Онлайн Игры"
+      },
+      "about": {
+        "seoTitle": "О платформе KYRAXO — Бесплатные Браузерные Игры",
+        "seoDesc": "Узнайте больше о KYRAXO — портале бесплатных онлайн игр без регистрации и скачивания."
+      },
+      "game": {
+        "titleSuffix": "Играть Бесплатно Онлайн Без Скачивания",
+        "descFallback": "Играйте в {title} бесплатно онлайн на KYRAXO без скачивания и регистрации на ПК и телефоне.",
+        "controlsHeading": "🎮 Управление и Правила Игры",
+        "faqHeading": "❓ Частые Вопросы",
+        "relatedHeading": "Похожие Бесплатные Игры: {category}"
+      }
+    },
+    "it": {
+      "home": {
+        "seoTitle": "KYRAXO — Giochi Online Gratis Senza Scaricare (+3.200 Giochi Browser)",
+        "seoDesc": "Gioca a oltre 3.200 giochi online gratis su KYRAXO senza scaricare nulla. Giochi di auto, azione, solitario, puzzle, calcio, 2 giocatori e giochi per bambini su PC e cellulare.",
+        "h1": "Giochi Online Gratis — Gioca Subito Senza Scaricare",
+        "subtitle": "Oltre 3.200 giochi gratis istantanei nel browser su PC e smartphone: auto, calcio, solitario, puzzle e 2 giocatori senza download.",
+        "keywords": "giochi gratis, giochi online, giochi online gratis, giochi senza scaricare, giochi di auto, solitario gratis, giochi per bambini",
+        "popularTitle": "Giochi Online Gratis Più Popolari",
+        "exploreCategories": "Esplora Tutte le Categorie",
+        "gamesLabel": "Giochi"
+      },
+      "categoriesHub": {
+        "seoTitle": "Categorie Giochi Online Gratis — Auto, Puzzle, Calcio & 2 Giocatori | KYRAXO",
+        "seoDesc": "Esplora tutte le categorie di giochi gratis online su KYRAXO senza download: corse d'auto, azione, strategia, sport, carte e bambini.",
+        "h1": "Categorie di Giochi Online Gratis",
+        "subtitle": "Scegli una categoria e inizia a giocare subito nel browser senza scaricare.",
+        "exploreCta": "Esplora Giochi"
+      },
+      "trending": {
+        "seoTitle": "Giochi di Tendenza — Giochi Online Gratis Più Giocati | KYRAXO",
+        "seoDesc": "Scopri i giochi online gratis di tendenza più giocati oggi su KYRAXO senza download su PC e mobile.",
+        "h1": "Giochi Online Gratis di Tendenza"
+      },
+      "popular": {
+        "seoTitle": "Giochi Più Popolari — Migliori Giochi Gratis Online | KYRAXO",
+        "seoDesc": "Gioca ai migliori giochi online gratis più votati su KYRAXO senza scaricare nulla su smartphone e PC.",
+        "h1": "Migliori Giochi Online Gratis"
+      },
+      "about": {
+        "seoTitle": "Chi Siamo — KYRAXO Giochi Gratis nel Browser",
+        "seoDesc": "Scopri KYRAXO, la piattaforma di giochi online gratis istantanei senza download per tutti i dispositivi."
+      },
+      "game": {
+        "titleSuffix": "Gioca Gratis Online Senza Scaricare",
+        "descFallback": "Gioca gratis a {title} online su KYRAXO senza download. Avvio immediato nel browser su PC e cellulare.",
+        "controlsHeading": "🎮 Come Giocare e Comandi",
+        "faqHeading": "❓ Domande Frequenti",
+        "relatedHeading": "Altri Giochi Gratis di {category}"
+      }
+    },
+    "pl": {
+      "home": {
+        "seoTitle": "KYRAXO — Darmowe Gry Online Bez Pobierania (+3 200 Gier Przeglądarkowych)",
+        "seoDesc": "Graj w ponad 3 200 darmowych gier online na KYRAXO bez pobierania i rejestracji. Gry samochodowe, strzelanki, puzzle, piłka nożna, gry dla 2 osób i gry dla dzieci.",
+        "h1": "Darmowe Gry Online — Graj w Przeglądarce Bez Pobierania",
+        "subtitle": "Ponad 3 200 darmowych gier online bez instalacji na telefon i komputer: wyścigi, akcja, logika i gry dla dwóch graczy.",
+        "keywords": "gry online, darmowe gry online, gry online za darmo, gry bez pobierania, gry samochodowe, gry dla dzieci, gry dla 2 osób",
+        "popularTitle": "Najpopularniejsze Darmowe Gry Online",
+        "exploreCategories": "Wszystkie Kategorie Gier",
+        "gamesLabel": "Gier"
+      },
+      "categoriesHub": {
+        "seoTitle": "Wszystkie Kategorie Gier Online Za Darmo — Wyścigi, Puzzle & 2 Graczy | KYRAXO",
+        "seoDesc": "Przeglądaj wszystkie kategorie darmowych gier online bez pobierania na KYRAXO: wyścigi, akcja, puzzle, sport, multiplayer i gry dla dzieci.",
+        "h1": "Kategorie Darmowych Gier Online",
+        "subtitle": "Wybierz kategorię i uruchom darmową grę w przeglądarce bez pobierania.",
+        "exploreCta": "Przeglądaj Gry"
+      },
+      "trending": {
+        "seoTitle": "Gry Na Czasie — Najchętniej Grane Darmowe Gry Online | KYRAXO",
+        "seoDesc": "Odkryj najpopularniejsze i zyskujące na popularności darmowe gry online bez pobierania na KYRAXO.",
+        "h1": "Darmowe Gry Online Na Czasie"
+      },
+      "popular": {
+        "seoTitle": "Najpopularniejsze Gry — Najlepsze Darmowe Gry Online | KYRAXO",
+        "seoDesc": "Graj w najwyżej oceniane darmowe gry online na KYRAXO bez pobierania na komputer i telefon.",
+        "h1": "Najlepsze Darmowe Gry Online"
+      },
+      "about": {
+        "seoTitle": "O KYRAXO — Darmowe Gry Przeglądarkowe Online",
+        "seoDesc": "Dowiedz się więcej o KYRAXO — platformie darmowych gier online w przeglądarce bez instalacji."
+      },
+      "game": {
+        "titleSuffix": "Graj Za Darmo Online Bez Pobierania",
+        "descFallback": "Graj w {title} za darmo online na KYRAXO bez pobierania. Natychmiastowa gra przeglądarkowa na PC i telefon.",
+        "controlsHeading": "🎮 Sterowanie i Jak Grać",
+        "faqHeading": "❓ Najczęstsze Pytania",
+        "relatedHeading": "Więcej Darmowych Gier: {category}"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
 import { GameGrid } from '../components/game/GameGrid';
 import { AdSlot } from '../components/ads/AdSlot';
+import { getLocaleSeo, localizePath } from '../i18n/localeRouting';
 import { Star } from 'lucide-react';
 
 export const PopularPage: React.FC = () => {
@@ -19,18 +20,17 @@ export const PopularPage: React.FC = () => {
   }, []);
 
   const popularGames = gameService.getPopularGames(20);
+  const localeSeo = getLocaleSeo(lang);
 
-  const seoTitle =
-    lang === 'ar'
-      ? 'أفضل وأشهر الألعاب — الأعلى تقييماً | كايراكسو'
-      : 'Most Popular Online Games — Highest Rated Games | KYRAXO';
+  const seoTitle = localeSeo.popular.seoTitle;
+  const seoDescription = localeSeo.popular.seoDesc;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Play the top-rated, most popular free browser games on KYRAXO. Hand-picked games with thousands of player reviews."
-        canonicalUrl={`${window.location.origin}/popular`}
+        description={seoDescription}
+        canonicalUrl={`${window.location.origin}${localizePath('/popular', lang)}`}
         lang={lang}
       />
 
@@ -42,7 +42,7 @@ export const PopularPage: React.FC = () => {
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            {t.home.popularGames}
+            {localeSeo.popular.h1}
           </h1>
           <p className="text-xs text-slate-400">
             {popularGames.length} {t.category.gamesCount}

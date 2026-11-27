@@ -8,7 +8,8 @@ export type GameCategorySlug =
   | 'two-player'
   | 'multiplayer'
   | 'casual'
-  | 'kids';
+  | 'kids'
+  | 'strategy';
 
 export interface GameControls {
   desktop: string[];
@@ -88,6 +89,10 @@ export interface Game {
   // SEO & Benchmark Lookalike Fields
   benchmarkGame?: string; // Famous benchmark game name (e.g. "Fruit Ninja", "Subway Surfers")
   benchmarkGameAr?: string; // Famous benchmark game name in Arabic (e.g. "فروت نينجا", "صب واي سيرفرز")
+  seoTitle?: string; // Custom CTR-optimized English SEO <title>
+  seoDescription?: string; // Custom CTR-optimized English meta description
+  seoTitleAr?: string; // Custom CTR-optimized Arabic SEO <title>
+  seoDescriptionAr?: string; // Custom CTR-optimized Arabic meta description
   similarTo?: string[]; // Array of famous benchmark game titles
   searchKeywords?: string[]; // Targeted high-volume SEO search queries
 }
@@ -101,4 +106,5 @@ export interface GameCategory {
   descriptionAr: string;
   icon: string;
   color: string;
+  thumbnail?: string;
 }

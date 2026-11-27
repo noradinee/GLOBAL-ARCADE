@@ -5,6 +5,7 @@ import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
 import { GameGrid } from '../components/game/GameGrid';
 import { AdSlot } from '../components/ads/AdSlot';
+import { getLocaleSeo, localizePath } from '../i18n/localeRouting';
 import { Flame } from 'lucide-react';
 
 export const TrendingPage: React.FC = () => {
@@ -19,18 +20,17 @@ export const TrendingPage: React.FC = () => {
   }, []);
 
   const trendingGames = gameService.getTrendingGames();
+  const localeSeo = getLocaleSeo(lang);
 
-  const seoTitle =
-    lang === 'ar'
-      ? 'الألعاب الرائجة والأكثر تداولاً — العاب اون لاين | كايراكسو'
-      : 'Trending Browser Games — What Gamers Are Playing Now | KYRAXO';
+  const seoTitle = localeSeo.trending.seoTitle;
+  const seoDescription = localeSeo.trending.seoDesc;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <SEOHead
         title={seoTitle}
-        description="Discover the most played and trending online HTML5 games on KYRAXO. Free instant play on mobile and desktop."
-        canonicalUrl={`${window.location.origin}/trending`}
+        description={seoDescription}
+        canonicalUrl={`${window.location.origin}${localizePath('/trending', lang)}`}
         lang={lang}
       />
 
@@ -42,7 +42,7 @@ export const TrendingPage: React.FC = () => {
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            {t.home.trendingGames}
+            {localeSeo.trending.h1}
           </h1>
           <p className="text-xs text-slate-400">
             {trendingGames.length} {t.category.gamesCount}

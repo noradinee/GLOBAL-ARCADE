@@ -1,18 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { getLocalizedCategorySeo, localizePath } from '../../i18n/localeRouting';
+import seoTranslations from '../../data/seoTranslations.json';
+import type { Language } from '../../i18n/translations';
 import { Gamepad2, ShieldCheck, Zap, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const { t, lang } = useLanguage();
 
   const topCategories = [
-    { name: lang === 'ar' ? 'ألعاب أكشن' : 'Action Games', slug: 'action' },
-    { name: lang === 'ar' ? 'ألعاب أركيد' : 'Arcade Games', slug: 'arcade' },
-    { name: lang === 'ar' ? 'ألعاب سباق' : 'Racing Games', slug: 'racing' },
-    { name: lang === 'ar' ? 'ألعاب ذكاء' : 'Puzzle Games', slug: 'puzzle' },
-    { name: lang === 'ar' ? 'ألعاب لاعبين 2' : 'Two Player Games', slug: 'two-player' },
-  ];
+    { slug: 'action', fallbackEn: 'Action Games', fallbackAr: 'ألعاب أكشن' },
+    { slug: 'arcade', fallbackEn: 'Arcade Games', fallbackAr: 'ألعاب أركيد' },
+    { slug: 'racing', fallbackEn: 'Car & Racing Games', fallbackAr: 'ألعاب سيارات وسباق' },
+    { slug: 'puzzle', fallbackEn: 'Puzzle Games', fallbackAr: 'ألعاب ذكاء' },
+    { slug: 'two-player', fallbackEn: '2 Player Games', fallbackAr: 'ألعاب شخصين' },
+  ].map((c) => ({
+    slug: c.slug,
+    name: getLocalizedCategorySeo(c.slug, lang)?.name || (lang === 'ar' ? c.fallbackAr : c.fallbackEn),
+  }));
 
   return (
     <footer className="bg-dark-900 border-t border-dark-800 text-slate-400 mt-20">
@@ -71,7 +77,7 @@ export const Footer: React.FC = () => {
           
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to={localizePath('/', lang)} className="flex items-center gap-3">
               <img src="/logo.svg" alt="KYRAXO" className="w-9 h-9" />
               <span className="text-2xl font-black text-white tracking-wider">
                 {lang === 'ar' ? 'كايراكسو' : 'KYRAXO'}
@@ -92,22 +98,22 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link to="/" className="hover:text-brand-cyan transition-colors">
+                <Link to={localizePath('/', lang)} className="hover:text-brand-cyan transition-colors">
                   {t.nav.home}
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="hover:text-brand-cyan transition-colors">
+                <Link to={localizePath('/categories', lang)} className="hover:text-brand-cyan transition-colors">
                   {t.nav.categories}
                 </Link>
               </li>
               <li>
-                <Link to="/trending" className="hover:text-brand-cyan transition-colors">
+                <Link to={localizePath('/trending', lang)} className="hover:text-brand-cyan transition-colors">
                   {t.nav.trending}
                 </Link>
               </li>
               <li>
-                <Link to="/popular" className="hover:text-brand-cyan transition-colors">
+                <Link to={localizePath('/popular', lang)} className="hover:text-brand-cyan transition-colors">
                   {t.nav.popular}
                 </Link>
               </li>
@@ -128,7 +134,7 @@ export const Footer: React.FC = () => {
               {topCategories.map((c) => (
                 <li key={c.slug}>
                   <Link
-                    to={`/category/${c.slug}`}
+                    to={localizePath(`/category/${c.slug}`, lang)}
                     className="hover:text-brand-cyan transition-colors"
                   >
                     {c.name}
@@ -145,7 +151,7 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link to="/about" className="hover:text-brand-cyan transition-colors">
+                <Link to={localizePath('/about', lang)} className="hover:text-brand-cyan transition-colors">
                   {t.footer.aboutUs}
                 </Link>
               </li>
@@ -174,8 +180,26 @@ export const Footer: React.FC = () => {
 
         </div>
 
+        {/* Multilingual Language Bar (Crawlable Alternate Language Hubs) */}
+        <div className="border-t border-dark-800/80 mt-10 pt-6 flex flex-wrap items-center justify-center gap-2 text-xs">
+          {seoTranslations.languages.map((item) => (
+            <Link
+              key={item.code}
+              to={localizePath('/', item.code as Language)}
+              hrefLang={item.code}
+              className={`px-2.5 py-1 rounded-lg border transition-colors ${
+                lang === item.code
+                  ? 'border-brand-cyan/60 bg-brand-cyan/10 text-brand-cyan font-bold'
+                  : 'border-dark-800 bg-dark-950/60 text-slate-400 hover:text-white hover:border-dark-700'
+              }`}
+            >
+              <span>{item.flag} {item.nativeName}</span>
+            </Link>
+          ))}
+        </div>
+
         {/* Bottom bar */}
-        <div className="border-t border-dark-800 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <div className="border-t border-dark-800 mt-6 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} KYRAXO. {t.footer.copyright}</p>
           <div className="flex items-center gap-1">
             <span>Built with precision for gamers globally</span>

@@ -2,27 +2,22 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { SEOHead } from '../components/common/SEOHead';
 import { Breadcrumb } from '../components/common/Breadcrumb';
+import { getLocaleSeo, localizePath } from '../i18n/localeRouting';
 import { Zap, Shield, Users, Rocket } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
   const { t, lang } = useLanguage();
+  const localeSeo = getLocaleSeo(lang);
 
-  const seoTitle =
-    lang === 'ar'
-      ? 'من نحن — رسالة ورؤية كايراكسو'
-      : 'About Us — Mission & Vision | KYRAXO';
-
-  const seoDescription =
-    lang === 'ar'
-      ? 'تعرف على كايراكسو، منصتك الرائدة لألعاب الويب التفاعلية بدون تحميل وتجربة الألعاب المباشرة لجميع الفئات العمرية.'
-      : 'Learn more about KYRAXO, our mission to provide high-speed instant HTML5 games globally, and our commitment to accessible gaming.';
+  const seoTitle = localeSeo.about.seoTitle;
+  const seoDescription = localeSeo.about.seoDesc;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        canonicalUrl={`${window.location.origin}/about`}
+        canonicalUrl={`${window.location.origin}${localizePath('/about', lang)}`}
         lang={lang}
       />
 
@@ -100,6 +95,17 @@ export const AboutPage: React.FC = () => {
             ? 'نعمل باستمرار على استقطاب وتطوير أفضل ألعاب الأركيد، والتفحيط، والألغاز، والقتال، وتقديمها في بيئة تفاعلية حديثة تحترم خصوصية المستخدم وتوفر أعلى درجات المتعة.'
             : 'We continuously curate and partner with top independent studios to bring high-energy arcade games, physics puzzles, and multiplayer challenges right to your fingertips.'}
         </p>
+
+        <div className="pt-4 mt-4 border-t border-dark-800 text-xs text-slate-400 space-y-1">
+          <h4 className="text-white font-bold text-sm mb-2">
+            {lang === 'ar' ? 'معلومات المنصة والتشغيل' : 'Platform & Publishing Transparency'}
+          </h4>
+          <p>
+            {lang === 'ar'
+              ? 'تدار منصة KYRAXO بشكل مستقل عبر فريق متخصص في تطوير ألعاب الويب ونظم التوزيع الرقمي. للتواصل مع الإدارة أو الاستفسارات الصحفية والشراكات: contact@kyraxo.com'
+              : 'KYRAXO is independently operated by an experienced digital entertainment and web technology team. For media, publisher inquiries, or partnerships: contact@kyraxo.com'}
+          </p>
+        </div>
       </div>
     </div>
   );

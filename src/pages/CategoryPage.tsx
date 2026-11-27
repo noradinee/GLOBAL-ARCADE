@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { gameService } from '../services/gameService';
@@ -7,6 +7,7 @@ import { Breadcrumb } from '../components/common/Breadcrumb';
 import { GameGrid } from '../components/game/GameGrid';
 import { AdSlot } from '../components/ads/AdSlot';
 import { CategoryBar } from '../components/home/CategoryBar';
+import { getLocalizedCategorySeo, localizePath } from '../i18n/localeRouting';
 import {
   Gamepad2,
   Brain,
@@ -41,6 +42,14 @@ export const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t, lang, isRtl } = useLanguage();
   const [sortBy, setSortBy] = useState<SortOption>('popular');
+  const [, setCatalogVersion] = useState(0);
+
+  useEffect(() => {
+    gameService.loadFullCatalog();
+    return gameService.subscribe(() => {
+      setCatalogVersion((v) => v + 1);
+    });
+  }, []);
 
   const category = slug ? gameService.getCategoryBySlug(slug) : undefined;
   const allCategories = gameService.getAllCategories();
@@ -82,21 +91,27 @@ export const CategoryPage: React.FC = () => {
     );
   }
 
-  const categoryName = lang === 'ar' ? category.nameAr : category.name;
-  const categoryDesc = lang === 'ar' ? category.descriptionAr : category.description;
+  const catSeo = getLocalizedCategorySeo(category.slug, lang);
+  const categoryName = catSeo?.name || (lang === 'ar' ? category.nameAr : category.name);
+  const categoryDesc = catSeo?.intro || (lang === 'ar' ? category.descriptionAr : category.description);
+  const categoryH1 = catSeo?.h1 || categoryName;
   const IconComponent = iconMap[category.icon] || Gamepad2;
 
-  const seoTitle =
-    lang === 'ar'
-      ? `${categoryName} — العب أفضل ${categoryName} مجاناً بدون تحميل | كايراكسو`
-      : `Free Online ${category.name} — Play Best ${category.name} Browser Games | KYRAXO`;
+  const seoTitle = catSeo
+    ? catSeo.title
+    : lang === 'ar'
+      ? `${categoryName} — ألعاب مجانية اون لاين بدون تحميل | كايراكسو`
+      : `Free Online ${category.name} — Play Browser Games (No Downloads) | KYRAXO`;
 
-  const seoDescription =
-    lang === 'ar'
-      ? `العب أحدث وأقوى ${categoryName} أونلاين على متصفحك بدون تحميل. استمتع بألعاب مجانية عالية الجودة للجوال والكمبيوتر على كايراكسو (KYRAXO).`
-      : `Play the best free online ${category.name.toLowerCase()} on KYRAXO. Instant browser play, no download required. Discover top-rated games now!`;
+  const seoDescription = catSeo
+    ? catSeo.desc
+    : lang === 'ar'
+      ? `العب أفضل ${categoryName} مجانية اون لاين على متصفحك بدون تحميل على كايراكسو (KYRAXO).`
+      : `Play the best free online ${category.name.toLowerCase()} on KYRAXO with no downloads required on PC and mobile.`;
 
-  const canonicalUrl = `${window.location.origin}/category/${category.slug}`;
+  const seoKeywords = catSeo?.keywords;
+
+  const canonicalUrl = `${window.location.origin}${localizePath(`/category/${category.slug}`, lang)}`;
 
   // CollectionPage Schema.org structured data
   const collectionSchema = {
@@ -105,7 +120,7 @@ export const CategoryPage: React.FC = () => {
     name: seoTitle,
     description: seoDescription,
     url: canonicalUrl,
-    inLanguage: lang === 'ar' ? 'ar' : 'en',
+    inLanguage: lang,
     isPartOf: {
       '@type': 'WebSite',
       name: 'KYRAXO',
@@ -113,13 +128,13 @@ export const CategoryPage: React.FC = () => {
     },
     about: {
       '@type': 'Thing',
-      name: category.name,
-      description: category.description,
+      name: categoryName,
+      description: categoryDesc,
     },
   };
 
   const breadcrumbItems = [
-    { label: t.nav.categories, path: '/categories' },
+    { label: t.nav.categories, path: localizePath('/categories', lang) },
     { label: categoryName },
   ];
 
@@ -128,6 +143,7 @@ export const CategoryPage: React.FC = () => {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
+        keywords={seoKeywords}
         canonicalUrl={canonicalUrl}
         schemaData={collectionSchema}
         lang={lang}
@@ -146,7 +162,7 @@ export const CategoryPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
-                  {categoryName}
+                  {categoryH1}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-dark-800 text-brand-cyan text-xs font-bold border border-dark-700">
                   {rawGames.length}

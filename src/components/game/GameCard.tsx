@@ -1,21 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Game } from '../../types/game';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { analytics } from '../../services/analytics';
-import { Star, Play, Bookmark, Flame } from 'lucide-react';
+import { localizePath } from '../../i18n/localeRouting';
+import { Star, Play, Bookmark, Flame, Crown } from 'lucide-react';
 
 interface GameCardProps {
   game: Game;
   priority?: boolean;
 }
 
-export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) => {
+const GameCardComponent: React.FC<GameCardProps> = ({ game, priority = false }) => {
   const { lang, isRtl } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const formatThumb = (url?: string) => {
+    if (!url) return '/thumbnails/cyber-dash.svg?v=20261117cover';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return url.includes('?v=') ? url : `${url}?v=20261117cover`;
+  };
+  const [imgSrc, setImgSrc] = useState(() => formatThumb(game.thumbnail));
+
+  useEffect(() => {
+    setImgSrc(formatThumb(game.thumbnail));
+  }, [game.thumbnail]);
 
   const title = lang === 'ar' ? game.titleAr : game.title;
+  const gameUrl = localizePath(`/game/${game.slug}`, lang);
   const favorited = isFavorite(game.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -32,16 +44,17 @@ export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) =>
   return (
     <div className="group relative bg-dark-900/90 hover:bg-dark-850 border border-dark-800/90 hover:border-brand-cyan/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-glow-cyan hover:-translate-y-1 flex flex-col">
       <Link
-        to={`/game/${game.slug}`}
+        to={gameUrl}
         onClick={handleCardClick}
         className="block relative aspect-[16/10] overflow-hidden bg-dark-950"
       >
-        {/* Lazy Loaded Thumbnail */}
+        {/* Lazy Loaded Thumbnail with Fallback */}
         <img
-          src={game.thumbnail}
+          src={imgSrc}
           alt={title}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
+          onError={() => setImgSrc('/thumbnails/cyber-dash.svg?v=20261117cover')}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
@@ -57,7 +70,12 @@ export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) =>
 
         {/* Top Badges */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-          {game.trending ? (
+          {game.isOriginal || game.author?.toLowerCase().includes('kyraxo') ? (
+            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 text-dark-950 shadow-md border border-amber-300">
+              <Crown className="w-3 h-3 fill-dark-950" />
+              <span>{lang === 'ar' ? 'حصري للمنصة' : 'ORIGINAL'}</span>
+            </span>
+          ) : game.trending ? (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-brand-rose text-white shadow-md">
               <Flame className="w-3 h-3" />
               <span>HOT</span>
@@ -86,7 +104,7 @@ export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) =>
       {/* Card Body */}
       <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
         <Link
-          to={`/game/${game.slug}`}
+          to={gameUrl}
           onClick={handleCardClick}
           className="focus:outline-none"
         >
@@ -109,3 +127,5 @@ export const GameCard: React.FC<GameCardProps> = ({ game, priority = false }) =>
     </div>
   );
 };
+
+export const GameCard = React.memo(GameCardComponent);

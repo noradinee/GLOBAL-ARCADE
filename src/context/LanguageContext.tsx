@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, translations, TranslationDictionary } from '../i18n/translations';
+import { SUPPORTED_LANGUAGES, extractLangFromPathname } from '../i18n/localeRouting';
 
 interface LanguageContextType {
   lang: Language;
@@ -11,19 +12,40 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+function detectInitialLanguage(): Language {
+  if (typeof window !== 'undefined') {
+    const { langFromUrl } = extractLangFromPathname(window.location.pathname);
+    if (langFromUrl) return langFromUrl;
+  }
+
+  const saved = (typeof localStorage !== 'undefined' ? localStorage.getItem('global_arcade_lang') : null) as Language | null;
+  if (saved && SUPPORTED_LANGUAGES.includes(saved)) return saved;
+
+  const nav = (typeof navigator !== 'undefined' ? navigator.language?.toLowerCase() : '') || '';
+  if (nav.startsWith('ar')) return 'ar';
+  if (nav.startsWith('es')) return 'es';
+  if (nav.startsWith('pt')) return 'pt';
+  if (nav.startsWith('fr')) return 'fr';
+  if (nav.startsWith('de')) return 'de';
+  if (nav.startsWith('tr')) return 'tr';
+  if (nav.startsWith('id') || nav.startsWith('in')) return 'id';
+  if (nav.startsWith('ru')) return 'ru';
+  if (nav.startsWith('it')) return 'it';
+  if (nav.startsWith('pl')) return 'pl';
+  return 'en';
+}
+
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lang, setLangState] = useState<Language>(() => {
-    const saved = localStorage.getItem('global_arcade_lang');
-    if (saved === 'en' || saved === 'ar') return saved;
-    // Auto-detect browser language
-    if (navigator.language && navigator.language.startsWith('ar')) return 'ar';
-    return 'en';
-  });
+  const [lang, setLangState] = useState<Language>(detectInitialLanguage);
 
   const isRtl = lang === 'ar';
 
   useEffect(() => {
-    localStorage.setItem('global_arcade_lang', lang);
+    try {
+      localStorage.setItem('global_arcade_lang', lang);
+    } catch {
+      // ignore storage errors in restricted environments
+    }
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
 
@@ -41,10 +63,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const toggleLang = () => {
-    setLangState(prev => (prev === 'en' ? 'ar' : 'en'));
+    setLangState((prev) => (prev === 'en' ? 'ar' : 'en'));
   };
 
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, toggleLang, t, isRtl }}>

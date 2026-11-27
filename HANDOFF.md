@@ -15,10 +15,86 @@
 - **Current branch:** main
 - **Active Editor:** None
 - **Editing Status:** IDLE
-- **Work started:** 2026-11-24T23:02:00Z
+- **Work started:** 2026-11-26T18:55:00Z
 - **Last working agent:** Antigravity
-- **Last updated:** 2026-11-24T23:27:00Z
-- **Stage Status:** AdSense Readiness Optimizations Deployed Live (135.181.197.174) & Committed
+- **Last updated:** 2026-11-26T22:08:00Z
+- **Stage Status:** Multilingual SEO (11 Languages, Real Keyword Planner Data Across EN/AR/FR/ES/PT/DE/TR/ID/RU + Localized URLs + SSR + 0-Click Game CTR + Review Schema) Deployed Live (`https://kyraxo.com`, `index-V45LeRuA.js`, `308/308` tests); Sitemap Resubmitted (`26 nov. 2026`); IndexNow `200 OK`
+
+### Latest Keyword Planner Multilingual Optimization Pass (2026-11-26 — Night)
+- **Live Keyword Planner Data Extracted Across 7 More Markets (`57,131` keyword ideas in 7 CSV exports — All locations, Nov 2025 – Oct 2026):**
+  - **French (`fr` — `5,980` rows):** `jeux gratuits` (`5M`), `solitaire gratuit` (`5M`), `jeux en ligne` / `jeux gratuits en ligne` / `mahjong gratuit` (`500K`), `jeux de voiture` / `jeux de foot` / `jeux gratuits sans téléchargement` (`50K`).
+  - **Spanish (`es` — `10,033` rows):** `juegos gratis` / `solitario online` (`5M`), **`juegos de carros` (`500K` vs `juegos de coches` `50K`, 10x higher)**, `juegos de futbol` / `solitario gratis` / `rompecabezas` / `minijuegos` / `juegos sin descargar` (`500K`).
+  - **Portuguese (`pt` — `12,455` rows):** `jogos online` (`5M`), **`jogos de carro` (`500K` vs `jogos de corrida` `50K`, 10x higher)**, `jogos sem baixar` (`500K`, `+900% YoY`), `paciencia online` (`500K`), `jogos de tiro` / `futebol online` (`50K`).
+  - **German (`de` — `6,965` rows):** **`solitär` (`5M`) & `solitär kostenlos` / `schach spielen` / `sudoku kostenlos` (`500K` vs `autorennen kostenlos` `50`)**, `kostenlose spiele` / `spiele kostenlos` / `gratis spiele` (`500K`), `kostenlose spiele ohne anmeldung` (`50K`, `+900% YoY`).
+  - **Turkish (`tr` — `7,896` rows):** `oyunlar` (`5M`), **`iki kişilik oyunlar` (`500K` vs `2 kişilik oyunlar` `5K`, 100x higher)**, `oyun oyna` / `ücretsiz oyunlar` / `araba oyunları` / `silah oyunu` / `kız oyunları` (`500K`), `zeka oyunları` / `çocuk oyunları` / `futbol oyunları` / `strateji oyunları` (`50K`).
+  - **Indonesian (`id` — `3,454` rows):** `game online gratis` / `game gratis` / **`permainan gratis` / `permainan online gratis`** (`500K`), `tetris gratis` / `mahjong classic gratis` / `game pc gratis` (`50K`, `+900% 3mo`), `game balap mobil` / `game sepak bola` (`5K`).
+  - **Russian (`ru` — `10,349` rows):** `игры онлайн` (`5M`), `игры бесплатно` / `онлайн игры` / `пасьянс косынка` / `маджонг` (`500K`), `гонки онлайн` / `игры на двоих` / `детские игры` / `игры для девочек` / `браузерные игры` / `игры онлайн бесплатно без регистрации` (`50K`).
+- **Updates Applied, Verified & Deployed Live (`135.181.197.174` / `https://kyraxo.com`):**
+  - Updated `src/data/seoTranslations.json`, `src/data/categorySeo.json`, and `tests/seo-keyword-planner.test.js` with exact highest-volume terms per market.
+  - `npx tsc --noEmit`: 0 errors; `npm run build`: 22.42s (`dist/assets/index-V45LeRuA.js`); `npm test`: **`308/308 pass, 0 fail, 0 skipped`**.
+  - Deployed delta (`243.8 KB`) cleanly to host & container `global-arcade` (`healthy`), verified **15/15** live Googlebot HTTPS `200 OK` responses across `/`, `/fr`, `/fr/category/{puzzle,sports}`, `/es`, `/es/category/{racing,puzzle}`, `/pt/category/racing`, `/de/category/{puzzle,strategy}`, `/tr/category/{two-player,action}`, `/id/category/puzzle`, `/ru/category/puzzle`, `/api/health`.
+  - Broadcasted `532` priority URLs via `node scripts/broadcast-indexnow.cjs` -> **200 OK** (`api.indexnow.org` -> Bing, Yandex, Seznam, Naver).
+  - *GSC Request Indexing progress:* `https://kyraxo.com/`, `https://kyraxo.com/game/mining-up`, `https://kyraxo.com/game/obstacle-racing`, `https://kyraxo.com/game/avatar-maker`, `https://kyraxo.com/game/snakes-and-ladders`, `https://kyraxo.com/category/racing`, and `https://kyraxo.com/es` submitted (`7` URLs); daily GSC quota reached (`Quota dépassé`) on `https://kyraxo.com/ar`. Remaining localized hubs (`/ar`, `/tr`, `/id`, `/ru`, `/fr`, `/pt`, `/de`, `/it`, `/pl`) will be discovered via `sitemap.xml` (`26 nov. 2026`), `hreflang`, and crawlable footer links, or can be requested tomorrow when daily quota resets.
+  - *Note on Italian (`it`) & Polish (`pl`):* Keyword Planner CSV exports remain optional follow-up if desired (currently powered by real Google Trends CSVs `giochi online gratis` / `darmowe gry online`).
+  - *Blockers requiring manual user action:* GSC individual `Demander une indexation` hits Google **reCAPTCHA**; `git commit` awaits user confirmation.
+
+### Latest Multilingual SEO, Google Trends & 0-Click CTR Pass (2026-11-26 — Evening)
+- **Google Trends & Search Console Evidence Used:**
+  - Inspected 12-month worldwide Trends CSV exports (`multiTimeline*.csv`, `geoMap*.csv`, `relatedQueries*.csv`) alongside GSC Performance data (`kyraxo.com` last 3 months):
+    - Top non-EN Trends demand indices (12-mo avg): `juegos gratis` (**74.5**, `es`), `игры онлайн` (**28.2**, `ru`, + GSC Russia `47` imp pos `8.7`), `jogos online` (**22.5**, `pt`, + GSC Brazil `64` imp), `العاب مجانية` (**19.5**, `ar`, KP `1M–10M`), `giochi gratis` (**16.8**, `it`, + GSC Italy `18` imp pos `7.6`), `gry online` (**13.3**, `pl`), `game gratis` (**11.9**, `id`, + GSC Indonesia `52` imp pos `7.8`, 0 clicks), `jeux gratuits` (**9.2**, `fr`, + GSC France `15` imp), `ücretsiz oyunlar`+`oyun oyna` (**4.9+4.5**, `tr`, + GSC Turkey `48` imp pos `8.5`, 0 clicks), `kostenlose spiele` (**5.1**, `de`, + `#1` related query `kostenlose spiele ohne anmeldung`).
+    - EN Trends confirmed `unblocked games` (`50.6`) slightly above `free online games` (`44.8`), with breakout/rising `best browser games 2026` (+2,250%), `best free online games` (+250%), `free online games no download` (+90%), and `games for free online` (+110%).
+  - **Decision:** Added **5 new languages** (`tr`, `id`, `ru`, `it`, `pl`) on top of the existing 6 (`en`, `ar`, `es`, `pt`, `fr`, `de`) -> **11 supported languages total**, with real crawlable localized URLs (`/<lang>/...` + EN root `/`) and distinct bidirectional `<link rel="alternate" hreflang="...">` + `x-default`.
+- **Implementation Summary (All Verified Live):**
+  - Created `src/data/seoTranslations.json` (11-language SEO titles, descriptions, H1s, keywords, hub copy, `og:locale`) and expanded `src/data/categorySeo.json` (`11 categories × 11 languages × 6 fields = 726` entries, `0` missing).
+  - Created `src/i18n/localeRouting.ts` (`extractLangFromPathname`, `localizePath`, `getHreflangLinks`, `getLocaleSeo`, `getLocalizedCategorySeo`) and expanded `src/i18n/translations.ts`, `src/context/LanguageContext.tsx`, `src/components/common/LanguageSwitcher.tsx`, `src/App.tsx`, `src/utils/seo.ts`, `src/components/common/SEOHead.tsx`, `src/components/common/Header.tsx`, `src/components/common/Footer.tsx` (adds crawlable 11-language footer links), `src/components/common/Breadcrumb.tsx`, `src/components/home/CategoryBar.tsx`, `src/components/game/GameCard.tsx`, `src/pages/HomePage.tsx`, `src/pages/CategoryPage.tsx`, `src/pages/CategoriesListPage.tsx`, `src/pages/TrendingPage.tsx`, `src/pages/PopularPage.tsx`, `src/pages/AboutPage.tsx`, `src/pages/GameDetailPage.tsx`, `src/types/game.ts`.
+  - Generated real `1200x630` PNG social card `public/og-banner.png` (`28,299` bytes) and updated `index.html`, `src/utils/seo.ts`, `server/index.js`, and `public/manifest.webmanifest`.
+  - Cleaned catalog & fixed high-impression 0-click GSC pages (`src/data/games.json` & `src/data/starterGames.json`): added `seoTitle`/`seoDescription` & query-aligned keywords on `mining-up` (235 imp pos 2.6, 0 clicks -> `Up Mining`), `obstacle-racing` (57 imp pos 7.0), `street-driver` (41 imp pos 8.9), `snakes-and-ladders` (removed `"—only on GamePix!"` & wrong Slither.io benchmark), `avatar-maker` (removed wrong `Subway Surfers` benchmark hurting `avatar games online` CTR), `the-windows-game`, `racing-master-3d`, `magic-coloring-book`, `space-invaders`, `cyborg`, `funny-hair-salon`, `kart-racer-vs`, `penalty-shooters`, `stickman-io`, `case-opener-case-clicking-simulator`, and `angry-birds`; stripped `1,743` duplicate `"لعبة X — X"` titles and `799` generic bucket benchmarks.
+  - Upgraded `server/index.js` SSR for `/<lang>/...` routes (sets `<html lang dir>`, localized titles/desc/keywords/H1/intro, distinct 11-lang `hreflang` + `x-default`, crawlable footer language links, and `AggregateRating` VideoGame JSON-LD when `rating` & `ratingCount` exist).
+  - Updated `scripts/generate-sitemap.js` & regenerated `public/sitemap.xml` (`3,454` URLs, `847,713` bytes, `<xhtml:link rel="alternate">` on all 165 localized hub/category URLs); updated `scripts/broadcast-indexnow.cjs` & `tests/seo-keyword-planner.test.js` (`4` tests).
+- **Verification & Live Deployment Evidence (2026-11-26 ~18:18–18:27 UTC):**
+  - `npx tsc --noEmit`: 0 errors (Exit 0).
+  - `npm run build`: clean build in 20.82s (`dist/assets/index-_1J24VF4.js`, `dist/index.html` 4.42 kB).
+  - `npm test`: **`308 tests, 308 pass, 0 fail, 0 skipped`** (`tests/seo-keyword-planner.test.js` `4 pass, 0 fail`).
+  - Remote pre-deploy backup created at `/opt/global-arcade/backups/pre-multilingual-seo-20261126/`, deployed archive (`2.45 MB`), synced host & `global-arcade` container -> container `healthy` (`3,274` games).
+  - Live `https://kyraxo.com` Googlebot probes: **17/17 HTTP `200`** across `/`, `/ar`, `/es`, `/tr`, `/id`, `/ru`, `/it`, `/pl`, `/category/racing`, `/es/category/racing`, `/tr/category/action`, `/game/mining-up`, `/game/avatar-maker`, `/game/snakes-and-ladders`, `/og-banner.png` (`image/png`, `28,299 B`), `/sitemap.xml` (`847,713 B`, `3,454` URLs), `/api/health`.
+  - **IndexNow & GSC:** `node scripts/broadcast-indexnow.cjs` submitted `532` priority URLs (`200 OK` to Bing/Yandex); GSC `Indexation -> Sitemaps` resubmitted `sitemap.xml` on `26 nov. 2026` (`Sitemap envoyé`, `Opération effectuée`). Clicking `Demander une indexation` on `/` hit Google's manual **reCAPTCHA** check (`BLOCKED / BOT_CHECK_HIT`), so agent stopped cleanly without interacting.
+- **Verification Checklist & Evidence:**
+  - TypeScript (`npx tsc --noEmit`): **PASS** (0 errors, after final edit)
+  - Vite production build (`npm run build`): **PASS** (`20.82s`, after final edit)
+  - Full test suite (`npm test`): **PASS** (`308/308 pass`, after final edit)
+  - Live HTTPS SSR & schema probes: **PASS** (17/17 HTTP 200, Googlebot UA, after deploy)
+  - GSC manual URL Request Indexing: **BLOCKED ON USER RECAPTCHA** (Sitemap resubmitted cleanly; individual URL Request Indexing requires human reCAPTCHA click in GSC pane)
+  - Git commit / push: **NOT RUN** (requires explicit user approval)
+- **Next Recommended Task:**
+  1. Complete the reCAPTCHA prompt in the open Google Search Console browser tab (optional) to submit individual indexing requests for `/`, `/game/mining-up`, `/game/obstacle-racing`, `/game/avatar-maker`, `/es`, `/ar`, `/tr`, `/id`, `/ru`.
+  2. When ready to extract exact Google Keyword Planner CPC/monthly volumes for FR/ES/DE/PT/TR/ID/RU/IT/PL, sign back into Google Ads in the browser pane and let the agent finish queries 5–8.
+  3. Approve `git commit` when ready to commit local changes.
+
+### Latest Google Keyword Planner SEO Pass (2026-11-26)
+- **Live Keyword Planner Data Extracted (All locations, Nov 2025 – Oct 2026, 4 CSV exports — 24,662 EN / 6,507 AR unique keywords):**
+  - **English findings:** `free online games` (`1M–10M`), `car games` (`1M–10M`), `solitaire online` (`1M–10M`), `browser games` / `web games` / `play free games online without downloading` / `free online games no downloads` / `shooting games` / `racing games` / `puzzle games` / `soccer games` / `football games` / `basketball games` / `2 player games` / `multiplayer games` / `online multiplayer games` (+900% YoY) / `free games for kids` (+900% YoY) / `online chess` (`100K–1M`) all outrank `html5 games` (`10K–100K`) and `no download games` (`10K–100K`) by `10x–100x`.
+  - **Arabic findings:** `ألعاب مجانية` / `العاب مجانية` (`1M–10M`), `العاب اون لاين` (`100K–1M`), `العاب سيارات` (`100K–1M` vs `العاب سباق سيارات` `1K–10K`), `العاب بدون تحميل` (`10K–100K`), `العاب حرب` & `العاب قتال` (+900% YoY, `10K–100K`), `العاب ذكاء` (`10K–100K`), `العاب كرة قدم` (`10K–100K`), `العاب بنات مجانية` (`10K–100K`), `العاب متصفح` (`1K–10K`, +900% 3mo & YoY), `العاب شخصين` & `العاب جماعية اون لاين` (`1K–10K`).
+- **SEO Upgrades Implemented Locally & Deployed Live (`135.181.197.174` / `https://kyraxo.com`):**
+  - Created single-source bilingual category SEO config `src/data/categorySeo.json` covering all 11 categories (`action`, `arcade`, `racing`, `puzzle`, `sports`, `adventure`, `two-player`, `multiplayer`, `casual`, `kids`, `strategy`) and wired it into both `src/pages/CategoryPage.tsx` and `server/index.js`.
+  - Updated `index.html`, `src/pages/HomePage.tsx`, `src/pages/CategoriesListPage.tsx`, `src/pages/TrendingPage.tsx`, `src/pages/PopularPage.tsx`, `src/pages/GameDetailPage.tsx`, and `server/index.js` (`applyHeadMeta` helper + RSS + SSR pre-render) to target high-volume player queries (`Free Online Browser Games`, `No Downloads`, `Car & Racing`, `Action & Shooting`, `Soccer & Basketball`, `2 Player`, `Kids`, `ألعاب مجانية اون لاين بدون تحميل`, `ألعاب سيارات`, `ألعاب شخصين`, `ألعاب حرب وقتال`), and added missing Arabic descriptions on `TrendingPage.tsx` & `PopularPage.tsx`.
+  - Updated `src/data/categories.json` (`racing` -> `ألعاب سيارات وسباق`, `two-player` -> `ألعاب شخصين`).
+  - Converted rotating carousel title in `src/components/home/HeroBanner.tsx` from `<h1>` to `<h2>` (unchanged styling) and set stable homepage `<h1>` in `src/pages/HomePage.tsx` matching SSR `<h1>` structure.
+  - Added `tests/seo-keyword-planner.test.js` (3 unit/SSR tests).
+  - Created remote pre-deploy backup `/opt/global-arcade/backups/pre-kwplanner-20261126` (`dist-index.html`, `server-index.js`, `categories.json`), deployed delta archive (`1.19 MB`) to `/opt/global-arcade` and container `global-arcade:/app/`, and restarted `global-arcade` (`healthy`).
+- **Verification & Build Evidence (after final edit & live deploy):**
+  - `npx tsc --noEmit`: 0 errors (Exit 0).
+  - `npm run build`: clean build in 21.48s (`dist/assets/index-DYbGojGO.js`, `dist/index.html` 4.42 kB).
+  - `npm test`: `307 tests, 307 pass, 0 fail, 0 skipped` (including `tests/seo-keyword-planner.test.js` `3 pass, 0 fail`).
+  - Live production HTTPS probes (`Googlebot/2.1` User-Agent against `https://kyraxo.com`):
+    - `/` (`200`, `index-DYbGojGO.js`, `KYRAXO — Play Free Online Browser Games (No Downloads) | ألعاب مجانية اون لاين`)
+    - `/category/racing`, `/category/action`, `/category/two-player`, `/trending`, `/popular`, `/categories`, `/game/subway-metro-runner` (all `200` with updated Keyword Planner `<title>`, `<meta name="description">`, `<h1>`, and `<link rel="canonical">`)
+    - `/api/health` (`200`, `status: "healthy"`, `gamesInCatalog: 3274`), `/sitemap.xml` (`200`, `474254` bytes), `/ads.txt` (`200`, `39535` bytes).
+  - **Google Search Console inspection (`/u/1/` -> `https://kyraxo.com/`, verified URL-prefix property; read-only):**
+    - **Performance (Last 3 months, Web):** `55` clicks, `1,701` impressions, `3.2%` average CTR, `15.3` average position across `283` queries & `552` pages.
+    - **Top page & queries:** `/category/racing` (`5` clicks, `166` impressions), `/game/racing-master-3d` (`3` clicks, `16` impressions), `/game/mountain-bike-challenge` (`3` clicks, `9` impressions), `/game/drive-mad-2` (`2` clicks, `4` impressions); top queries include `racing master online play`, `online racing games`, `racing game online free`, `racing game no download`, `drive mad 2 free`.
+    - **Indexing (`23/11/2026`):** `2,466` indexed pages, `1,210` not indexed (GSC overview notes data processing in progress); `/sitemap.xml` status `Success` (`3,289` discovered pages, submitted `21 nov. 2026`, last read `24 nov. 2026`).
+    - **Enhancements & HTTPS:** `45` HTTPS URLs (`0` Non-HTTPS), `139` valid Breadcrumbs (`0` invalid), `47` valid Review snippets (`0` invalid).
+- **Next Recommended Task:** Sort Search Console Queries by highest impressions to optimize titles/descriptions for near-page-1 games (`avatar-maker`, `space-invaders`, `racing-master-3d`), request indexing on updated `/` and `/category/*` pages, and optionally `git commit` / `git push` when approved.
 
 ### Latest AdSense Readiness Pass (2026-11-24 — Second Session After `0ab6d99`)
 - **Ad Policy & Layout Compliance:**

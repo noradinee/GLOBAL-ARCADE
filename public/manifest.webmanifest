@@ -1,0 +1,21 @@
+{
+  "name": "KYRAXO — Play Free Online Browser Games (No Downloads) | ألعاب مجانية اون لاين",
+  "short_name": "KYRAXO",
+  "description": "Play 3,200+ free online browser games without downloading on PC and mobile.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07080c",
+  "theme_color": "#07080c",
+  "orientation": "any",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

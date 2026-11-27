@@ -12,6 +12,7 @@ import { AdvancedFilterBar, FilterState } from '../components/common/AdvancedFil
 import { GameGrid } from '../components/game/GameGrid';
 import { AdSlot } from '../components/ads/AdSlot';
 import { GameCategory } from '../types/game';
+import { getLocaleSeo, getLocalizedCategorySeo, localizePath } from '../i18n/localeRouting';
 import {
   Flame,
   Star,
@@ -103,23 +104,19 @@ export const HomePage: React.FC = () => {
     });
   };
 
-  const seoTitle =
-    lang === 'ar'
-      ? `كايراكسو — ${allGames.length}+ لعبة مجانية بدون تحميل أونلاين | ألعاب أطفال وأكشن وذكاء`
-      : `KYRAXO — ${allGames.length}+ Free Online HTML5 Browser Games | Kids, Action & Puzzles`;
-
-  const seoDescription =
-    lang === 'ar'
-      ? `العب أكثر من ${allGames.length} لعبة متصفح مجانية بدون تحميل على كايراكسو. باقة متكاملة من ألعاب الأطفال، تعلم الحروف والأرقام، وأشهر ألعاب الويب العالمية والسباقات والقتال.`
-      : `Play over ${allGames.length} high-quality free HTML5 games on KYRAXO. Early learning, drawing, numbers, global blockbuster hits, racing, and 2-player games without installation.`;
+  const localeSeo = getLocaleSeo(lang);
+  const seoTitle = localeSeo.home.seoTitle;
+  const seoDescription = localeSeo.home.seoDesc;
+  const seoKeywords = localeSeo.home.keywords;
+  const canonicalUrl = `${window.location.origin}${localizePath('/', lang)}`;
 
   const websiteSchema = [
     {
       '@type': 'WebSite',
-      name: lang === 'ar' ? 'كايراكسو — منصة ألعاب المتصفح المجانية' : 'KYRAXO — Free Online HTML5 Browser Games',
+      name: seoTitle,
       alternateName: ['KYRAXO', 'كايراكسو', 'KYRAXO Games', 'ألعاب كايراكسو'],
       url: window.location.origin,
-      inLanguage: ['ar', 'en'],
+      inLanguage: lang,
       potentialAction: {
         '@type': 'SearchAction',
         target: `${window.location.origin}/search?q={search_term_string}`,
@@ -137,9 +134,10 @@ export const HomePage: React.FC = () => {
     },
     {
       '@type': 'CollectionPage',
-      name: lang === 'ar' ? `مكتبة ألعاب كايراكسو (${allGames.length} لعبة مجانية)` : `KYRAXO ${allGames.length}+ Free Online Games Catalog`,
+      name: localeSeo.home.h1,
       description: seoDescription,
-      url: window.location.origin,
+      url: canonicalUrl,
+      inLanguage: lang,
       numberOfItems: allGames.length,
     }
   ];
@@ -158,7 +156,8 @@ export const HomePage: React.FC = () => {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        canonicalUrl={window.location.origin}
+        keywords={seoKeywords}
+        canonicalUrl={canonicalUrl}
         schemaData={websiteSchema}
         lang={lang}
       />
@@ -361,19 +360,17 @@ export const HomePage: React.FC = () => {
                   <Grid className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white">
-                    {lang === 'ar' ? 'تصنيفات الألعاب المميزة' : 'Explore by Category'}
-                  </h2>
+                  <h1 className="text-xl sm:text-2xl font-black text-white">
+                    {localeSeo.home.h1}
+                  </h1>
                   <p className="text-xs text-slate-400">
-                    {lang === 'ar'
-                      ? 'اختر نوعك المفضل وابدأ اللعب فوراً بدون تحميل وبأعلى سرعة'
-                      : 'Choose your favorite genre and jump straight in with zero downloads'}
+                    {localeSeo.home.subtitle}
                   </p>
                 </div>
               </div>
 
               <Link
-                to="/categories"
+                to={localizePath('/categories', lang)}
                 className="flex items-center gap-1.5 text-xs font-bold text-brand-cyan hover:text-brand-purple transition-colors bg-brand-cyan/10 hover:bg-brand-cyan/20 px-3.5 py-1.5 rounded-xl border border-brand-cyan/20"
               >
                 <span>{t.home.viewAll}</span>
@@ -383,13 +380,13 @@ export const HomePage: React.FC = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
               {featuredCategories.map((cat) => {
-                const name = lang === 'ar' ? cat.nameAr : cat.name;
+                const name = getLocalizedCategorySeo(cat.slug, lang)?.name || (lang === 'ar' ? cat.nameAr : cat.name);
                 const count = gameService.getGamesByCategory(cat.slug).length;
 
                 return (
                   <Link
                     key={cat.id}
-                    to={`/category/${cat.slug}`}
+                    to={localizePath(`/category/${cat.slug}`, lang)}
                     className="group relative rounded-2xl overflow-hidden bg-dark-900 border border-dark-800 hover:border-brand-cyan/60 transition-all duration-300 hover:shadow-glow-cyan hover:-translate-y-1 flex flex-col"
                   >
                     <div className="relative aspect-[4/3] w-full overflow-hidden bg-dark-950">
@@ -595,7 +592,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               <Link
-                to="/categories"
+                to={localizePath('/categories', lang)}
                 className="flex items-center gap-1 text-xs font-bold text-brand-cyan hover:text-brand-purple transition-colors"
               >
                 <span>{t.home.viewAll}</span>
@@ -605,13 +602,13 @@ export const HomePage: React.FC = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
               {categories.map((cat: GameCategory) => {
-                const name = lang === 'ar' ? cat.nameAr : cat.name;
+                const name = getLocalizedCategorySeo(cat.slug, lang)?.name || (lang === 'ar' ? cat.nameAr : cat.name);
                 const count = gameService.getGamesByCategory(cat.slug).length;
 
                 return (
                   <Link
                     key={cat.id}
-                    to={`/category/${cat.slug}`}
+                    to={localizePath(`/category/${cat.slug}`, lang)}
                     className="group relative bg-dark-900 border border-dark-800 hover:border-brand-purple/50 p-4 rounded-2xl transition-all duration-300 hover:shadow-glow-purple flex flex-col justify-between overflow-hidden"
                   >
                     {cat.thumbnail ? (
