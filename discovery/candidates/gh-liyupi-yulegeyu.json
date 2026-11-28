@@ -1,0 +1,52 @@
+{
+  "candidateId": "gh-liyupi-yulegeyu",
+  "name": "Yulegeyu",
+  "originalRepoUrl": "https://github.com/liyupi/yulegeyu",
+  "author": "liyupi",
+  "description": "鱼了个鱼（yulegeyu）是程序员鱼皮基于 Vue 3、TypeScript、Vite 与 Ant Design Vue 实现的纯前端开源三消 H5 网页小游戏，完整复刻了热门叠层消除游戏羊了个羊的核心玩法。游戏内置 4 种预设难度并支持深度自定义关卡参数，允许玩家自由替换方块图案、无广告畅玩、无限使用撤回移出洗牌等辅助道具且保证可以顺利通关。项目在核心算法层面清晰实现了全局参数抽取、24x24 虚拟棋盘网格定位、洗牌随机方块分布以及生成阶段直接绑定上下层覆盖关系的高效碰撞检测逻辑，代码精炼易读且无后端依赖，适合前端初学者学习 Vue 3 游戏开发、组件状态管理与创意魔改，在线试玩地址为 http://yulegeyu.yupi.icu",
+  "discoveryDate": "2026-11-28",
+  "lastUpdateDate": "2026-11-23",
+  "sourcePlatform": "github",
+  "programmingLanguage": "TypeScript",
+  "gameEngine": "HTML5 / JavaScript",
+  "popularityIndicators": {
+    "githubStars": 1836,
+    "forks": 564,
+    "openIssues": 41,
+    "communityPlays": 6426,
+    "trendVelocity": "1836 stars / 564 forks",
+    "signalsSource": "GitHub REST API v3",
+    "signalsDate": "2026-11-28"
+  },
+  "licenseName": "UNKNOWN",
+  "licenseUrl": "https://github.com/liyupi/yulegeyu/blob/main/LICENSE",
+  "assetLicensingStatus": "Unspecified in repo header (Requires manual asset review)",
+  "dependencies": [],
+  "html5Compatibility": true,
+  "mobileCompatibility": false,
+  "buildInstructions": "Inspect repository README for bundle instructions",
+  "exactCommitHash": "master",
+  "licensingStatus": "UNKNOWN",
+  "securityStatus": "PASSED",
+  "securityFindings": [],
+  "qualityStatus": "PASSED",
+  "qualityClassification": "GAME",
+  "qualityEvidence": [
+    "html5Compatibility=true.",
+    "Zero runtime dependencies (standalone).",
+    "Game engine reported: HTML5 / JavaScript."
+  ],
+  "playability": true,
+  "scores": {
+    "popularityScore": 25,
+    "technicalQualityScore": 16,
+    "mobileScore": 5,
+    "maintenanceScore": 15,
+    "relevanceScore": 5,
+    "standaloneScore": 5,
+    "totalScore": 71
+  },
+  "publicationEligibility": "INELIGIBLE",
+  "reviewerDecision": "REJECT",
+  "reviewNotes": "License \"UNKNOWN\" is not on the verified commercial whitelist."
+}
